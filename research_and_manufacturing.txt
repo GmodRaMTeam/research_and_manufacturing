@@ -1,0 +1,7 @@
+"research_and_manufacturing"
+{
+	"base"		"base"
+	"title"		"Research And Manufacturing"
+	"maps"		"^ram_"
+	"menusystem"	"1"
+}
