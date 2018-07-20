@@ -33,11 +33,11 @@ function GM:CreateTeams()
 	if ( not GAMEMODE.TeamBased ) then return end
 
 	TEAM_BLUE = 1
-	team.SetUp( TEAM_BLUE, "Blue Team", Color( 0, 0, 255 ) )
+	team.SetUp( TEAM_BLUE, "Nerds", Color( 0, 0, 255 ) )
 	team.SetSpawnPoint( TEAM_BLUE, "ai_hint" ) -- <-- This would be info_terrorist or some entity that is in your map
 
 	TEAM_ORANGE = 2
-	team.SetUp( TEAM_ORANGE, "Orange Team", Color( 255, 150, 0 ) )
+	team.SetUp( TEAM_ORANGE, "Virgins", Color( 255, 150, 0 ) )
 	team.SetSpawnPoint( TEAM_ORANGE, "sky_camera" ) -- <-- This would be info_terrorist or some entity that is in your map
 
 	--TEAM_SEXY = 3

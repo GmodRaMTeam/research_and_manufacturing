@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        .header-text {
+            text-align: center;
+        }
+
+        .research-table {
+            width: 100%;
+        }
+        .research-table thead {
+            font-weight: bold;
+            text-align: center;
+        }
+        .research-table thead td {
+            width: 25%
+        }
+        .research-table tbody td {
+            vertical-align: top;
+        }
+
+        .upgrade {
+            text-align: center;
+            border: solid 2px red;
+            margin-bottom: 10px;
+            padding: 5px 15px 15px 15px;
+            height: 76px
+        }
+
+        .upgrade .level {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        .upgrade .level li {
+            float: left;
+            width: 12px;
+            height: 12px;
+            margin-right: 2px;
+
+            box-shadow: inset 0 0 0 2px red;
+        }
+        .upgrade .level .researched {
+            background-color: red;
+        }
+
+        .upgrade .title {
+            margin-bottom: 0;
+        }
+        .upgrade .action-label {
+            margin-top: 0;
+        }
+
+        .item {
+            text-align: center;
+            border: solid 2px red;
+            height: 33px;
+            margin-bottom: 10px;
+            padding: 8px 15px 0 15px;
+        }
+        .item .title {
+            display: inline-block;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+
+<h1 class="header-text">Research</h1>
+
+<table class="research-table">
+    <thead>
+        <tr>
+            <td>Defense</td>
+            <td>Weapons</td>
+            <td>Devices</td>
+            <td>Implants</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <div class="upgrade">
+                    <ul class="level">
+                        <li class="researched"></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                    <h3 class="title">reinforce</h3>
+                    <h2 class="action-label">+1</h2>
+                </div>
+                <div class="upgrade">
+                    <h3 class="title">health</h3>
+                    <h2 class="action-label">+20</h2>
+                </div>
+            </td>
+
+            <td>
+                <div class="upgrade">
+                    <h3 class="title">basic pistol</h3>
+                    <span class="transition">&darr;</span>
+                    <h2 class="action-label">magnum pistol</h2>
+                </div>
+            </td>
+
+            <td>
+                <div class="item">
+                    <span class="icon">&#x2B22;</span>
+                    <h3 class="title">tripmine</h3>
+                </div>
+                <div class="item">
+                    <span class="icon">&#x1f4a3;</span>
+                    <h3 class="title">grenade</h3>
+                </div>
+            </td>
+
+            <td>
+                <div class="item">
+                    <span class="icon">&#8667;</span>
+                    <h3 class="title">long jump</h3>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

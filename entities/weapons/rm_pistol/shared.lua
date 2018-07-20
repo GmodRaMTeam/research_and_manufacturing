@@ -20,9 +20,9 @@ SWEP.HoldType = "pistol"        -- how others view you carrying the weapon
 -- you're mostly going to use ar2, smg, shotgun or pistol. rpg makes for good sniper rifles
 
 SWEP.ViewModelFOV = 70
-SWEP.ViewModelFlip = true
-SWEP.ViewModel = "models/weapons/v_pist_usp.mdl"    -- Weapon view model
-SWEP.WorldModel = "models/weapons/w_pist_usp.mdl"    -- Weapon world model
+SWEP.ViewModelFlip = false
+SWEP.ViewModel = "models/weapons/v_Pistol.mdl"    -- Weapon view model
+SWEP.WorldModel = "models/weapons/w_Pistol.mdl"    -- Weapon world model
 SWEP.ShowWorldModel = false
 SWEP.Base = "komerads_gun_base" --the Base this weapon will work on. PLEASE RENAME THE BASE!
 SWEP.Spawnable = true
