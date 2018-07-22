@@ -63,6 +63,7 @@
     <style scoped>
         .scoreboard-title {
             margin: 20px 0 !important;
+            color: #efefef;
         }
     </style>
 </scoreboard>
