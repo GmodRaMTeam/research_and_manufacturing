@@ -1,29 +1,31 @@
 <scoreboard>
-        <table each="{ team in team_list }" class="ui striped table">
-            <tr>
-                <th>Team: {team.name}</th>
-                <th>Score: {team.score}</th>
-            </tr>
+
+    <div each="{ team in teams }" no-reorder>
+        <h1 class="scoreboard-title">{team.name} ({team.score} pts)</h1>
+        <table class="ui striped table">
+            <thead>
             <tr>
                 <th>
-                    <div class="ui large yellow label">
+                    <div class="ui large">
                         <i class="pencil icon"></i>
                         Name
                     </div>
                 </th>
                 <th>
-                    <div class="ui large blue label">
+                    <div class="ui large">
                         <i class="shield alternate icon"></i>
                         Kills
                     </div>
                 </th>
                 <th>
-                    <div class="ui large red label">
+                    <div class="ui large red">
                         <i class="ambulance icon"></i>
                         Deaths
                     </div>
                 </th>
             </tr>
+            </thead>
+            <tbody>
             <tr each="{ name, player in team.team_members }" class="">
                 <td>
                     {player}
@@ -35,7 +37,9 @@
                     {player.deaths}
                 </td>
             </tr>
+            </tbody>
         </table>
+    </div>
 
     <script>
         var self = this;
@@ -46,12 +50,19 @@
 
 
         var update_loop = function () {
-//            self.player_list = JSON.parse(player.getAll());
-            self.update({
-                team_list: JSON.parse(player.getAll()),
-            })
-            console.log(self.team_list)
-            window.setTimeout(update_loop, 1000);
+            // player may not exist if we're testing in local browser, wait for it
+            if (typeof player !== 'undefined') {
+                self.update({
+                    teams: JSON.parse(player.getAll()),
+                })
+                console.log(self.teams)
+            }
+            //window.setTimeout(update_loop, 1000);
         }
     </script>
+    <style scoped>
+        .scoreboard-title {
+            margin: 20px 0 !important;
+        }
+    </style>
 </scoreboard>

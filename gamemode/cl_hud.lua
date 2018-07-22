@@ -180,12 +180,12 @@ function scoreboard_frame:Paint()
 --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
 end
 
-local html = vgui.Create("DHTML", scoreboard_frame)
-html:Dock(FILL)
-html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/test.html")
-html:SetAllowLua(true)
+local scoreboard_html = vgui.Create("DHTML", scoreboard_frame)
+scoreboard_html:Dock(FILL)
+scoreboard_html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
+scoreboard_html:SetAllowLua(true)
 
-html:AddFunction("player", "getAll", function()
+scoreboard_html:AddFunction("player", "getAll", function()
 
     local team_table = team.GetAllTeams()
     local teams_tbl = {}
