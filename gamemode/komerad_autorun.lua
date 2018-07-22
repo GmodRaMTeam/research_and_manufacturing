@@ -145,8 +145,8 @@ table.insert(m9knpw, "m9k_ammo_winchester")
 function PocketM9KWeapons(ply, wep)
 
 	if not IsValid(wep) then return end
-	class = wep:GetClass()
-	m9knopocket = false
+	local class = wep:GetClass()
+	local m9knopocket = false
 	
 	for k, v in pairs(m9knpw) do
 		if v == class then

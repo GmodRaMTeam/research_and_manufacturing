@@ -97,7 +97,7 @@ local colors =
 
 local function HUDPaint()
 
-    client = client or LocalPlayer(); -- set a shortcut to the client
+    local client = client or LocalPlayer(); -- set a shortcut to the client
     if (not client:Alive()) then return; end -- don't draw if the client is dead
 
     local _, th = good_hud:TextSize("TEXT", vars.font); -- get text size( height in this case )
@@ -188,42 +188,41 @@ html:AddFunction("player", "getAll", function()
     local teams_tbl = {}
 
     for index, team in ipairs(team_table) do
-        print("Index is: "..index)
+--        print("Index is: "..index)
 --        print("Team is: "..team)
-        PrintTable(team)
+--        PrintTable(team)
         teams_tbl[index] = {
             name=team[name],
             score=team[score],
             color=team[color],
             team_members={},
         }
+--        PrintTable(teams_tbl[index])
     end
-
-
 
     local player_table = player.GetAll()
 --    local plys_tbl = {}
-    for index, ply in ipairs(player_table) do
-        if ply:IsValid() then
-            print(ply:Team())
-            table.insert(teams_tbl[ply:Team()]['team_members'], {
-                nick = ply:Nick(),
-                frags = ply:Frags(),
-                deaths = ply:Deaths()
-            })
-        end
-
---        tbl[index] = {
---            nick = ply:Nick(),
---            frags = ply:Frags(),
---            deaths = ply:Deaths()
---        }
-    end
+--    for index, ply in ipairs(player_table) do
+--        if ply:IsValid() then
+--            print(ply:Team())
+--            table.insert(teams_tbl[ply:Team()]['team_members'], {
+--                nick = ply:Nick(),
+--                frags = ply:Frags(),
+--                deaths = ply:Deaths()
+--            })
+--        end
+--
+----        tbl[index] = {
+----            nick = ply:Nick(),
+----            frags = ply:Frags(),
+----            deaths = ply:Deaths()
+----        }
+--    end
 --    local_json_player_table = util.TableToJSON(tbl)
 --    return local_json_player_table
     local json_scoreboard_table = util.TableToJSON(teams_tbl)
-    print(json_scoreboard_table)
-    return json_scoreboard_table
+--    print(json_scoreboard_table)
+--    return json_scoreboard_table
 end)
 scoreboard_frame:Hide()
 

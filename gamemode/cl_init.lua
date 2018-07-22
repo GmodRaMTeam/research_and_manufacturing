@@ -18,7 +18,7 @@ function GM:Initialize()
     --LANG.Init()
 
     self.BaseClass:Initialize()
-    local AllTeams = team.GetAllTeams()
-    timer.Simple( 30, function() PrintTable(AllTeams) end )
+--    local AllTeams = team.GetAllTeams()
+--    timer.Simple( 30, function() PrintTable(AllTeams) end )
     --PrintTable(AllTeams)
 end

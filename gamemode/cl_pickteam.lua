@@ -5,8 +5,8 @@
 -----------------------------------------------------------]]
 function GM:ShowTeam()
 
-	print(ScrW())
-	print(ScrH())
+--	print(ScrW())
+--	print(ScrH())
 
 	if ( IsValid( self.TeamSelectFrame ) ) then return end
 	

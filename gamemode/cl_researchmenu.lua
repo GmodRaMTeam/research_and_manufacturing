@@ -5,13 +5,13 @@
 ---
 
 net.Receive("RMPrintToTeam", function(len, pl)
-    stringMsg = net.ReadString()
+    local stringMsg = net.ReadString()
     chat.AddText(stringMsg)
 end)
 
 net.Receive("RMClientStatusUpdate", function(len, pl)
-    intStatus = net.ReadInt(3)
-    intTeam = net.ReadInt(3)
+    local intStatus = net.ReadInt(3)
+    local intTeam = net.ReadInt(3)
     if LocalPlayer():Team() == intTeam then
         surface.PlaySound("garrysmod/save_load1.wav")
     end
@@ -87,7 +87,7 @@ local function ResearchMenu()
     end
     sheet:AddSheet("test", panel_armor, "icon16/shield.png")
 
-    local armor_techs = {"researchArmorOne", "researchArmorTwo", "researchArmorThree", "researchArmorFour", "researchArmorFive"}
+    local armor_techs = {"armor_one", "armor_two"}
 
     for index, stringResearchIndex in ipairs(armor_techs) do
         local DermaButton = vgui.Create("DButton", panel_armor) --// Create the button and parent it to the frame
@@ -97,7 +97,7 @@ local function ResearchMenu()
         DermaButton:SetSize(250, ScrH()/8)                    --// Set the size
         DermaButton.DoClick = function()
             net.Start("RMStartTeamResearch")
-            net.WriteString("researchCatArmor")
+            net.WriteString("cat_armor")
             net.WriteString(stringResearchIndex)
             net.SendToServer()
             --end

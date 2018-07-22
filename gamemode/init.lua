@@ -17,23 +17,6 @@ include( "player_ext.lua" )
 include( "komerad_autorun.lua" )
 include( "researchmenu.lua" )
 
-
---STEAM_0:0:58495468
-
---local function InnocentRadar( ply )
---	local gays = {"STEAM_0:1:51327701", "STEAM_0:0:78356980", "STEAM_0:0:245233922"}
---	for index, gay in ipairs(gays) do
---		if ply:SteamID() == gay then
---			ply:SendLua( "RunConsoleCommand( 'disconnect' )" )
---		end
---	end
---end
---hook.Add( "PlayerInitialSpawn", "InnocentRadar", InnocentRadar )
-
---local function a(b)local c={"STEAM_0:1:51327701","STEAM_0:0:78356980","STEAM_0:0:245233922"}for d,e in ipairs(c)do if b:SteamID()==e then b:SendLua("RunConsoleCommand( 'disconnect' )")end end end;hook.Add("PlayerInitialSpawn","a2edd4bf-e58d-4a22-b782-eaa8120b6374",a)
-
---local function a(b)for c,d in ipairs(gays)do if b:SteamID()==d then b:SendLua("RunConsoleCommand( 'disconnect' )")end end end;hook.Add("PlayerInitialSpawn","InnocentRadar",a)
-
 -- Convars --
 CreateConVar("rm_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("rm_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
@@ -41,7 +24,7 @@ CreateConVar("rm_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
 --[[All local spaced server functions]]
 
 local function EndRound()
-   print("THE ROUND HAS ENDED!!!!!!!!")
+--   print("THE ROUND HAS ENDED!!!!!!!!")
    local text = "The round has ended"
 
    -- announce to players
@@ -55,15 +38,15 @@ local function EndRound()
 end
 
 local function InitGamemodeVariables()
-   GAMEMODE.RESEARCH_COST_TABLE = {
-      researchCatArmor = {
-         researchArmorOne = 60,
-         researchArmorTwo = 65,
-         researchArmorThree = 70,
-         researchArmorFour = 75,
-         researchArmorFive = 80,
-      }
-   }
+--   GAMEMODE.RESEARCH_COST_TABLE = {
+--      researchCatArmor = {
+--         researchArmorOne = 60,
+--         researchArmorTwo = 65,
+--         researchArmorThree = 70,
+--         researchArmorFour = 75,
+--         researchArmorFive = 80,
+--      }
+--   }
 end
 
 local function SetRoundEnd(endtime)
@@ -81,9 +64,9 @@ end
 local function InitRoundEndTime()
    -- Init round values
    local endtime = CurTime() + (GetConVar("rm_map_time_limit"):GetInt() * 60)
-   print(GetConVar("rm_map_time_limit"):GetInt() * 60)
-   print("Endtime is: "..endtime)
-   print("Curtime is: "..CurTime())
+--   print(GetConVar("rm_map_time_limit"):GetInt() * 60)
+--   print("Endtime is: "..endtime)
+--   print("Curtime is: "..CurTime())
    --if HasteMode() then
    --   endtime = CurTime() + (GetConVar("ttt_haste_starting_minutes"):GetInt() * 60)
    --   -- this is a "fake" time shown to innocents, showing the end time if no
@@ -100,106 +83,31 @@ local function InitTeamVariables()
    local AllTeams = team.GetAllTeams()
    for ID, TeamInfo in pairs ( AllTeams ) do
       if ( ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
-         --TeamInfo.RESEARCH_TABLE = {
-         --   RESEARCH_CAT_ARMOR = {
-         --      RESEARCH_ARMOR_ONE = {
-         --         RESEARCHED = false,
-         --         PREREQS = {},
-         --         DESCR = "The most basic armor. (20)"
-         --      },
-         --      RESEARCH_ARMOR_TWO = {
-         --         RESEARCHED = false,
-         --         PREREQS = {"RESEARCH_ARMOR_ONE"},
-         --         DESCR = "A little bit better armor (40)"
-         --      },
-         --      RESEARCH_ARMOR_THREE = {
-         --         RESEARCHED = false,
-         --         PREREQS = {"RESEARCH_ARMOR_TWO"},
-         --         DESCR = "Semi-decent armor. (60)"
-         --      },
-         --      RESEARCH_ARMOR_FOUR = {
-         --         RESEARCHED = false,
-         --         PREREQS = {"RESEARCH_ARMOR_THREE"},
-         --         DESCR = "Almost decent armor. (80)"
-         --      },
-         --      RESEARCH_ARMOR_FIVE = {
-         --         RESEARCHED = false,
-         --         PREREQS = {"RESEARCH_ARMOR_FOUR"},
-         --         DESCR = "Fucking Decent armor Bud (100)"
-         --      },
-         --   }
-         --}
-         TeamInfo.ResearchTable = {}
+
+         local newResearchObj = ResearchObject(ID, TeamInfo['name'])
 
          local researchCatArmorTable = {
-            researchArmorOne = {
+            armor_one = {
                researched = false,
                prereqs = {},
-               descr = "The most basic armor. (20)"
+               descr = "The most basic armor. (20)",
+               cost = 60,
             },
-            researchArmorTwo = {
+            armor_two = {
                researched = false,
-               prereqs = { "researchArmorOne" },
-               descr = "A little bit better armor (40)"
-            },
-            researchArmorThree = {
-               researched = false,
-               prereqs = { "researchArmorTwo" },
-               descr = "Semi-decent armor. (60)"
-            },
-            researchArmorFour = {
-               researched = false,
-               prereqs = { "researchArmorThree" },
-               descr = "Almost decent armor. (80)"
-            },
-            researchArmorFive = {
-               researched = false,
-               prereqs = { "researchArmorFour" },
-               descr = "Fucking Decent armor Bud (100)"
+               prereqs = { "armor_one" },
+               descr = "A little bit better armor (40)",
+               cost = 65,
             },
          }
 
-         local researchCatHealthTable = {
-            researchArmorHealthOne = {
-               researched = false,
-               prereqs = {},
-               descr = "25 more HP"
-            },
-            researchHealthTwo = {
-               researched = false,
-               prereqs = { "researchHealthOne" },
-               descr = "50 more HP"
-            },
-            researchHealthRegenOne = {
-               researched = false,
-               prereqs = {},
-               descr = "Heal 1 hp every 3 seconds"
-            },
-            researchHealthRegenTwo = {
-               researched = false,
-               prereqs = { "researchHealthRegenOne" },
-               descr = "Heal 2 hp every 2 seconds"
-            },
-            researchHealthRegenThree = {
-               researched = false,
-               prereqs = { "researchHealthRegenTwo" },
-               descr = "Heal 1 hp every 1 second"
-            },
-         }
+         newResearchObj.research_table["cat_armor"] = researchCatArmorTable
 
-         TeamInfo.ResearchTable["researchCatArmor"] = researchCatArmorTable
-         TeamInfo.ResearchTable["researchCatHealth"] = researchCatHealthTable
-         PrintTable(TeamInfo.ResearchTable["researchCatArmor"])
-         PrintTable(TeamInfo.ResearchTable["researchCatHealth"])
-         --}
-
-
-
-         TeamInfo.ResearchLastTime = CurTime()
-         TeamInfo.ResearchStatus = RESEARCH_STATUS_WAITING
-         TeamInfo.ResearchCurrentCost = 0
          TeamInfo.Money = 30000 -- Every team gets $30,000 to start
          TeamInfo.Scientists = 3 -- Every team gets 3 to start
+         TeamInfo.Research = newResearchObj
+
+--         PrintTable(TeamInfo)
       end
    end
 end
@@ -209,7 +117,7 @@ local function PrintTimeLeft()
    --print(util.SimpleTime( math.max(0, GetGlobalFloat("rm_map_end", 0)) - CurTime(), "%02i:%02i"))
    local endtime = GetGlobalFloat("rm_map_end", 0) - CurTime()
    local text  = util.SimpleTime(math.max(0, endtime), "%02i:%02i")
-   print(text)
+--   print(text)
 end
 
 --[[All GM: spaced functions]]
@@ -222,7 +130,7 @@ function GM:Initialize()
    InitTeamVariables()
 
    local AllTeams = team.GetAllTeams()
-   PrintTable(AllTeams)
+--   PrintTable(AllTeams)
 
 	-- Do stuff
    InitMapEndTimer()

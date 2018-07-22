@@ -27,31 +27,31 @@ end
 --end -- This is not hooking?
 
 function ENT:Use( plyActivator, entCaller, numUseType, numInteger )
-	print(plyActivator)
-	print(entCaller)
-	print(numUseType)
-	print(numInteger)
+--	print(plyActivator)
+--	print(entCaller)
+--	print(numUseType)
+--	print(numInteger)
 end
 
 function ENT:OnTakeDamage( damageInfo )
-	print(damageInfo)
-	PrintTable(damageInfo)
+--	print(damageInfo)
+--	PrintTable(damageInfo)
 end
 
 function ENT:OnInjured( damageInfo )
-	print(damageInfo)
+--	print(damageInfo)
 	--PrintTable(damageInfo)
-	print("On Injured Called")
+--	print("On Injured Called")
 	local attacker = damageInfo:GetAttacker()
 	local inflictor = damageInfo:GetInflictor()
 	--print(attacker)
 	--print(inflictor)
 	if attacker:IsValid() and attacker:IsPlayer() then
-		print(attacker)
+--		print(attacker)
 		local weapon = attacker:GetActiveWeapon()
-		print(weapon)
+--		print(weapon)
 		if weapon:GetClass() == "weapon_crowbar" then
-			print("SUCCESS!!!")
+--			print("SUCCESS!!!")
 			--self:Remove()
 			--NextBot:BecomeRagdoll( CTakeDamageInfo info )
 			local ragdoll = ents.Create("prop_physics_multiplayer") --do not globalize the ragdoll
