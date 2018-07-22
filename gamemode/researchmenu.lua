@@ -83,11 +83,6 @@ end
 function ResearchObjectClass:TeamCanDoResearch(researchCat, researchIndex)
     if (CurTime() >= self.last_time) and (self.status ~= RESEARCH_STATUS_IN_PROGRESS) then
         -- If we have researched it, return false, if not true
---        print("Research cat is "..researchCat)
---        print("Research index is "..researchIndex)
---        PrintTable(self)
---        PrintTable(self.research_table)
---        PrintTable(self.research_table[researchCat])
         local is_researched = self.research_table[researchCat][researchIndex]["researched"]
         local prereqs_list = self.research_table[researchCat][researchIndex]["prereqs"]
         local meets_requirements = self:TeamMeetsRequirement(researchCat, prereqs_list)
@@ -168,20 +163,16 @@ end
 --######################## Constructor ########################--
 
 function ResearchObject(teamIndex, teamName)
-
     local newResearchObjectClass = table.Copy(ResearchObjectClass)
     --table.Copy is a Garry's Mod function. Look for it in the source code should you need to replicate it in a different API.
-
     --Override the old default teamIndex property should we have a new code to replace it with:
     if teamIndex then
         newResearchObjectClass.team_index = teamIndex
     end
-
     --Override the old default Code property should we have a new code to replace it with:
     if teamName then
         newResearchObjectClass.team_name = teamName
     end
-
     --Return our new Object.
     return newResearchObjectClass
 end
@@ -189,16 +180,9 @@ end
 --====================================================================================================================--
 
 net.Receive("RMStartTeamResearch", function(len, ply)
-
 	local research_cat = net.ReadString()
 	local research_index = net.ReadString()
-
---    print(research_cat)
---    print(research_index)
-
     local TeamInfo = GetTeamInfoTable(ply:Team())
---    local ResearchObj = TeamInfo.Research
-
 	local research_cost = TeamInfo.Research.research_table[research_cat][research_index]['cost']
 
 	if TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
@@ -206,7 +190,5 @@ net.Receive("RMStartTeamResearch", function(len, ply)
 		PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
 	else
 		local difference = (CurTime() - (TeamInfo.Research.last_time))
---		print(difference)
 	end
-
 end)

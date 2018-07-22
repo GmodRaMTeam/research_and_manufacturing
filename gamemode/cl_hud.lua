@@ -176,6 +176,9 @@ scoreboard_frame:Center()
 scoreboard_frame:ShowCloseButton(false)
 scoreboard_frame:SetSizable(false)
 scoreboard_frame:SetPaintShadow(true)
+function scoreboard_frame:Paint()
+--    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
+end
 
 local html = vgui.Create("DHTML", scoreboard_frame)
 html:Dock(FILL)
@@ -183,46 +186,45 @@ html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/htm
 html:SetAllowLua(true)
 
 html:AddFunction("player", "getAll", function()
-    local team_table = team.GetAllTeams()
 
+    local team_table = team.GetAllTeams()
     local teams_tbl = {}
 
     for index, team in ipairs(team_table) do
---        print("Index is: "..index)
---        print("Team is: "..team)
---        PrintTable(team)
         teams_tbl[index] = {
-            name=team[name],
-            score=team[score],
-            color=team[color],
+            name=team['Name'],
+            score=team['Score'],
+            color=team['Color'],
             team_members={},
         }
---        PrintTable(teams_tbl[index])
     end
+--    PrintTable(team_table)
+
+--    print("Teams table is ")
+--    PrintTable(teams_tbl)
 
     local player_table = player.GetAll()
---    local plys_tbl = {}
---    for index, ply in ipairs(player_table) do
---        if ply:IsValid() then
---            print(ply:Team())
+    local plys_tbl = {}
+
+    for index, ply in ipairs(player_table) do
+        if ply:IsValid() then
+--            print("ply team is "..ply:Team())
 --            table.insert(teams_tbl[ply:Team()]['team_members'], {
 --                nick = ply:Nick(),
 --                frags = ply:Frags(),
 --                deaths = ply:Deaths()
 --            })
---        end
---
-----        tbl[index] = {
-----            nick = ply:Nick(),
-----            frags = ply:Frags(),
-----            deaths = ply:Deaths()
-----        }
---    end
---    local_json_player_table = util.TableToJSON(tbl)
---    return local_json_player_table
-    local json_scoreboard_table = util.TableToJSON(teams_tbl)
---    print(json_scoreboard_table)
---    return json_scoreboard_table
+            if ply:Team() ~= nil then
+                teams_tbl[ply:Team()]['team_members'][ply:Nick()] = {
+                    frags = ply:Frags(),
+                    deaths = ply:Deaths()
+                }
+            end
+        end
+    end
+    PrintTable(teams_tbl)
+--    local json_scoreboard_table = util.TableToJSON(teams_tbl)
+    return util.TableToJSON(teams_tbl)
 end)
 scoreboard_frame:Hide()
 

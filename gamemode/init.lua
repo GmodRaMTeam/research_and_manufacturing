@@ -38,15 +38,7 @@ local function EndRound()
 end
 
 local function InitGamemodeVariables()
---   GAMEMODE.RESEARCH_COST_TABLE = {
---      researchCatArmor = {
---         researchArmorOne = 60,
---         researchArmorTwo = 65,
---         researchArmorThree = 70,
---         researchArmorFour = 75,
---         researchArmorFive = 80,
---      }
---   }
+
 end
 
 local function SetRoundEnd(endtime)
@@ -64,22 +56,11 @@ end
 local function InitRoundEndTime()
    -- Init round values
    local endtime = CurTime() + (GetConVar("rm_map_time_limit"):GetInt() * 60)
---   print(GetConVar("rm_map_time_limit"):GetInt() * 60)
---   print("Endtime is: "..endtime)
---   print("Curtime is: "..CurTime())
-   --if HasteMode() then
-   --   endtime = CurTime() + (GetConVar("ttt_haste_starting_minutes"):GetInt() * 60)
-   --   -- this is a "fake" time shown to innocents, showing the end time if no
-   --   -- one would have been killed, it has no gameplay effect
-   --   SetGlobalFloat("ttt_haste_end", endtime)
-   --end
 
    SetRoundEnd(endtime)
 end
 
 local function InitTeamVariables()
-   --InitResearchTables()
-   --GAMEMODE.ResearchTimers = { CurTime(), CurTime() } -- Change to use teamInfo tables?
    local AllTeams = team.GetAllTeams()
    for ID, TeamInfo in pairs ( AllTeams ) do
       if ( ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
@@ -107,7 +88,6 @@ local function InitTeamVariables()
          TeamInfo.Scientists = 3 -- Every team gets 3 to start
          TeamInfo.Research = newResearchObj
 
---         PrintTable(TeamInfo)
       end
    end
 end
@@ -130,7 +110,6 @@ function GM:Initialize()
    InitTeamVariables()
 
    local AllTeams = team.GetAllTeams()
---   PrintTable(AllTeams)
 
 	-- Do stuff
    InitMapEndTimer()
@@ -147,6 +126,7 @@ end --Ends function
 
 -- Convar replication is broken in gmod, so we do this.
 -- I don't like it any more than you do, dear reader.
+-- Saw this in TTT, seems like a good idea to replicate for our timer.
 function GM:SyncGlobals()
    SetGlobalInt("rm_map_time_limit", GetConVar("rm_map_time_limit"):GetInt())
 end
