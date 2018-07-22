@@ -4,10 +4,6 @@
    Desc:
 -----------------------------------------------------------]]
 function GM:ShowTeam()
-
-	print(ScrW())
-	print(ScrH())
-
 	if ( IsValid( self.TeamSelectFrame ) ) then return end
 	
 	 --Simple team selection box
@@ -16,7 +12,6 @@ function GM:ShowTeam()
 	function self.TeamSelectFrame:Paint()
 		draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
 	end
-	--self.TeamSelectFrame:SetSize(ScrH()/2, ScrW()/3)
 
 	local AllTeams = team.GetAllTeams()
 	local y = 80

@@ -4,169 +4,191 @@
 --- DateTime: 5/26/2018 5:35 PM
 ---
 
-util.AddNetworkString( "RMStartTeamResearch" )
-util.AddNetworkString( "RMClientStatusUpdate" )
-util.AddNetworkString( "RMPrintToTeam" )
+util.AddNetworkString("RMStartTeamResearch")
+util.AddNetworkString("RMClientStatusUpdate")
+util.AddNetworkString("RMPrintToTeam")
 
 local function round(num, numDecimalPlaces)
-  local mult = 10^(numDecimalPlaces or 0)
-  return math.floor(num * mult + 0.5) / mult
+    local mult = 10 ^ (numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
 end
 
 local function PrintToTeam(teamIndex, stringMsg)
-	for k, ply in pairs(player.GetAll()) do
-		if ply:Team() == teamIndex then
-			--ply:ChatPrint(stringMsg)
-			net.Start("RMPrintToTeam")
-				net.WriteString(stringMsg)
-			net.Send(ply)
-		end
-	end
+    for k, ply in pairs(player.GetAll()) do
+        if ply:Team() == teamIndex then
+            --ply:ChatPrint(stringMsg)
+            net.Start("RMPrintToTeam")
+            net.WriteString(stringMsg)
+            net.Send(ply)
+        end
+    end
 end
 
 local function ClientStatusUpdate(intStatus, intTeam)
-	net.Start("RMClientStatusUpdate")
-		--net.WriteString("some text")
-		net.WriteInt(intStatus, 3)
-		net.WriteInt(intTeam, 3)
-	net.Broadcast()
-	-- We did something!
+    net.Start("RMClientStatusUpdate")
+    --net.WriteString("some text")
+    net.WriteInt(intStatus, 3)
+    net.WriteInt(intTeam, 3)
+    net.Broadcast()
+    -- We did something!
 end
 
-local function TeamMeetsRequirment(teamIndex, researchCat, requirementList)
-	teamInfo = GetTeamInfoTable(teamIndex)
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	PrintTable(requirementList)
-	--for i, name in ipairs(names) do
 
-	if #requirementList == 0 then
-		print("NO PREREQS")
-		return true
-	end
+--====================================================================================================================--
+--                                                  Research Object Class/Object                                        --
+--====================================================================================================================--
+
+--######################## Fields ########################--
+
+local ResearchObjectClass = {}
+-- Change these when constructing
+ResearchObjectClass.team_index = 9999
+ResearchObjectClass.team_name = "default"
+-- Default values should be fine
+ResearchObjectClass.last_time = CurTime()
+ResearchObjectClass.status = RESEARCH_STATUS_WAITING
+ResearchObjectClass.current_cost = 0
+-- Set this after constructing when initing team vars.
+ResearchObjectClass.research_table = {}
+
+--######################## Methods ########################--
 
 
-	for index, requirement in ipairs(requirementList) do
-		print(requirement)
-		print(teamInfo.ResearchTable[researchCat][requirement]["researched"])
-		if teamInfo.ResearchTable[researchCat][requirement]["researched"] == true then
-			return true
-		end
-	end
-	return false
+--@@@@@ Magic @@@@@--
+-- Test function that simply prints 'Magic!'
+function ResearchObjectClass:Magic()
+    print("Magic!")
 end
 
-local function TeamCanDoResearch(teamIndex, researchCat, researchIndex)
-	teamInfo = GetTeamInfoTable(teamIndex)
-	if (CurTime() >= teamInfo.ResearchLastTime) and (teamInfo.ResearchStatus ~= RESEARCH_STATUS_IN_PROGRESS) then
-		--local is_researched = teamInfo.RESEARCH_TABLE[researchCat][researchIndex] -- If we have researched it, return false, if not true
-		local is_researched = teamInfo.ResearchTable[researchCat][researchIndex]["researched"] -- If we have researched it, return false, if not true
-		local meets_requirments = TeamMeetsRequirment(teamIndex, researchCat, teamInfo.ResearchTable[researchCat][researchIndex]["prereqs"])
-		if is_researched then
-			--PrintMessage( HUD_PRINTTALK, "Cannot start research! Please wait "..difference.." more seconds." )
-			local msg = "Cannot start research! You already have this researched."
-			PrintToTeam(teamIndex, msg)
-			return false
-		else
-			if meets_requirments then
-				return true
-			else
-				local msg = "Cannot start research! You need to research the requirements!"
-				PrintToTeam(teamIndex, msg)
-				return false
-			end
 
-		end
-	else
-		local difference = round(teamInfo.ResearchCurrentCost - (CurTime() - (teamInfo.ResearchLastTime)), 1)
-		local msg = "Cannot start research! Please wait "..difference.." more seconds."
-		--PrintMessage( HUD_PRINTTALK, "Cannot start research! Please wait "..difference.." more seconds." )
-		PrintToTeam(teamIndex, msg)
-		return false
-	end
+--@@@@@ TeamMeetsRequirement @@@@@--
+-- Sees if the team meets the prereqs for the tech they're trying to research
+function ResearchObjectClass:TeamMeetsRequirement(researchCat, requirementList)
+    -- If no requirementList passed, return True
+    if #requirementList == 0 then
+        return true
+    end
+    -- Loop through the requirment list given, see if we have them researched
+    for index, requirement in ipairs(requirementList) do
+        if self.research_table[researchCat][requirement]["researched"] == true then
+            return true
+        end
+    end
+    return false
 end
 
+
+--@@@@@ TeamCanDoResearch @@@@@--
+-- Can the team do the research at the given category/index?
+function ResearchObjectClass:TeamCanDoResearch(researchCat, researchIndex)
+    if (CurTime() >= self.last_time) and (self.status ~= RESEARCH_STATUS_IN_PROGRESS) then
+        -- If we have researched it, return false, if not true
+        local is_researched = self.research_table[researchCat][researchIndex]["researched"]
+        local prereqs_list = self.research_table[researchCat][researchIndex]["prereqs"]
+        local meets_requirements = self:TeamMeetsRequirement(researchCat, prereqs_list)
+        if is_researched then
+            local msg = "Cannot start research! You already have this researched."
+            PrintToTeam(self.team_index, msg)
+            return false
+        else
+            if meets_requirements then
+                return true
+            else
+                local msg = "Cannot start research! You need to research the requirements!"
+                PrintToTeam(self.team_index, msg)
+                return false
+            end
+        end
+    else
+        local difference = round(self.current_cost - (CurTime() - (self.last_time)), 1)
+        local msg = "Cannot start research! Please wait " .. difference .. " more seconds."
+        PrintToTeam(self.team_index, msg)
+        return false
+    end
+end
+
+
+--@@@@@ TeamAutoPickResearch @@@@@--
+-- Simple Auto Pick for now
 -- Bad function. Loop through some local string tables of research names, check if we can do research, if so, research.
-local function TeamAutoPickResearch(teamIndex)
-	teamInfo = GetTeamInfoTable(teamIndex)
-	-- If this gets called but we chose some research, do nothing (In case of race case)!
-	if teamInfo.ResearchStatus == RESEARCH_STATUS_IN_PROGRESS then
-		return
-	end
-	local research_cat_list = {"researchCatArmor"}
-	local research_list = {
-		researchCatArmor = {
-			"researchArmorOne",
-			"researchArmorTwo",
-			"researchArmorThree",
-			"researchArmorFour",
-			"researchArmorFive"
-		}
-	}
-	for cat_index, researchCat in ipairs(research_cat_list) do
-		for armor_index, researchIndex in ipairs(research_list[cat_index]) do
-			if TeamCanDoResearch(teamIndex, researchCat, researchIndex) then
-				local research_cost = GAMEMODE.RESEARCH_COST_TABLE[researchCat][researchIndex]
-				TeamDoResearch(teamIndex, research_cost, researchCat, researchIndex)
-				PrintMessage( HUD_PRINTTALK, "Team "..teamIndex.." has started research." )
-			end
-		end
-	end
+function ResearchObjectClass:TeamAutoPickResearch()
+    -- If this gets called but we chose some research, do nothing (In case of race case)!
+    if self.status == RESEARCH_STATUS_IN_PROGRESS then
+        return
+    end
+    local research_cat_list = { "researchCatArmor" }
+    local research_list = {
+        researchCatArmor = {
+            "researchArmorOne",
+            "researchArmorTwo",
+            "researchArmorThree",
+            "researchArmorFour",
+            "researchArmorFive"
+        }
+    }
+    for cat_index, researchCat in ipairs(research_cat_list) do
+        for armor_index, researchIndex in ipairs(research_list[cat_index]) do
+            if self:TeamCanDoResearch(researchCat, researchIndex) then
+                local research_cost = self.research_table[researchCat][researchIndex]['cost']
+                self:TeamDoResearch(research_cost, researchCat, researchIndex)
+                PrintMessage(HUD_PRINTTALK, "Team " .. self.team_index .. " has started research.")
+            end
+        end
+    end
 end
 
-local function CompleteResearch(teamIndex, researchCat, researchIndex)
-	PrintMessage( HUD_PRINTTALK, "Team "..teamIndex.." has completed research "..researchIndex.."." )
 
-	teamInfo = GetTeamInfoTable(teamIndex)
-
-	--print(teamInfo.RESEARCH_TABLE[researchCat][researchIndex])
-
-	--teamInfo.RESEARCH_TABLE[researchCat][researchIndex] = true
-
-	--print(teamInfo.RESEARCH_TABLE[researchCat][researchIndex])
-
-	print(teamInfo.ResearchTable[researchCat][researchIndex]["researched"])
-
-	teamInfo.ResearchTable[researchCat][researchIndex]["researched"] = true
-
-	print(teamInfo.ResearchTable[researchCat][researchIndex]["researched"])
-
-	teamInfo.ResearchStatus = RESEARCH_STATUS_WAITING
-
-	ClientStatusUpdate(RESEARCH_STATUS_WAITING, teamIndex)
-
-	print(RESEARCH_STATUS_WAITING)
-	print(teamIndex)
-
-	local auto_vote_time = GetConVar("rm_auto_vote_time_seconds"):GetInt()
-
-	timer.Create( "Team"..teamIndex.."ResearchAutoTimer", auto_vote_time, 1, function() TeamAutoPickResearch(teamIndex) end )
+--@@@@@ CompleteResearch @@@@@--
+-- Completes the given research at cat/index.
+function ResearchObjectClass:CompleteResearch(researchCat, researchIndex)
+    PrintMessage(HUD_PRINTTALK, "Team " .. self.team_index .. " has completed research " .. researchIndex .. ".")
+    self.research_table[researchCat][researchIndex]["researched"] = true
+    self.status = RESEARCH_STATUS_WAITING
+    ClientStatusUpdate(RESEARCH_STATUS_WAITING, self.team_index)
+    local auto_vote_time = GetConVar("rm_auto_vote_time_seconds"):GetInt()
+    timer.Create("Team" .. self.team_index .. "ResearchAutoTimer", auto_vote_time, 1, function() self:TeamAutoPickResearch() end)
 end
 
-local function TeamDoResearch(teamIndex, researchTime, researchCat, researchIndex)
-	teamInfo = GetTeamInfoTable(teamIndex)
-	teamInfo.ResearchLastTime = CurTime()
-	teamInfo.ResearchStatus = RESEARCH_STATUS_IN_PROGRESS
-	teamInfo.ResearchCurrentCost = researchTime
-	ClientStatusUpdate(RESEARCH_STATUS_IN_PROGRESS, teamIndex)
-	print(RESEARCH_STATUS_IN_PROGRESS)
-	print(teamIndex)
-	timer.Create( "Team"..teamIndex.."ResearchTimer", researchTime, 1, function() CompleteResearch(teamIndex, researchCat, researchIndex) end )
+
+--@@@@@ TeamDoResearch @@@@@--
+-- Starts research on the given cat/index.
+function ResearchObjectClass:TeamDoResearch(researchTime, researchCat, researchIndex)
+    self.last_time = CurTime()
+    self.status = RESEARCH_STATUS_IN_PROGRESS
+    self.current_cost = researchTime
+    ClientStatusUpdate(RESEARCH_STATUS_IN_PROGRESS, self.team_index)
+    timer.Create("Team" .. self.team_index .. "ResearchTimer", researchTime, 1, function() self:CompleteResearch(researchCat, researchIndex) end)
 end
+
+--######################## Constructor ########################--
+
+function ResearchObject(teamIndex, teamName)
+    local newResearchObjectClass = table.Copy(ResearchObjectClass)
+    --table.Copy is a Garry's Mod function. Look for it in the source code should you need to replicate it in a different API.
+    --Override the old default teamIndex property should we have a new code to replace it with:
+    if teamIndex then
+        newResearchObjectClass.team_index = teamIndex
+    end
+    --Override the old default Code property should we have a new code to replace it with:
+    if teamName then
+        newResearchObjectClass.team_name = teamName
+    end
+    --Return our new Object.
+    return newResearchObjectClass
+end
+
+--====================================================================================================================--
 
 net.Receive("RMStartTeamResearch", function(len, ply)
-
 	local research_cat = net.ReadString()
 	local research_index = net.ReadString()
-	local research_cost = GAMEMODE.RESEARCH_COST_TABLE[research_cat][research_index]
+    local TeamInfo = GetTeamInfoTable(ply:Team())
+	local research_cost = TeamInfo.Research.research_table[research_cat][research_index]['cost']
 
-	if TeamCanDoResearch(ply:Team(), research_cat, research_index) then
-		TeamDoResearch(ply:Team(), research_cost, research_cat, research_index)
+	if TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
+		TeamInfo.Research:TeamDoResearch(research_cost, research_cat, research_index)
 		PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
 	else
-		--PrintMessage( HUD_PRINTTALK, "Cannot start research!" )
-		teamInfo = GetTeamInfoTable(ply:Team())
-		local difference = (CurTime() - (teamInfo.ResearchLastTime))
-		print(difference)
+		local difference = (CurTime() - (TeamInfo.Research.last_time))
 	end
-
 end)

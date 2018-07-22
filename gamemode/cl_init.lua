@@ -13,12 +13,5 @@ function GM:Initialize()
     -- Do stuff
     MsgN("RM Client initializing...")
 
-    --GAMEMODE.round_state = ROUND_WAIT
-
-    --LANG.Init()
-
     self.BaseClass:Initialize()
-    local AllTeams = team.GetAllTeams()
-    timer.Simple( 30, function() PrintTable(AllTeams) end )
-    --PrintTable(AllTeams)
 end

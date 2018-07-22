@@ -5,13 +5,13 @@
 ---
 
 net.Receive("RMPrintToTeam", function(len, pl)
-    stringMsg = net.ReadString()
+    local stringMsg = net.ReadString()
     chat.AddText(stringMsg)
 end)
 
 net.Receive("RMClientStatusUpdate", function(len, pl)
-    intStatus = net.ReadInt(3)
-    intTeam = net.ReadInt(3)
+    local intStatus = net.ReadInt(3)
+    local intTeam = net.ReadInt(3)
     if LocalPlayer():Team() == intTeam then
         surface.PlaySound("garrysmod/save_load1.wav")
     end
@@ -38,46 +38,6 @@ local function ResearchMenu()
 		draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
 	end
 
-    --local ResearchOptions = vgui.Create("DComboBox", Menu)
-    --ResearchOptions:SetPos(5, 5)
-    --ResearchOptions:SetSize(100, 20)
-    --ResearchOptions:SetValue("Research Options")
-    ----ResearchOptions:AddChoice("option A")
-    ----ResearchOptions:AddChoice("option B")
-    ----ResearchOptions:AddChoice("option C")
-    --ResearchOptions:AddChoice("Armor 1", "researchArmorOne")
-    --ResearchOptions:AddChoice("Armor 2", "researchArmorTwo")
-    --ResearchOptions:AddChoice("Armor 3", "researchArmorThree")
-    --ResearchOptions:AddChoice("Armor 4", "researchArmorFour")
-    --ResearchOptions:AddChoice("Armor 5", "researchArmorFive")
-    ----ResearchOptions.OnSelect = function(panel, index, value)
-    ----    --print(value .. " was selected!")
-    ----end
-    --
-    --local send = vgui.Create("DButton", Menu)
-    --send:Dock(TOP)
-    --send:SetText("Do some research")
-    --send.DoClick = function()
-    --    choice_string, choice_data = ResearchOptions:GetSelected()
-    --    print(choice_string)
-    --    print(choice_data)
-    --    if not choice_string or not choice_data then
-    --        print("No option selected!")
-    --        return
-    --    else
-    --        --surface.PlaySound( "garrysmod/save_load1.wav" )
-    --        net.Start("RMStartTeamResearch")
-    --        net.WriteString("researchCatArmor")
-    --        net.WriteString(choice_data)
-    --        net.SendToServer()
-    --    end
-    --end
-
-    --local frame = vgui.Create("DFrame")
-    --frame:SetSize(500, 300)
-    --frame:Center()
-    --frame:MakePopup()
-
     local sheet = vgui.Create("DPropertySheet", Menu)
     sheet:Dock(FILL)
 
@@ -87,7 +47,7 @@ local function ResearchMenu()
     end
     sheet:AddSheet("test", panel_armor, "icon16/shield.png")
 
-    local armor_techs = {"researchArmorOne", "researchArmorTwo", "researchArmorThree", "researchArmorFour", "researchArmorFive"}
+    local armor_techs = {"armor_one", "armor_two"}
 
     for index, stringResearchIndex in ipairs(armor_techs) do
         local DermaButton = vgui.Create("DButton", panel_armor) --// Create the button and parent it to the frame
@@ -97,28 +57,12 @@ local function ResearchMenu()
         DermaButton:SetSize(250, ScrH()/8)                    --// Set the size
         DermaButton.DoClick = function()
             net.Start("RMStartTeamResearch")
-            net.WriteString("researchCatArmor")
+            net.WriteString("cat_armor")
             net.WriteString(stringResearchIndex)
             net.SendToServer()
             --end
         end
     end
-
-    --for i = 1, 10, 1 do
-    --    --print(i)
-    --end
-    --local DermaButton = vgui.Create("DButton", panel_armor) --// Create the button and parent it to the frame
-    --DermaButton:SetText("Armor 1")                    --// Set the text on the button
-    ----DermaButton:SetPos(25, 50)                    --// Set the position on the frame
-    --DermaButton:Dock(TOP)
-    --DermaButton:SetSize(250, 30)                    --// Set the size
-    --DermaButton.DoClick = function()
-    --    net.Start("RMStartTeamResearch")
-    --    net.WriteString("researchCatArmor")
-    --    net.WriteString("researchArmorOne")
-    --    net.SendToServer()
-    --    --end
-    --end
 
     local panel_health = vgui.Create("DPanel", sheet)
     panel_health.Paint = function(self, w, h)
@@ -129,5 +73,3 @@ local function ResearchMenu()
     ----//You can leave out the parentheses if there is a single string as an argument.
 end
 usermessage.Hook("OpenResearchMenu", ResearchMenu)
-
---usermessage.Hook("")

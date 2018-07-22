@@ -40,10 +40,6 @@ function GM:CreateTeams()
 	team.SetUp( TEAM_ORANGE, "Orange Team", Color( 255, 150, 0 ) )
 	team.SetSpawnPoint( TEAM_ORANGE, "sky_camera" ) -- <-- This would be info_terrorist or some entity that is in your map
 
-	--TEAM_SEXY = 3
-	--team.SetUp( TEAM_SEXY, "Sexy Team", Color( 255, 150, 150 ) )
-	--team.SetSpawnPoint( TEAM_SEXY, "info_player_start" ) -- <-- This would be info_terrorist or some entity that is in your map
-
 	team.SetSpawnPoint( TEAM_SPECTATOR, "worldspawn" )
 
 end
