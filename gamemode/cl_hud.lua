@@ -198,23 +198,13 @@ html:AddFunction("player", "getAll", function()
             team_members={},
         }
     end
---    PrintTable(team_table)
-
---    print("Teams table is ")
---    PrintTable(teams_tbl)
 
     local player_table = player.GetAll()
-    local plys_tbl = {}
 
     for index, ply in ipairs(player_table) do
         if ply:IsValid() then
---            print("ply team is "..ply:Team())
---            table.insert(teams_tbl[ply:Team()]['team_members'], {
---                nick = ply:Nick(),
---                frags = ply:Frags(),
---                deaths = ply:Deaths()
---            })
-            if ply:Team() ~= nil then
+            -- For some reason when the ply is on the unassigned/spectator team it causes issues.
+            if ply:Team() ~= 1001 or ply:Team() ~= 1002 then
                 teams_tbl[ply:Team()]['team_members'][ply:Nick()] = {
                     frags = ply:Frags(),
                     deaths = ply:Deaths()
@@ -222,8 +212,6 @@ html:AddFunction("player", "getAll", function()
             end
         end
     end
-    PrintTable(teams_tbl)
---    local json_scoreboard_table = util.TableToJSON(teams_tbl)
     return util.TableToJSON(teams_tbl)
 end)
 scoreboard_frame:Hide()
