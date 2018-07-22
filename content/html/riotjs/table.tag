@@ -12,6 +12,12 @@
                     </div>
                 </th>
                 <th>
+                    <div class="ui large yellow label">
+                        <i class="address card icon"></i>
+                        SteamID
+                    </div>
+                </th>
+                <th>
                     <div class="ui large blue label">
                         <i class="shield alternate icon"></i>
                         Kills
@@ -23,16 +29,28 @@
                         Deaths
                     </div>
                 </th>
+                <th>
+                    <div class="ui large teal label">
+                        <i class="computer icon"></i>
+                        Ping
+                    </div>
+                </th>
             </tr>
-            <tr each="{ name, player in team.team_members }" class="">
+            <tr each="{ player in team.team_members }" class="">
                 <td>
-                    {player}
+                    {player.nick}
+                </td>
+                <td>
+                    {player.steamid}
                 </td>
                 <td>
                     {player.frags}
                 </td>
                 <td>
                     {player.deaths}
+                </td>
+                <td>
+                    {player.ping}
                 </td>
             </tr>
         </table>
