@@ -68,7 +68,7 @@
             self.update({
                 team_list: JSON.parse(player.getAll()),
             })
-            console.log(self.team_list)
+            // console.log(self.team_list)
             window.setTimeout(update_loop, 1000);
         }
     </script>

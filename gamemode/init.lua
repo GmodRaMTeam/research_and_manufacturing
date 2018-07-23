@@ -20,6 +20,7 @@ include( "researchmenu.lua" )
 -- Convars --
 CreateConVar("rm_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("rm_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("rm_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
 
 --[[All local spaced server functions]]
 
@@ -73,12 +74,16 @@ local function InitTeamVariables()
                prereqs = {},
                descr = "The most basic armor. (20)",
                cost = 60,
+               name = 'Bodyarmor Type I',
+               votes = {},
             },
             armor_two = {
                researched = false,
                prereqs = { "armor_one" },
                descr = "A little bit better armor (40)",
                cost = 65,
+               name = 'Bodyarmor Type II',
+               votes = {},
             },
          }
 
@@ -87,6 +92,10 @@ local function InitTeamVariables()
          TeamInfo.Money = 30000 -- Every team gets $30,000 to start
          TeamInfo.Scientists = 3 -- Every team gets 3 to start
          TeamInfo.Research = newResearchObj
+
+         -- Kick off that research
+         local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
+         timer.Create("Team" .. ID .. "VoteMenuTimeLimit", menu_vote_time, 1, function() TeamInfo.Research:TallyVotes() end)
 
       end
    end
