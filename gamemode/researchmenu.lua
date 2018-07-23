@@ -5,6 +5,7 @@
 ---
 
 util.AddNetworkString("RMStartTeamResearch")
+util.AddNetworkString("RMRecordResearchVote")
 util.AddNetworkString("RMClientStatusUpdate")
 util.AddNetworkString("RMPrintToTeam")
 
@@ -46,6 +47,7 @@ ResearchObjectClass.team_index = 9999
 ResearchObjectClass.team_name = "default"
 -- Default values should be fine
 ResearchObjectClass.last_time = CurTime()
+ResearchObjectClass.last_vote_time = CurTime()
 ResearchObjectClass.status = RESEARCH_STATUS_WAITING
 ResearchObjectClass.current_cost = 0
 -- Set this after constructing when initing team vars.
@@ -116,21 +118,21 @@ function ResearchObjectClass:TeamAutoPickResearch()
     if self.status == RESEARCH_STATUS_IN_PROGRESS then
         return
     end
-    local research_cat_list = { "researchCatArmor" }
-    local research_list = {
-        researchCatArmor = {
-            "researchArmorOne",
-            "researchArmorTwo",
-            "researchArmorThree",
-            "researchArmorFour",
-            "researchArmorFive"
-        }
-    }
-    for cat_index, researchCat in ipairs(research_cat_list) do
-        for armor_index, researchIndex in ipairs(research_list[cat_index]) do
-            if self:TeamCanDoResearch(researchCat, researchIndex) then
-                local research_cost = self.research_table[researchCat][researchIndex]['cost']
-                self:TeamDoResearch(research_cost, researchCat, researchIndex)
+--    local research_cat_list = { "researchCatArmor" }
+--    local research_list = {
+--        researchCatArmor = {
+--            "researchArmorOne",
+--            "researchArmorTwo",
+--            "researchArmorThree",
+--            "researchArmorFour",
+--            "researchArmorFive"
+--        }
+--    }
+    for cat_index, research_cat_table in pairs(self.research_table) do
+        for research_index, research_table in pairs(research_cat_table) do
+            if self:TeamCanDoResearch(cat_index, research_index) then
+                local research_cost = self.research_table[cat_index][research_index]['cost']
+                self:TeamDoResearch(research_cost, cat_index, research_index)
                 PrintMessage(HUD_PRINTTALK, "Team " .. self.team_index .. " has started research.")
             end
         end
@@ -145,19 +147,102 @@ function ResearchObjectClass:CompleteResearch(researchCat, researchIndex)
     self.research_table[researchCat][researchIndex]["researched"] = true
     self.status = RESEARCH_STATUS_WAITING
     ClientStatusUpdate(RESEARCH_STATUS_WAITING, self.team_index)
-    local auto_vote_time = GetConVar("rm_auto_vote_time_seconds"):GetInt()
-    timer.Create("Team" .. self.team_index .. "ResearchAutoTimer", auto_vote_time, 1, function() self:TeamAutoPickResearch() end)
+    self:ResetVoteCount()
+--    local auto_vote_time = GetConVar("rm_auto_vote_time_seconds"):GetInt()
+--    timer.Create("Team" .. self.team_index .. "ResearchAutoTimer", auto_vote_time, 1, function() self:TeamAutoPickResearch() end)
+    local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
+    timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
 end
 
 
 --@@@@@ TeamDoResearch @@@@@--
 -- Starts research on the given cat/index.
 function ResearchObjectClass:TeamDoResearch(researchTime, researchCat, researchIndex)
+--    self.last_vote_time = CurTime()
     self.last_time = CurTime()
     self.status = RESEARCH_STATUS_IN_PROGRESS
     self.current_cost = researchTime
     ClientStatusUpdate(RESEARCH_STATUS_IN_PROGRESS, self.team_index)
     timer.Create("Team" .. self.team_index .. "ResearchTimer", researchTime, 1, function() self:CompleteResearch(researchCat, researchIndex) end)
+end
+
+
+--@@@@@ TallyVotes @@@@@--
+-- Tallies the current vote count and starts that research.
+function ResearchObjectClass:TallyVotes()
+    -- Setup a temp table to track our values
+    local temp_current_winner = {}
+    temp_current_winner.value = 0
+    temp_current_winner.research_cat = nil
+    temp_current_winner.research_index = nil
+
+    for cat_index, research_cat_table in pairs(self.research_table) do
+        for research_index, research_table in pairs(research_cat_table) do
+            -- If our current value is the default shit
+            if temp_current_winner.value == 0 or temp_current_winner.research_cat == nil or temp_current_winner.research_index == nil then
+                -- Don't bother assigning a temp winner if their score isn't above 0
+                if #research_table['votes'] > 0 then
+                    temp_current_winner.value = #research_table['votes']
+                    temp_current_winner.research_cat = cat_index
+                    temp_current_winner.research_index = research_index
+                end
+            else
+                if #research_table['votes'] > 0 then
+                    temp_current_winner.value = #research_table['votes']
+                    temp_current_winner.research_cat = cat_index
+                    temp_current_winner.research_index = research_index
+                end
+            end
+        end
+    end
+    if temp_current_winner.value == 0 or temp_current_winner.research_cat == nil or temp_current_winner.research_index == nil then
+        -- Call auto-mated vote
+        print("Auto vote!")
+        self:TeamAutoPickResearch()
+    else
+        PrintMessage( HUD_PRINTTALK, self.team_name.." team has started research." )
+        print("Temp current winner is! ")
+        PrintTable(temp_current_winner)
+        print("-------------------------")
+        -- Remove our timer if it is there
+        if timer.Exists("Team" .. self.team_index .. "ResearchAutoTimer") then
+            timer.Remove("Team" .. self.team_index .. "ResearchAutoTimer")
+        end
+        local research_time = self.research_table[temp_current_winner.research_cat][temp_current_winner.research_index]['cost']
+        self:TeamDoResearch(research_time, temp_current_winner.research_cat, temp_current_winner.research_index)
+    end
+end
+
+
+--@@@@@ ResetVotes @@@@@--
+-- Resets the vote counts for all research
+function ResearchObjectClass:ResetVoteCount()
+    for cat_index, research_cat_table in pairs(self.research_table) do
+        for research_index, research_table in pairs(research_cat_table) do
+            research_table['votes'] = {}
+        end
+    end
+end
+
+
+--@@@@@ HasUserVoted @@@@@--
+-- Returns true if the player has voted, false if not.
+function ResearchObjectClass:HasUserVoted(player_steamid)
+--    PrintTable(self.research_table)
+    for cat_index, research_cat_table in pairs(self.research_table) do
+--        PrintTable(research_cat_table)
+        for research_index, research_table in pairs(research_cat_table) do
+--            print('@@@@@@@@@@@@@@ VOTES TABLE @@@@@@@@@@@@@@@@@@@@')
+--            PrintTable(research_table['votes'])
+            for vote_index, vote in pairs(research_table['votes']) do
+--                print("Is vote: "..vote.." equal to: "..player_steamid.."?")
+                if vote == player_steamid then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end
 
 --######################## Constructor ########################--
@@ -179,16 +264,69 @@ end
 
 --====================================================================================================================--
 
-net.Receive("RMStartTeamResearch", function(len, ply)
+--net.Receive("RMStartTeamResearch", function(len, ply)
+--	local research_cat = net.ReadString()
+--	local research_index = net.ReadString()
+--    local TeamInfo = GetTeamInfoTable(ply:Team())
+--	local research_cost = TeamInfo.Research.research_table[research_cat][research_index]['cost']
+--
+--	if TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
+--		TeamInfo.Research:TeamDoResearch(research_cost, research_cat, research_index)
+--		PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
+--	else
+--		local difference = (CurTime() - (TeamInfo.Research.last_time))
+--        print(difference)
+--	end
+--end)
+
+net.Receive("RMRecordResearchVote", function(len, ply)
 	local research_cat = net.ReadString()
 	local research_index = net.ReadString()
     local TeamInfo = GetTeamInfoTable(ply:Team())
-	local research_cost = TeamInfo.Research.research_table[research_cat][research_index]['cost']
+--	local research_cost = TeamInfo.Research.research_table[research_cat][research_index]['cost']
+    -- UNGLY. Fix this in the future
+--    print(research_cat)
+--    print(research_index)
+--    print("printing research table")
+--    print("---------------")
+--    PrintTable(TeamInfo.Research.research_table[research_cat][research_index])
+--    print("---------------")
+--    local current_votes = TeamInfo.Research.research_table[research_cat][research_index]['votes']
+--    print("printing current votes table")
+--    print("---------------")
+--    PrintTable(current_votes)
+--    print("---------------")
+    local ply_has_voted = TeamInfo.Research:HasUserVoted(ply:SteamID())
+--    print("Has user voted?: "..tostring(ply_has_voted))
+--    local ply_has_voted = false
+--    for index, vote in ipairs(current_votes) do
+--        if vote == ply:SteamID() then
+--            ply_has_voted = true
+--        end
+--    end
+    if not ply_has_voted and TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
+        table.insert(TeamInfo.Research.research_table[research_cat][research_index]['votes'], ply:SteamID())
+        local research_name = TeamInfo.Research.research_table[research_cat][research_index]['name']
+        PrintMessage(HUD_PRINTTALK, "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!")
+    else
+        local difference = (CurTime() - (TeamInfo.Research.last_vote_time))
+        print(difference)
+--        PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
+    end
 
-	if TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
-		TeamInfo.Research:TeamDoResearch(research_cost, research_cat, research_index)
-		PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
-	else
-		local difference = (CurTime() - (TeamInfo.Research.last_time))
-	end
+--    print("Player steamid is " .. ply:SteamID() .. "!")
+--    print("printing research table")
+--    print("---------------")
+--    PrintTable(TeamInfo.Research.research_table)
+--    print("---------------")
+
+
+--	if TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
+--		TeamInfo.Research:TeamDoResearch(research_cost, research_cat, research_index)
+--		PrintMessage( HUD_PRINTTALK, "Team "..ply:Team().." has started research." )
+--	else
+--		local difference = (CurTime() - (TeamInfo.Research.last_time))
+--        print(difference)
+--	end
 end)
+

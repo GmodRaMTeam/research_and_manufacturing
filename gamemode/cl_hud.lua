@@ -164,78 +164,82 @@ end
 -- ===== Scoreboard ===== --
 
 scoreboard = scoreboard or {}
-
-scoreboard.status = 'NONE'
-
--- Drawing the scoreboard here for now, then hiding. Way faster to hide/un-hide than draw everytime.
-
-local scoreboard_frame = vgui.Create("DFrame")
-scoreboard_frame:SetTitle("")
-scoreboard_frame:SetSize(ScrW() * 0.75, ScrH() * 0.75)
-scoreboard_frame:Center()
-scoreboard_frame:ShowCloseButton(false)
-scoreboard_frame:SetSizable(false)
-scoreboard_frame:SetPaintShadow(true)
-function scoreboard_frame:Paint()
---    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
-end
-
-local html = vgui.Create("DHTML", scoreboard_frame)
-html:Dock(FILL)
-html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/test.html")
-html:SetAllowLua(true)
-
-html:AddFunction("player", "getAll", function()
-
-    local team_table = team.GetAllTeams()
-    local teams_tbl = {}
-
-    for index, team in ipairs(team_table) do
-        teams_tbl[index] = {
-            name=team['Name'],
-            score=team['Score'],
-            color=team['Color'],
-            team_members={},
-        }
-    end
---    PrintTable(team_table)
-
---    print("Teams table is ")
---    PrintTable(teams_tbl)
-
-    local player_table = player.GetAll()
-    local plys_tbl = {}
-
-    for index, ply in ipairs(player_table) do
-        if ply:IsValid() then
---            print("ply team is "..ply:Team())
---            table.insert(teams_tbl[ply:Team()]['team_members'], {
---                nick = ply:Nick(),
---                frags = ply:Frags(),
---                deaths = ply:Deaths()
---            })
-            if ply:Team() ~= nil then
-                teams_tbl[ply:Team()]['team_members'][ply:Nick()] = {
-                    frags = ply:Frags(),
-                    deaths = ply:Deaths()
-                }
-            end
-        end
-    end
-    PrintTable(teams_tbl)
---    local json_scoreboard_table = util.TableToJSON(teams_tbl)
-    return util.TableToJSON(teams_tbl)
-end)
-scoreboard_frame:Hide()
+scoreboard.frame = nil
 
 function scoreboard:show()
     --Create the scoreboard here, with an base like DPanel, you can use an DListView for the rows.
-    scoreboard_frame:Show()
+    function scoreboard:init()
+        -- Drawing the scoreboard here for now, then hiding. Way faster to hide/un-hide than draw everytime.
+
+        local scoreboard_frame = vgui.Create("DFrame")
+        scoreboard_frame:SetTitle("")
+        scoreboard_frame:SetSize(ScrW() * 0.75, ScrH() * 0.75)
+        scoreboard_frame:Center()
+        scoreboard_frame:ShowCloseButton(false)
+        scoreboard_frame:SetSizable(false)
+        scoreboard_frame:SetPaintShadow(true)
+        function scoreboard_frame:Paint()
+            --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
+        end
+
+        local html = vgui.Create("DHTML", scoreboard_frame)
+        html:Dock(FILL)
+        html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/test.html")
+        html:SetAllowLua(true)
+
+        html:AddFunction("player", "getAll", function()
+
+            local team_table = team.GetAllTeams()
+            local teams_tbl = {}
+
+            for index, team in ipairs(team_table) do
+                teams_tbl[index] = {
+                    name = team['Name'],
+                    score = team['Score'],
+                    color = team['Color'],
+                    team_members = {},
+                }
+            end
+
+            local player_table = player.GetAll()
+
+            for index, ply in ipairs(player_table) do
+                if ply:IsValid() then
+                    -- For some reason when the ply is on the unassigned/spectator team it causes issues.
+                    if ply:Team() ~= 1001 or ply:Team() ~= 1002 then
+                        teams_tbl[ply:Team()]['team_members'][ply:SteamID()] = {
+                            nick = ply:Nick(),
+                            steamid = ply:SteamID(),
+                            frags = ply:Frags(),
+                            deaths = ply:Deaths(),
+                            ping = ply:Ping(),
+                        }
+                    end
+                end
+            end
+            return util.TableToJSON(teams_tbl)
+        end)
+--        scoreboard_frame:Hide()
+        print("-- RM Scoreboard Initialized --")
+        return scoreboard_frame
+    end
+
+    if scoreboard.frame == nil then
+        scoreboard.frame = scoreboard:init()
+    else
+        scoreboard.frame:Show()
+    end
 
     function scoreboard:hide()
         -- This is where you hide the scoreboard, such as with Base:Remove()
-        scoreboard_frame:Hide()
+        if scoreboard.frame == nil then
+            scoreboard.frame = scoreboard:init()
+            scoreboard.frame:Hide()
+        else
+            scoreboard.frame:Hide()
+        end
     end
+
 end
 
 function GM:ScoreboardShow()
