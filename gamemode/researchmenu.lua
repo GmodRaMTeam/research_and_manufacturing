@@ -158,6 +158,7 @@ end
 --@@@@@ TeamDoResearch @@@@@--
 -- Starts research on the given cat/index.
 function ResearchObjectClass:TeamDoResearch(researchTime, researchCat, researchIndex)
+--    self.last_vote_time = CurTime()
     self.last_time = CurTime()
     self.status = RESEARCH_STATUS_IN_PROGRESS
     self.current_cost = researchTime
@@ -290,7 +291,7 @@ net.Receive("RMRecordResearchVote", function(len, ply)
 --    print("---------------")
 --    PrintTable(TeamInfo.Research.research_table[research_cat][research_index])
 --    print("---------------")
-    local current_votes = TeamInfo.Research.research_table[research_cat][research_index]['votes']
+--    local current_votes = TeamInfo.Research.research_table[research_cat][research_index]['votes']
 --    print("printing current votes table")
 --    print("---------------")
 --    PrintTable(current_votes)
@@ -303,7 +304,7 @@ net.Receive("RMRecordResearchVote", function(len, ply)
 --            ply_has_voted = true
 --        end
 --    end
-    if not ply_has_voted then
+    if not ply_has_voted and TeamInfo.Research:TeamCanDoResearch(research_cat, research_index) then
         table.insert(TeamInfo.Research.research_table[research_cat][research_index]['votes'], ply:SteamID())
         local research_name = TeamInfo.Research.research_table[research_cat][research_index]['name']
         PrintMessage(HUD_PRINTTALK, "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!")
