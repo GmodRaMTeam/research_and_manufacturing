@@ -4,18 +4,24 @@
 --- DateTime: 5/22/2018 10:15 PM
 ---
 
+util.AddNetworkString("RMDynamicNotification")
+util.AddNetworkString("RMShowHelp")
+
 AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "cl_pickteam.lua" )
 AddCSLuaFile( "cl_researchmenu.lua" )
 AddCSLuaFile( "cl_hud.lua" )
+AddCSLuaFile( "cl_scoreboard.lua" )
 AddCSLuaFile( "shared.lua" )
-AddCSLuaFile("util.lua")
+--AddCSLuaFile("utils.lua")
 
 include( "shared.lua" )
 include( "player.lua" )
 include( "player_ext.lua" )
 include( "komerad_autorun.lua" )
-include( "researchmenu.lua" )
+include( "research_manager.lua" )
+include( "research_category.lua" )
+include( "research_technology.lua" )
 
 -- Convars --
 CreateConVar("rm_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
@@ -65,38 +71,20 @@ local function InitTeamVariables()
    local AllTeams = team.GetAllTeams()
    for ID, TeamInfo in pairs ( AllTeams ) do
       if ( ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
+         PrintTable(TeamInfo)
+         local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
+         local armorCat = newResearchManager:AddCategory('armor', 'Armor')
+         local armor_one = armorCat:AddTechnology('armor_one', 'Armor Type I', 'Decent Armor (20)', 60)
+         local armor_two = armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65)
+         table.insert(armor_two.reqs, armor_one.key)
 
-         local newResearchObj = ResearchObject(ID, TeamInfo['name'])
-
-         local researchCatArmorTable = {
-            armor_one = {
-               researched = false,
-               prereqs = {},
-               descr = "The most basic armor. (20)",
-               cost = 60,
-               name = 'Bodyarmor Type I',
-               votes = {},
-            },
-            armor_two = {
-               researched = false,
-               prereqs = { "armor_one" },
-               descr = "A little bit better armor (40)",
-               cost = 65,
-               name = 'Bodyarmor Type II',
-               votes = {},
-            },
-         }
-
-         newResearchObj.research_table["cat_armor"] = researchCatArmorTable
-
+         PrintTable(newResearchManager)
+         TeamInfo.ResearchManager = newResearchManager
          TeamInfo.Money = 30000 -- Every team gets $30,000 to start
          TeamInfo.Scientists = 3 -- Every team gets 3 to start
-         TeamInfo.Research = newResearchObj
 
-         -- Kick off that research
          local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
-         timer.Create("Team" .. ID .. "VoteMenuTimeLimit", menu_vote_time, 1, function() TeamInfo.Research:TallyVotes() end)
-
+         timer.Create("Team" .. ID .. "VoteMenuTimeLimit", menu_vote_time, 1, function() newResearchManager:TallyVotes() end)
       end
    end
 end
@@ -129,8 +117,20 @@ function GM:Initialize()
 end
 
 function GM:ShowHelp( ply ) -- This hook is called everytime F1 is pressed.
-    umsg.Start( "OpenResearchMenu", ply ) -- Sending a message to the client.
-    umsg.End()
+--    umsg.Start( "OpenResearchMenu", ply ) -- Sending a message to the client.
+--    umsg.End()
+   local AllTeams = team.GetAllTeams()
+--   PrintTable(AllTeams)
+--   PrintTable(AllTeams[ply:Team()])
+
+   if (ply:Team() == 1 or ply:Team() == 2) then
+      local status = AllTeams[ply:Team()]['ResearchManager'].status
+      if status ~= RESEARCH_STATUS_IN_PROGRESS then
+         net.Start("RMShowHelp")
+         net.WriteInt(status, 3)
+         net.Send(ply)
+      end
+   end
 end --Ends function
 
 -- Convar replication is broken in gmod, so we do this.
@@ -145,4 +145,28 @@ end
 function GetTeamInfoTable(teamIndex)
    local AllTeams = team.GetAllTeams()
    return AllTeams[teamIndex]
+end
+
+function DynamicStatusUpdate(team_index, message, status, specific_player)
+   -- Status can be: 'warning', 'success', 'error'
+   if team_index ~= nil then
+      for k, ply in pairs(player.GetAll()) do
+         if IsValid(ply) and ply:Team() == team_index then
+            net.Start("RMDynamicNotification")
+            net.WriteString(message)
+            net.WriteString(status)
+            net.Send(ply)
+         end
+      end
+   elseif specific_player ~= nil and specific_player:IsValid() and team_index == nil then
+      net.Start("RMDynamicNotification")
+      net.WriteString(message)
+      net.WriteString(status)
+      net.Send(ply)
+   else
+      net.Start("RMDynamicNotification")
+      net.WriteString(message)
+      net.WriteString(status)
+      net.Broadcast()
+   end
 end

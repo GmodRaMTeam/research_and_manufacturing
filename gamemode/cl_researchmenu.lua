@@ -57,7 +57,7 @@ local function ResearchMenu()
         DermaButton:SetSize(250, ScrH()/8)                    --// Set the size
         DermaButton.DoClick = function()
             net.Start("RMRecordResearchVote")
-            net.WriteString("cat_armor")
+            net.WriteString("armor")
             net.WriteString(stringResearchIndex)
             net.SendToServer()
             --end
@@ -72,4 +72,16 @@ local function ResearchMenu()
 
     ----//You can leave out the parentheses if there is a single string as an argument.
 end
-usermessage.Hook("OpenResearchMenu", ResearchMenu)
+--usermessage.Hook("OpenResearchMenu", function()
+--    ResearchMenu()
+--end)
+
+net.Receive('RMShowHelp', function()
+    local ply = LocalPlayer()
+    local researchStatus = net.ReadInt(3)
+    if ( ply:Team() ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
+        if researchStatus ~= RESEARCH_STATUS_IN_PROGRESS then
+            ResearchMenu()
+        end
+    end
+end)
