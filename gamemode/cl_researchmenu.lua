@@ -57,7 +57,7 @@ local function ResearchMenu()
         DermaButton:SetSize(250, ScrH()/8)                    --// Set the size
         DermaButton.DoClick = function()
             net.Start("RMRecordResearchVote")
-            net.WriteString("armor")
+            net.WriteString("cat_armor")
             net.WriteString(stringResearchIndex)
             net.SendToServer()
             --end
