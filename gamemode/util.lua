@@ -17,3 +17,28 @@ function util.SimpleTime(seconds, fmt)
 
     return string.format(fmt, m, s, ms)
 end
+
+function round(num, numDecimalPlaces)
+    local mult = 10 ^ (numDecimalPlaces or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
+function PrintToTeam(teamIndex, stringMsg)
+    for k, ply in pairs(player.GetAll()) do
+        if ply:Team() == teamIndex then
+            --ply:ChatPrint(stringMsg)
+            net.Start("RMPrintToTeam")
+            net.WriteString(stringMsg)
+            net.Send(ply)
+        end
+    end
+end
+
+function ClientStatusUpdate(intStatus, intTeam)
+    net.Start("RMClientStatusUpdate")
+    --net.WriteString("some text")
+    net.WriteInt(intStatus, 3)
+    net.WriteInt(intTeam, 3)
+    net.Broadcast()
+    -- We did something!
+end
