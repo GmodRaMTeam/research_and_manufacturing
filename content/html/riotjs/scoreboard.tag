@@ -13,28 +13,46 @@
                 </th>
                 <th>
                     <div class="ui large">
+                        <i class="address card icon"></i>
+                        SteamID
+                    </div>
+                </th>
+                <th>
+                    <div class="ui large">
                         <i class="shield alternate icon"></i>
                         Kills
                     </div>
                 </th>
                 <th>
-                    <div class="ui large red">
+                    <div class="ui large">
                         <i class="ambulance icon"></i>
                         Deaths
+                    </div>
+                </th>
+                <th>
+                    <div class="ui large">
+                        <i class="computer icon"></i>
+                        Ping
                     </div>
                 </th>
             </tr>
             </thead>
             <tbody>
-            <tr each="{ name, player in team.team_members }" class="">
+            <tr each="{ player in team.team_members }" class="">
                 <td>
-                    {player}
+                    {player.nick}
+                </td>
+                <td>
+                    {player.steamid}
                 </td>
                 <td>
                     {player.frags}
                 </td>
                 <td>
                     {player.deaths}
+                </td>
+                <td>
+                    {player.ping}
                 </td>
             </tr>
             </tbody>
@@ -55,9 +73,8 @@
                 self.update({
                     teams: JSON.parse(player.getAll()),
                 })
-                console.log(self.teams)
             }
-            //window.setTimeout(update_loop, 1000);
+            window.setTimeout(update_loop, 1000);
         }
     </script>
     <style scoped>
