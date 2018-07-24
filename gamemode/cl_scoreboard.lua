@@ -29,7 +29,14 @@ function scoreboard:show()
 
         local html = vgui.Create("DHTML", scoreboard_frame)
         html:Dock(FILL)
-        html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
+
+        --html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
+
+        --local template = include "template"
+        local compiled_template = template.render("../content/html/scoreboard.html")
+        html:SetHTML(compiled_template)
+
+
         html:SetAllowLua(true)
 
         html:AddFunction("player", "getAll", function()
