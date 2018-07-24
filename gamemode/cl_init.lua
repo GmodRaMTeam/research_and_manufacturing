@@ -8,6 +8,7 @@ include( "shared.lua" )
 include( "cl_pickteam.lua" )
 include( "cl_researchmenu.lua" )
 include( "cl_hud.lua" )
+include( "cl_scoreboard.lua" )
 
 function GM:Initialize()
     -- Do stuff
