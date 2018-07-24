@@ -184,7 +184,7 @@ function scoreboard:show()
 
         local html = vgui.Create("DHTML", scoreboard_frame)
         html:Dock(FILL)
-        html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/test.html")
+        html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
         html:SetAllowLua(true)
 
         html:AddFunction("player", "getAll", function()
