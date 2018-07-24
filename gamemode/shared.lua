@@ -7,7 +7,9 @@
 include( "komerad_autorun.lua" )
 AddCSLuaFile( "komerad_autorun.lua" )
 
-include("utils.lua")
+if SERVER then
+	include("utils.lua")
+end
 include( "player_class/player_rm.lua" )
 
 
