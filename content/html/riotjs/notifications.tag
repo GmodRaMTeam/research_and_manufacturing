@@ -1,5 +1,0 @@
-<notifications>
-    <script>
-
-    </script>
-</notifications>

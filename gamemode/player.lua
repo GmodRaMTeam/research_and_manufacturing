@@ -20,9 +20,9 @@
 --    --ply.has_spawned = true
 --
 --    -- let the client do things on spawn
---    net.Start("TTT_PlayerSpawned")
---       net.WriteBit(ply:IsSpec())
---    net.Send(ply)
+--    --net.Start("TTT_PlayerSpawned")
+--    --   net.WriteBit(ply:IsSpec())
+--    --net.Send(ply)
 --
 --    if ply:IsSpec() then
 --       ply:StripAll()

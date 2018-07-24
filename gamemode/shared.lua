@@ -7,7 +7,7 @@
 include( "komerad_autorun.lua" )
 AddCSLuaFile( "komerad_autorun.lua" )
 
-include("utils.lua")
+include("util.lua")
 include( "player_class/player_rm.lua" )
 
 
@@ -42,9 +42,4 @@ function GM:CreateTeams()
 
 	team.SetSpawnPoint( TEAM_SPECTATOR, "worldspawn" )
 
-end
-
-function round(num, numDecimalPlaces)
-    local mult = 10 ^ (numDecimalPlaces or 0)
-    return math.floor(num * mult + 0.5) / mult
 end
