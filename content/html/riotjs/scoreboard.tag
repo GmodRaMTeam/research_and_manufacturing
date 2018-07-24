@@ -52,9 +52,9 @@
         }
 
         .address-column {
-            max-width: 150px;
-            min-width: 150px;
-            width: 150px;
+            max-width: 175px;
+            min-width: 175px;
+            width: 175px;
         }
 
         .number-column {
