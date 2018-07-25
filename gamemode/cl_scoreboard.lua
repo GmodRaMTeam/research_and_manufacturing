@@ -33,9 +33,17 @@ function scoreboard:show()
         --html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
 
         --local template = include "template"
-        local compiled_template = template.render("../content/html/scoreboard.html")
-        html:SetHTML(compiled_template)
+        --local template = include( "garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html" )
+        --local template = include( "garrysmod/gamemodes/research_and_manufacturing/gamemode/template.lua" )
+        --PrintTable(template)
+        --local compiled_template = template.render("../content/html/scoreboard.html")
+        --html:SetHTML(compiled_template)
 
+        local base = file.Read("gamemodes/research_and_manufacturing/content/html/base.html", "GAME")
+        local content = file.Read("gamemodes/research_and_manufacturing/content/html/scoreboard.html", "GAME")
+        local compiled_view = string.Replace(base, "{*view*}", content)
+        print(compiled_view)
+        html:SetHTML(compiled_view)
 
         html:SetAllowLua(true)
 
