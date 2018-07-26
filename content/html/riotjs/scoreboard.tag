@@ -67,7 +67,7 @@
 
         var update_loop = function () {
             // player may not exist if we're testing in local browser, wait for it
-            if (typeof player !== 'undefined') {
+            if (typeof player !== 'undefined' && typeof player.getAll !== 'undefined') {
                 self.update({
                     teams: JSON.parse(player.getAll()),
                 })

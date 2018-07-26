@@ -1,6 +1,7 @@
 <app>
     <notifications show='{ view_notifications }'></notifications>
     <scoreboard show='{ view_scoreboard }'></scoreboard>
+    <hud-health show='{ view_hud_health }'></hud-health>
 
     <script>
         var self = this
@@ -20,7 +21,7 @@
 
             self.view_scoreboard = view === 'scoreboard'
             self.view_notifications = view === 'notifications'
-            self.view_hud = view === 'hud'
+            self.view_hud_health = view === 'hud_health'
         })
 
         self.check_view = function(view_name) {

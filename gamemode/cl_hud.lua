@@ -25,7 +25,7 @@ function hud:HealthInit()
 
     local html = vgui.Create("DHTML", health_frame)
     html:Dock(FILL)
-    html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/hud.html")
+    html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/base.html?view=hud_health")
     html:SetAllowLua(true)
 
     html:AddFunction("player", "getInfo", function()

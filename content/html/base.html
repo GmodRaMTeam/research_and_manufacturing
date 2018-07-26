@@ -8,14 +8,17 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/semantic.min.css">
+    <link rel="stylesheet" href="css/toastr.min.css">
 
     <!-- JS -->
     <script src="js/jquery.min.js"></script>
     <script src="js/semantic.min.js"></script>
     <script src="js/riot+compiler.min.js"></script>
+    <script src="js/toastr.min.js"></script>
 
     <!-- Riot tags -->
     <script src="riotjs/app.tag" type="riot/tag"></script>
+    <script src="riotjs/hud_health.tag" type="riot/tag"></script>
     <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
 
     <style>
@@ -24,6 +27,14 @@
             height: 100%;
             overflow: hidden;
         }
+
+        .toast {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .toast.toast-success {
+            background-color: #225222;
+        }
     </style>
 </head>
 <body>
@@ -31,12 +42,23 @@
 <app></app>
 
 <script>
+    // Sometimes default functions aren't defined yet, so put placeholders so we don't crash
+    // window.player = {
+        //getAll: function() {return "{}"},
+        //getInfo: function() {return "{}"}
+    // }
+
     // We need to wait for Gmod to add this JS function.
     $(document).ready(function () {
-        // For quicker testing locally, but we try again in 5 seconds anyway
+        // For quicker testing locally, but we try again in a second or two anyway
+        riot.mount('*')
         setTimeout(function() {
             riot.mount('*')
-        }, 10)
+        }, 1000)
+
+        toastr.success("test", "", {timeOut: 500000})
+        toastr.warning("test", "", {timeOut: 500000})
+        toastr.error("test", "", {timeOut: 500000})
     })
 </script>
 </body>
