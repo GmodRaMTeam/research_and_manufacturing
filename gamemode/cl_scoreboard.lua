@@ -29,24 +29,8 @@ function scoreboard:show()
 
         local html = vgui.Create("DHTML", scoreboard_frame)
         html:Dock(FILL)
-
-        --html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html")
-
-        --local template = include "template"
-        --local template = include( "garrysmod/gamemodes/research_and_manufacturing/content/html/scoreboard.html" )
-        --local template = include( "garrysmod/gamemodes/research_and_manufacturing/gamemode/template.lua" )
-        --PrintTable(template)
-        --local compiled_template = template.render("../content/html/scoreboard.html")
-        --html:SetHTML(compiled_template)
-
-        local base = file.Read("gamemodes/research_and_manufacturing/content/html/base.html", "GAME")
-        local content = file.Read("gamemodes/research_and_manufacturing/content/html/scoreboard.html", "GAME")
-        local compiled_view = string.Replace(base, "{*view*}", content)
-        print(compiled_view)
-        html:SetHTML(compiled_view)
-
+        html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/base.html?view=scoreboard")
         html:SetAllowLua(true)
-
         html:AddFunction("player", "getAll", function()
 
             local team_table = team.GetAllTeams()

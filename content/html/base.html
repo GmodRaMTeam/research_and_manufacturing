@@ -7,17 +7,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="content/html/css/semantic.min.css">
+    <link rel="stylesheet" href="css/semantic.min.css">
 
     <!-- JS -->
-    <script src="content/html/js/jquery.min.js"></script>
-    <script src="content/html/js/semantic.min.js"></script>
-    <script src="content/html/js/riot+compiler.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/semantic.min.js"></script>
+    <script src="js/riot+compiler.min.js"></script>
 
     <!-- Riot tags -->
-    <script src="content/html/riotjs/scoreboard.tag" type="riot/tag"></script>
+    <script src="riotjs/app.tag" type="riot/tag"></script>
+    <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
+
+    <style>
+        html, body {
+            background-color: transparent;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-    {*view*}
+
+<app></app>
+
+<script>
+    // We need to wait for Gmod to add this JS function.
+    $(document).ready(function () {
+        // For quicker testing locally, but we try again in 5 seconds anyway
+        setTimeout(function() {
+            riot.mount('*')
+        }, 10)
+    })
+</script>
 </body>
 </html>
