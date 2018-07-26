@@ -23,7 +23,7 @@ local PLAYER = {}
 ----
 ---- Creates a Taunt Camera
 ----
---PLAYER.TauntCam = TauntCamera()
+PLAYER.TauntCam = TauntCamera()
 --
 ----
 ---- See gamemodes/base/player_class/player_default.lua for all overridable variables
@@ -41,6 +41,7 @@ PLAYER.CanUseFlashlight		= true		-- Can we use the flashlight
 PLAYER.MaxHealth			= 100		-- Max health we can have
 PLAYER.StartHealth			= 100		-- How much health we start with
 PLAYER.StartArmor			= 0			-- How much armour we start with
+PLAYER.MaxArmor				= 100
 PLAYER.DropWeaponOnDie		= false		-- Do we drop our weapon when we die
 PLAYER.TeammateNoCollide	= true		-- Do we collide with teammates or run straight through them
 PLAYER.AvoidPlayers			= true		-- Automatically swerves around other players
@@ -57,8 +58,43 @@ end
 
 
 function PLAYER:Loadout()
+--	print("@@@@@@@@@@@@@@@@@@@@@")
 
 	self.Player:RemoveAllAmmo()
+
+	-- If we're on one of the two teams we made...
+	if self.Player:Team() == TEAM_BLUE or self.Player:Team() == TEAM_ORANGE then
+		local AllTeams = team.GetAllTeams()
+		local TeamInfo = AllTeams[self.Player:Team()]
+		local ResearchManager = TeamInfo.ResearchManager
+
+		if ResearchManager.categories['armor']:HasAtLeastOneTechUnlocked() then
+--			print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+			local tech = ResearchManager.categories['armor']:GetHighestTechResearched()
+--			PrintTable(tech)
+			if tech then
+--				print("##############################################")
+--				PrintTable(tech)
+				self.MaxArmor = tech.tier * 20
+				self.StartArmor = tech.tier * 20
+				self.Player:SetArmor(tech.tier * 20)
+			end
+		else
+			self.MaxArmor = 100
+			self.StartArmor = 0
+			self.Player:SetArmor(0)
+		end
+	end
+--	local mdl = GAMEMODE.playermodel or "models/player/phoenix.mdl"
+--	util.PrecacheModel(mdl)
+--	self.Player:SetModel(mdl)
+--
+--	-- Always clear color state, may later be changed in TTTPlayerSetColor
+--	self.Player:SetColor(COLOR_WHITE)
+--
+	self.Player:Give( "weapon_crowbar" )
+	self.Player:Give( "rm_pistol" )
+
 
 	--if ( cvars.Bool( "sbox_weapons", true ) ) then
     --
@@ -222,4 +258,4 @@ function PLAYER:FinishMove( move )
 
 end
 
-player_manager.RegisterClass( "player_rm", PLAYER, "player_default" )
+player_manager.RegisterClass( "player_ram", PLAYER, "player_default" )

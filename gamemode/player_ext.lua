@@ -17,3 +17,73 @@ function plymeta:StripAll()
    self:StripAmmo()
    self:StripWeapons()
 end
+
+function plymeta:InitScientistVars()
+   self.has_scientist = false
+   self.scientist = {}
+end
+
+function plymeta:PrintScientistVars()
+--   print(self.has_scientist)
+--   PrintTable(self.scientist)
+end
+
+function plymeta:CanPickUpScientist()
+   return not self.has_scientist
+end
+
+function plymeta:CanRemoveScientist()
+   return self.has_scientist
+end
+
+function plymeta:PickUpScientist(scientist_name, scientist_cost, scientist_team)
+   if self:CanPickUpScientist() then
+      local message = "Your team-member " .. self:Nick() .. " has picked up a scientist!"
+      DynamicStatusUpdate(self:Team(), message, 'success', nil)
+      self.has_scientist = true
+      self.scientist = {name=scientist_name, cost=scientist_cost, original_team=scientist_team}
+      return true
+   else
+      local message = "You already have a scientist!"
+      local ply = self.Player
+      DynamicStatusUpdate(nil, message, 'warning', ply)
+      return false
+   end
+end
+
+function plymeta:RemoveScientist()
+   if self:CanRemoveScientist() then
+      self.has_scientist = false
+      local data_table = {
+         status = true,
+         name = self.scientist['name'],
+         cost = self.scientist['cost'],
+         original_team = self.scientist['original_team']
+      }
+      self.scientist = {}
+      return data_table
+   else
+      return {status=false}
+   end
+end
+
+function plymeta:DropScientist(victim_pos)
+   if self:CanRemoveScientist() then
+      self.has_scientist = false
+
+      local new_scientist = ents.Create("ram_simple_scientist")
+      if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
+      --                button:SetModel("models/dav0r/buttons/button.mdl")
+      -- Create a new scientist with the same name/cost and new team
+      new_scientist:SetPos(victim_pos)
+      new_scientist:Spawn()
+      new_scientist:SetTeam(self.scientist['original_team'])
+      new_scientist:SetDisplayName(self.scientist['name'])
+      new_scientist:SetCost(self.scientist['cost'])
+      self.scientist = {}
+   end
+end
+
+hook.Add("PlayerDeath", "RMPlayerDropScientistOnDeath", function(victim, inflictor, attacker)
+   victim:DropScientist(victim:GetPos())
+end)

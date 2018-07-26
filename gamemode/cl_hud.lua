@@ -14,8 +14,8 @@ function hud:HealthInit()
     local health_frame = vgui.Create("DFrame")
     health_frame:SetTitle("")
     health_frame:SetSize(ScrW() * 0.25, ScrH() * 0.2)
---    health_frame:Center()
-    health_frame:SetPos(0, ScrH()-ScrH() * 0.15)
+    --    health_frame:Center()
+    health_frame:SetPos(0, ScrH() - ScrH() * 0.15)
     health_frame:ShowCloseButton(false)
     health_frame:SetSizable(false)
     health_frame:SetPaintShadow(true)
@@ -33,7 +33,7 @@ function hud:HealthInit()
             health = LocalPlayer():Health(),
             armor = LocalPlayer():Armor()
         }
---        print(util.TableToJSON(player_data))
+        --        print(util.TableToJSON(player_data))
         return util.TableToJSON(player_data)
     end)
 
@@ -46,7 +46,7 @@ function hud:CrosshairInit()
     crosshair_frame:SetTitle("")
     crosshair_frame:SetSize(ScrW() * 0.05, ScrH() * 0.07)
     crosshair_frame:Center()
---    crosshair_frame:SetPos(0, ScrH()-ScrH() * 0.15)
+    --    crosshair_frame:SetPos(0, ScrH()-ScrH() * 0.15)
     crosshair_frame:ShowCloseButton(false)
     crosshair_frame:SetSizable(false)
     crosshair_frame:SetPaintShadow(true)
@@ -57,7 +57,7 @@ function hud:CrosshairInit()
     local html = vgui.Create("DHTML", crosshair_frame)
     html:Dock(FILL)
     html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/crosshair.html")
---    html:SetAllowLua(true)
+    --    html:SetAllowLua(true)
 
     print("-- RM HUD Initialized --")
     return crosshair_frame
@@ -68,7 +68,7 @@ function hud:NotificationInit()
     notification_frame:SetTitle("")
     notification_frame:SetSize(ScrW(), ScrH())
     notification_frame:Center()
---    notification_frame:SetPos(0, ScrH()-ScrH() * 0.15)
+    --    notification_frame:SetPos(0, ScrH()-ScrH() * 0.15)
     notification_frame:ShowCloseButton(false)
     notification_frame:SetSizable(false)
     notification_frame:SetPaintShadow(true)
@@ -78,6 +78,7 @@ function hud:NotificationInit()
 
     local html = vgui.Create("DHTML", notification_frame)
     html:Dock(FILL)
+
     html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/base.html?view=notifications")
 --    html:SetAllowLua(true)
 
@@ -91,19 +92,19 @@ function hud:Draw()
         hud.health_frame = hud:HealthInit()
     end
     if hud.notification_html_frame == nil then
---        local temp_table = hud:NotificationInit()
---        hud.notification_frame = temp_table[0]
+        --        local temp_table = hud:NotificationInit()
+        --        hud.notification_frame = temp_table[0]
         hud.notification_html_frame = hud:NotificationInit()
     end
---    if hud.crosshair_frame == nil then
---        hud.crosshair_frame = hud:CrosshairInit()
---    end
---
---    if not LocalPlayer():Alive() then
---        hud.crosshair_frame:Hide()
---    else
---        hud.crosshair_frame:Show()
---    end
+    --    if hud.crosshair_frame == nil then
+    --        hud.crosshair_frame = hud:CrosshairInit()
+    --    end
+    --
+    --    if not LocalPlayer():Alive() then
+    --        hud.crosshair_frame:Hide()
+    --    else
+    --        hud.crosshair_frame:Show()
+    --    end
 end
 
 local function DrawHud()
@@ -122,8 +123,8 @@ net.Receive("RMDynamicNotification", function(len, pl)
         surface.PlaySound("garrysmod/save_load2.wav")
     end
 
---    chat.AddText(stringMsg)
-    hud.notification_html_frame:Call("toastr."..stringStatus.."('"..stringMsg.."')")
+    --    chat.AddText(stringMsg)
+    hud.notification_html_frame:Call("toastr." .. stringStatus .. "('" .. stringMsg .. "')")
 end)
 
 hook.Add("HUDPaint", "PaintOurHud", DrawHud);
@@ -157,3 +158,40 @@ function GM:HUDShouldDraw(name)
 
     return true
 end
+
+hook.Add("HUDPaint", "ShowNPCHealthAboveHead", function() -- Get the entity we're looking at
+    local ent = LocalPlayer():GetEyeTrace().Entity
+    -- check if it's really an NPC
+    if IsValid(ent) and ent:GetClass() == 'ram_simple_scientist' then -- change the Vector in LocalToWorld to change-- where the text should appear in relation to the ent
+        local pos = (ent:GetPos() + Vector(0,-2,80)):ToScreen()
+        local team = ''
+        local color = Color(255, 255, 255)
+        if ent:GetTeam() == TEAM_BLUE then
+            team = 'Blue Team'
+            color = Color(0, 0, 255)
+        else
+            team = 'Orange Team'
+            color = Color(255, 160, 0)
+        end
+        --        local x,y = ent:LocalToWorld(ent:GetPos() + Vector(0,0,100)):ToScreen()
+        -- check we can actually see this part of the entity
+        if pos.visible and LocalPlayer():GetPos():Distance(ent:GetPos()) < 100 then -- what info to draw
+            draw.DrawText(
+                tostring(ent:GetDisplayName()),
+                "Trebuchet18",
+                pos.x, pos.y,
+                color,
+                -- how to align the text
+                TEXT_ALIGN_CENTER
+            )
+            draw.DrawText(
+                tostring(team),
+                "Trebuchet18",
+                pos.x, pos.y + 10,
+                color,
+                -- how to align the text
+                TEXT_ALIGN_CENTER
+            )
+        end
+    end
+end)
