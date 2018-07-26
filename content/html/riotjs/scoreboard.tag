@@ -32,12 +32,42 @@
 
         self.on('mount', function () {
             update_loop();
-        })
 
+            var enter_test_mode = function () {
+                window.player = {
+                    getAll: function () {
+                        return JSON.stringify([{
+                            name: "Oj",
+                            score: "0",
+                            team_members: [{
+                                nick: "Testerino",
+                                steamid: "0:0:123321313",
+                                frags: 0,
+                                deaths: 0,
+                                ping: 20
+                            }]
+                        }, {
+                            name: "Blue with some words",
+                            score: "0",
+                            team_members: [{
+                                nick: "Testerino",
+                                steamid: "123asdf",
+                                frags: 0,
+                                deaths: 0,
+                                ping: 43
+                            }]
+                        }])
+                    }
+                }
+            }
+
+            // UNCOMMENT to enter test mode when using a browser window!
+            //enter_test_mode()
+        })
 
         var update_loop = function () {
             // player may not exist if we're testing in local browser, wait for it
-            if (typeof player !== 'undefined') {
+            if (typeof player !== 'undefined' && typeof player.getAll !== 'undefined') {
                 self.update({
                     teams: JSON.parse(player.getAll()),
                 })
