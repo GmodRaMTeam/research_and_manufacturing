@@ -52,6 +52,7 @@ PLAYER.UseVMHands			= false		-- Uses viewmodel hands
 --
 function PLAYER:SetupDataTables()
 
+	self.Player:NetworkVar( 'Bool', 16, 'HasScientist') -- There's gotta be a better way...
 	BaseClass.SetupDataTables( self )
 
 end

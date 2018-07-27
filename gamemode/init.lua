@@ -235,11 +235,11 @@ end
 --   ply:PrintScientistVars()
 --end
 
-hook.Add("PlayerInitialSpawn", "InitScientistVarsForPlayer", function(ply)
-    ply:PrintScientistVars()
-    ply:InitScientistVars()
-    ply:PrintScientistVars()
-end)
+--hook.Add("PlayerInitialSpawn", "InitScientistVarsForPlayer", function(ply)
+--    ply:PrintScientistVars()
+--    ply:InitScientistVars()
+--    ply:PrintScientistVars()
+--end)
 
 hook.Add("InitPostEntity", "SpawnRMNPCS", function()
     --	print( "Initialization hook called" )

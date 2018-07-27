@@ -19,7 +19,8 @@ function plymeta:StripAll()
 end
 
 function plymeta:InitScientistVars()
-   self.has_scientist = false
+--   self.has_scientist = false
+   self.Player.SetHasScientist(false)
    self.scientist = {}
 end
 
@@ -29,18 +30,21 @@ function plymeta:PrintScientistVars()
 end
 
 function plymeta:CanPickUpScientist()
-   return not self.has_scientist
+--   return not self.has_scientist
+   return not self.Player.GetHasScientist()
 end
 
 function plymeta:CanRemoveScientist()
-   return self.has_scientist
+--   return self.has_scientist
+   return self.Player.GetHasScientist()
 end
 
 function plymeta:PickUpScientist(scientist_name, scientist_cost, scientist_team)
    if self:CanPickUpScientist() then
       local message = "Your team-member " .. self:Nick() .. " has picked up a scientist!"
       DynamicStatusUpdate(self:Team(), message, 'success', nil)
-      self.has_scientist = true
+--      self.has_scientist = true
+      self.Player.SetHasScientist(true)
       self.scientist = {name=scientist_name, cost=scientist_cost, original_team=scientist_team}
       return true
    else
@@ -53,7 +57,8 @@ end
 
 function plymeta:RemoveScientist()
    if self:CanRemoveScientist() then
-      self.has_scientist = false
+--      self.has_scientist = false
+      self.Player.SetHasScientist(false)
       local data_table = {
          status = true,
          name = self.scientist['name'],
@@ -69,7 +74,8 @@ end
 
 function plymeta:DropScientist(victim_pos)
    if self:CanRemoveScientist() then
-      self.has_scientist = false
+--      self.has_scientist = false
+      self.Player.SetHasScientist(false)
 
       local new_scientist = ents.Create("ram_simple_scientist")
       if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
