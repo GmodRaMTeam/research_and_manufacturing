@@ -82,10 +82,10 @@ local function ScientistSelectSpawn(team)
 
     local ChosenSpawnPoint = nil
 
-    local searcing_for_spawn = true
+--    local searcing_for_spawn = true
 
-    while searcing_for_spawn do
-        local ChosenSpawnPoint = table.Random(SpawnPoints)
+    for i=0,6 do
+        ChosenSpawnPoint = table.Random(SpawnPoints)
         if ChosenSpawnPoint ~= nil then
             if (IsScientistSpawnpointSuitable(ChosenSpawnPoint:GetPos())) then
                 return ChosenSpawnPoint:GetPos()
@@ -99,7 +99,7 @@ end
 local function OverseerSelectSpawn(team)
     local spawn_class = ''
 
-    if team == 1 then
+    if team == TEAM_BLUE then
         spawn_class = 'info_overseer_blue_spawn'
     else
         spawn_class = 'info_overseer_orange_spawn'
@@ -109,7 +109,11 @@ local function OverseerSelectSpawn(team)
 
     local ChosenSpawnPoint = table.Random(SpawnPoints)
 
-    return ChosenSpawnPoint:GetPos()
+    if ChosenSpawnPoint == nil then
+        return nil
+    else
+        return ChosenSpawnPoint:GetPos()
+    end
 end
 
 local function EndRound()
@@ -250,16 +254,26 @@ hook.Add("InitPostEntity", "SpawnRMNPCS", function()
                 local new_scientist = ents.Create("ram_simple_scientist")
                 if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
                 --                button:SetModel("models/dav0r/buttons/button.mdl")
-                new_scientist:SetPos(ScientistSelectSpawn(ID))
-                new_scientist:SetTeam(ID)
-                new_scientist:Spawn()
+                local spawnpoint_pos = ScientistSelectSpawn(ID)
+                if spawnpoint_pos ~= nil then
+                    new_scientist:SetPos(spawnpoint_pos)
+                    new_scientist:SetTeam(ID)
+                    new_scientist:Spawn()
+                else
+                    new_scientist:Remove()
+                end
             end
             local new_overseer = ents.Create("ram_overseer")
             if (not IsValid(new_overseer)) then return end -- Check whether we successfully made an entity, if not - bail
             --                button:SetModel("models/dav0r/buttons/button.mdl")
-            new_overseer:SetPos(OverseerSelectSpawn(ID))
-            new_overseer:SetTeam(ID)
-            new_overseer:Spawn()
+            local spawnpoint_pos = OverseerSelectSpawn(ID)
+            if spawnpoint_pos ~= nil then
+                new_overseer:SetPos(spawnpoint_pos)
+                new_overseer:SetTeam(ID)
+                new_overseer:Spawn()
+            else
+                new_overseer:Remove()
+            end
         end
     end
 end)
