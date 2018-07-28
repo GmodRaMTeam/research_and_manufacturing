@@ -4,111 +4,53 @@
 --- DateTime: 5/30/2018 11:00 PM
 ---
 
-local hud = {}
-hud.health_frame = nil
-hud.crosshair_frame = nil
-hud.notification_frame = nil
-hud.notification_html_frame = nil
+HUD = {}
+HUD.health_frame = nil
+HUD.crosshair_frame = nil
+HUD.notification_frame = nil
+HUD.notification_html_frame = nil
+HUD.html = nil
 
-function hud:HealthInit()
-    local health_frame = vgui.Create("DFrame")
-    health_frame:SetTitle("")
-    health_frame:SetSize(ScrW() * 0.25, ScrH() * 0.2)
-    --    health_frame:Center()
-    health_frame:SetPos(0, ScrH() - ScrH() * 0.15)
-    health_frame:ShowCloseButton(false)
-    health_frame:SetSizable(false)
-    health_frame:SetPaintShadow(true)
-    function health_frame:Paint()
+function HUD:Init()
+    local hud_frame = vgui.Create("DFrame")
+    hud_frame:SetTitle("")
+    hud_frame:SetSize(ScrW(), ScrH())
+    hud_frame:Center()
+    --hud_frame:SetPos(0, ScrH() - ScrH() * 0.15)
+    hud_frame:ShowCloseButton(false)
+    hud_frame:SetSizable(false)
+    hud_frame:SetPaintShadow(true)
+    function hud_frame:Paint()
         --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
     end
 
-    local html = vgui.Create("DHTML", health_frame)
-    html:Dock(FILL)
-    html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/base.html?view=hud_health")
-    html:SetAllowLua(true)
+    self.html = vgui.Create("DHTML", hud_frame)
+    self.html:Dock(FILL)
+    self.html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/hud.html")
+    self.html:SetAllowLua(true)
 
-    html:AddFunction("player", "getInfo", function()
+    self.html:AddFunction("player", "getInfo", function()
         local player_data = {
             health = LocalPlayer():Health(),
             armor = LocalPlayer():Armor()
+            --has_scientist = LocalPlayer():has_scientist()
         }
         --        print(util.TableToJSON(player_data))
         return util.TableToJSON(player_data)
     end)
 
-    print("-- RM HUD Initialized --")
-    return health_frame
-end
-
-function hud:CrosshairInit()
-    local crosshair_frame = vgui.Create("DFrame")
-    crosshair_frame:SetTitle("")
-    crosshair_frame:SetSize(ScrW() * 0.05, ScrH() * 0.07)
-    crosshair_frame:Center()
-    --    crosshair_frame:SetPos(0, ScrH()-ScrH() * 0.15)
-    crosshair_frame:ShowCloseButton(false)
-    crosshair_frame:SetSizable(false)
-    crosshair_frame:SetPaintShadow(true)
-    function crosshair_frame:Paint()
-        --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
-    end
-
-    local html = vgui.Create("DHTML", crosshair_frame)
-    html:Dock(FILL)
-    html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/crosshair.html")
-    --    html:SetAllowLua(true)
 
     print("-- RM HUD Initialized --")
-    return crosshair_frame
 end
 
-function hud:NotificationInit()
-    local notification_frame = vgui.Create("DFrame")
-    notification_frame:SetTitle("")
-    notification_frame:SetSize(ScrW(), ScrH())
-    notification_frame:Center()
-    --    notification_frame:SetPos(0, ScrH()-ScrH() * 0.15)
-    notification_frame:ShowCloseButton(false)
-    notification_frame:SetSizable(false)
-    notification_frame:SetPaintShadow(true)
-    function notification_frame:Paint()
-        --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
+function HUD:Draw()
+    if HUD.html == nil then
+        HUD:Init()
     end
-
-    local html = vgui.Create("DHTML", notification_frame)
-    html:Dock(FILL)
-
-    html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/base.html?view=notifications")
---    html:SetAllowLua(true)
-
-
-    print("-- RM HUD Nofitications Initialized --")
-    return html
-end
-
-function hud:Draw()
-    if hud.health_frame == nil then
-        hud.health_frame = hud:HealthInit()
-    end
-    if hud.notification_html_frame == nil then
-        --        local temp_table = hud:NotificationInit()
-        --        hud.notification_frame = temp_table[0]
-        hud.notification_html_frame = hud:NotificationInit()
-    end
-    --    if hud.crosshair_frame == nil then
-    --        hud.crosshair_frame = hud:CrosshairInit()
-    --    end
-    --
-    --    if not LocalPlayer():Alive() then
-    --        hud.crosshair_frame:Hide()
-    --    else
-    --        hud.crosshair_frame:Show()
-    --    end
 end
 
 local function DrawHud()
-    hud:Draw()
+    HUD:Draw()
 end
 
 net.Receive("RMDynamicNotification", function(len, pl)
@@ -123,8 +65,7 @@ net.Receive("RMDynamicNotification", function(len, pl)
         surface.PlaySound("garrysmod/save_load2.wav")
     end
 
-    --    chat.AddText(stringMsg)
-    hud.notification_html_frame:Call("toastr." .. stringStatus .. "('" .. stringMsg .. "')")
+    HUD.html:QueueJavascript("toastr." .. stringStatus .. "('" .. stringMsg .. "')")
 end)
 
 hook.Add("HUDPaint", "PaintOurHud", DrawHud);
@@ -136,14 +77,6 @@ function GM:HUDShouldDraw(name)
 
     -- Allow the weapon to override this
     local ply = LocalPlayer()
-    --local team = ply:Team()
-    --print(ply:Team())
-    --if ply:IsValid() and ply:IsPlayer() then
-    --	if team == TEAM_SPECTATOR or team == TEAM_UNASSIGNED or team == TEAM_UNASSIGNED then
-    --		--if ply:Team() == TEAM_SPECTATOR or ply:Team() == TEAM_UNASSIGNED or ply:Team() == TEAM_CONNECTING then
-    --		return false
-    --	end
-    --end
     if (IsValid(ply)) then
         local wep = ply:GetActiveWeapon()
         local team = ply:Team()

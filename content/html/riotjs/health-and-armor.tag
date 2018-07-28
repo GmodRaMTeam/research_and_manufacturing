@@ -1,5 +1,5 @@
-<hud-health>
-    <!--<div class="ui inverted segment">-->
+<health-and-armor>
+    <!-- Health -->
     <div class="ui active inverted small red progress" id="health">
         <div class="bar">
             <div class="progress"></div>
@@ -12,19 +12,19 @@
         </div>
         <div class="label">Armor</div>
     </div>
-    <!--</div>-->
     <script>
-        var self = this;
+        var self = this
 
         self.on('mount', function () {
-            update_loop();
+            // start recurring update loop
+            update_loop()
+
+            // Initialize progress bars
             $('#health')
                 .progress()
-
             $('#armor')
                 .progress()
         })
-
 
         var update_loop = function () {
             if (typeof player !== 'undefined' && typeof player.getInfo !== 'undefined') {
@@ -40,8 +40,7 @@
                     self.player_data.armor
                 )
             }
-            // console.log(self.team_list)
-            window.setTimeout(update_loop, 250);
+            window.setTimeout(update_loop, 25)
         }
     </script>
-</hud-health>
+</health-and-armor>

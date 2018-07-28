@@ -1,4 +1,4 @@
-<scoreboard>
+<scoreboard show="{ show_scoreboard }">
 
     <div each="{ team in teams }" no-reorder>
         <h1 class="scoreboard-title">{team.name} ({team.score} pts)</h1>
@@ -29,11 +29,16 @@
 
     <script>
         var self = this;
+        self.show_scoreboard = false
 
+        /**********************************************************************
+         * Init
+         *********************************************************************/
         self.on('mount', function () {
             update_loop();
 
             var enter_test_mode = function () {
+                self.show_scoreboard = true
                 window.player = {
                     getAll: function () {
                         return JSON.stringify([{
@@ -65,6 +70,9 @@
             //enter_test_mode()
         })
 
+        /**********************************************************************
+         * Methods
+         *********************************************************************/
         var update_loop = function () {
             // player may not exist if we're testing in local browser, wait for it
             if (typeof player !== 'undefined' && typeof player.getAll !== 'undefined') {
@@ -72,8 +80,21 @@
                     teams: JSON.parse(player.getAll()),
                 })
             }
-            window.setTimeout(update_loop, 1000);
+            window.setTimeout(update_loop, 25);
         }
+
+        /**********************************************************************
+         * Events
+         *********************************************************************/
+        EVENTS.on('show_scoreboard', function() {
+            self.show_scoreboard = true
+            self.update()
+        })
+
+        EVENTS.on('hide_scoreboard', function() {
+            self.show_scoreboard = false
+            self.update()
+        })
     </script>
     <style scoped>
         .scoreboard-title {

@@ -17,8 +17,7 @@
     <script src="js/toastr.min.js"></script>
 
     <!-- Riot tags -->
-    <script src="riotjs/app.tag" type="riot/tag"></script>
-    <script src="riotjs/hud_health.tag" type="riot/tag"></script>
+    <script src="riotjs/health-and-armor.tag" type="riot/tag"></script>
     <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
 
     <style>
@@ -35,13 +34,30 @@
         .toast.toast-success {
             background-color: #225222;
         }
+
+        health-and-armor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 10%;
+        }
+
+        scoreboard {
+            width: 80%;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
 
-<app></app>
+<health-and-armor></health-and-armor>
+
+<scoreboard></scoreboard>
 
 <script>
+    var EVENTS = riot.observable()
+
     // We need to wait for Gmod to add this JS function.
     $(document).ready(function () {
         // For quicker testing locally, but we try again in a second or two anyway
@@ -49,10 +65,6 @@
         setTimeout(function() {
             riot.mount('*')
         }, 1000)
-
-        toastr.success("test", "", {timeOut: 500000})
-        toastr.warning("test", "", {timeOut: 500000})
-        toastr.error("test", "", {timeOut: 500000})
     })
 </script>
 </body>
