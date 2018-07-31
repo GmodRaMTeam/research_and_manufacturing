@@ -7,8 +7,10 @@
 include( "komerad_autorun.lua" )
 AddCSLuaFile( "komerad_autorun.lua" )
 
-include("utils.lua")
-include( "player_class/player_rm.lua" )
+if SERVER then
+	include("utils.lua")
+end
+include( "player_class/player_ram.lua" )
 
 
 GM.Name = "Research & Manufactury"
@@ -34,11 +36,11 @@ function GM:CreateTeams()
 
 	TEAM_BLUE = 1
 	team.SetUp( TEAM_BLUE, "Blue Team", Color( 0, 0, 255 ) )
-	team.SetSpawnPoint( TEAM_BLUE, "ai_hint" ) -- <-- This would be info_terrorist or some entity that is in your map
+	team.SetSpawnPoint( TEAM_BLUE, "info_blue_spawn" ) -- <-- This would be info_terrorist or some entity that is in your map
 
 	TEAM_ORANGE = 2
 	team.SetUp( TEAM_ORANGE, "Orange Team", Color( 255, 150, 0 ) )
-	team.SetSpawnPoint( TEAM_ORANGE, "sky_camera" ) -- <-- This would be info_terrorist or some entity that is in your map
+	team.SetSpawnPoint( TEAM_ORANGE, "info_orange_spawn" ) -- <-- This would be info_terrorist or some entity that is in your map
 
 	team.SetSpawnPoint( TEAM_SPECTATOR, "worldspawn" )
 

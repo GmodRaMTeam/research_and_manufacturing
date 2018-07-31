@@ -1,0 +1,67 @@
+//-------------------------------------------------------------------------
+//
+// Game data for RAM (TTT.fgd used as an example)
+//
+//-------------------------------------------------------------------------
+
+@include "base.fgd"
+
+@PointClass base(Targetname, Origin, Angles) = info_blue_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = info_orange_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = info_scientist_blue_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = info_scientist_orange_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = info_overseer_blue_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = info_overseer_orange_spawn :
+	"Point ent to act as a spawn"
+[
+
+]
+
+@PointClass base(Targetname, Origin, Angles) = ram_logic_team :
+	"Point ent a bit like a combination of a filter and a logic ent (because it is currently not possible to write proper filters in Lua). Tests if !activator is a certain role (detective/traitor/innocent/any) and fires output OnPass if true, or OnFail if not."
+[
+	Team(choices) : "Player role to test for" : 1 : "Specifies what role the !activator of TestActivator should be for this entity to fire the OnPass output." =
+	[
+		1 : "Blue Team"
+		2 : "Orange Team"
+		3 : "Any Team"
+	]
+
+	// Inputs
+	input TestActivator(void) : "Test the activator for the given Role (ie. if it's a traitor/detective/etc) and fires OnPass or OnFail output. If activator is not a valid player it will always fail."
+
+	// Outputs
+	output OnPass(void) : "Fired in response to TestActivator input if the activator player is of the role set in this ent."
+	output OnFail(void) : "Fired in response to TestActivator input if the activator player is NOT of the role set in this ent."
+]
+
+@NPCClass base(BaseNPC) studio("models/humans/group02/male_08.mdl") sphere() = ram_simple_scientist :
+	"RaM simple scientist"
+[
+
+]

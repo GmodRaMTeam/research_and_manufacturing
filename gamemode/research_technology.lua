@@ -12,6 +12,7 @@ ResearchTechnologyClass.key = '' -- Default empty string
 ResearchTechnologyClass.name = '' -- Default empty string
 ResearchTechnologyClass.description = '' -- Default empty string
 ResearchTechnologyClass.cost = 60 -- Default of 60
+ResearchTechnologyClass.tier = 60 -- Default of 60
 ResearchTechnologyClass.researched = false -- Default of false
 ResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
 ResearchTechnologyClass.votes = {} -- Defaults to empty array/table
@@ -58,20 +59,26 @@ function ResearchTechnologyClass:CanDoResearch()
     end
 end
 
-function ResearchTechnology(key, name, description, cost, category)
+function ResearchTechnology(key, name, description, cost, tier, reqs, category)
     assert(key ~= nil, "ResearchTechnology must be passed a valid key")
     assert(name ~= nil, "ResearchTechnology must be passed a valid name")
+    assert(tier ~= nil, "ResearchTechnology must be passed a valid tier")
     assert(description ~= nil, "ResearchTechnology must be passed a valid description")
     assert(category ~= nil, "ResearchTechnology must be passed a valid ResearchCategory table/object")
     assert(type(category) == 'table', "ResearchTechnology must be passed a valid ResearchCategory table/object")
     local newResearchTechnology = table.Copy(ResearchTechnologyClass)
     newResearchTechnology.key = key
     newResearchTechnology.name = name
+    newResearchTechnology.tier = tier
     newResearchTechnology.description = description
     newResearchTechnology.category = category
     -- Cost is optional
     if cost ~= nil then
         newResearchTechnology.cost = cost
+    end
+    if reqs ~= nil then
+        assert(type(reqs) == 'table', "ResearchTechnology must be passed a valid table/object for reqs")
+        newResearchTechnology.reqs = reqs
     end
     --Return our new Object.
     return newResearchTechnology

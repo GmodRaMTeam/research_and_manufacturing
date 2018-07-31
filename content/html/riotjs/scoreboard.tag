@@ -1,7 +1,7 @@
-<scoreboard>
+<scoreboard show="{ show_scoreboard }">
 
     <div each="{ team in teams }" no-reorder>
-        <h1 class="scoreboard-title">{team.name} ({team.score} pts)</h1>
+        <h1 class="header-text scoreboard-title">{team.name} ({team.score} pts)</h1>
         <table class="ui striped table">
             <thead>
             <tr>
@@ -29,21 +29,72 @@
 
     <script>
         var self = this;
+        self.show_scoreboard = false
 
+        /**********************************************************************
+         * Init
+         *********************************************************************/
         self.on('mount', function () {
             update_loop();
+
+            var enter_test_mode = function () {
+                self.show_scoreboard = true
+                window.player = {
+                    getAll: function () {
+                        return JSON.stringify([{
+                            name: "Oj",
+                            score: "0",
+                            team_members: [{
+                                nick: "Testerino",
+                                steamid: "0:0:123321313",
+                                frags: 0,
+                                deaths: 0,
+                                ping: 20
+                            }]
+                        }, {
+                            name: "Blue with some words",
+                            score: "0",
+                            team_members: [{
+                                nick: "Testerino",
+                                steamid: "123asdf",
+                                frags: 0,
+                                deaths: 0,
+                                ping: 43
+                            }]
+                        }])
+                    }
+                }
+            }
+
+            // UNCOMMENT to enter test mode when using a browser window!
+            //enter_test_mode()
         })
 
-
+        /**********************************************************************
+         * Methods
+         *********************************************************************/
         var update_loop = function () {
             // player may not exist if we're testing in local browser, wait for it
-            if (typeof player !== 'undefined') {
+            if (typeof player !== 'undefined' && typeof player.getAll !== 'undefined') {
                 self.update({
                     teams: JSON.parse(player.getAll()),
                 })
             }
-            window.setTimeout(update_loop, 1000);
+            window.setTimeout(update_loop, 25);
         }
+
+        /**********************************************************************
+         * Events
+         *********************************************************************/
+        EVENTS.on('show_scoreboard', function() {
+            self.show_scoreboard = true
+            self.update()
+        })
+
+        EVENTS.on('hide_scoreboard', function() {
+            self.show_scoreboard = false
+            self.update()
+        })
     </script>
     <style scoped>
         .scoreboard-title {
@@ -52,9 +103,9 @@
         }
 
         .address-column {
-            max-width: 150px;
-            min-width: 150px;
-            width: 150px;
+            max-width: 175px;
+            min-width: 175px;
+            width: 175px;
         }
 
         .number-column {

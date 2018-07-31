@@ -6,55 +6,80 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-    <!-- Site Properties -->
-    <title>Login Example - Semantic</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/semantic.min.css">
+    <link rel="stylesheet" href="css/toastr.min.css">
 
-    <!-- JQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <!-- Riot -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/3.6.1/riot+compiler.min.js"></script>
-    <!-- Semantic -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.css">
-    <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.js"></script>
-    <!-- Datepicker -->
+    <!-- JS -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/semantic.min.js"></script>
+    <script src="js/riot+compiler.min.js"></script>
+    <script src="js/toastr.min.js"></script>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <!-- Riot tags -->
+    <script src="riotjs/health-and-armor.tag" type="riot/tag"></script>
+    <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
 
-    <!--Compiled RiotJS-->
-    <script src="riotjs/hud_health.tag" type="riot/tag"></script>
-
-    <style type="text/css">
-        body {
+    <style>
+        html, body {
             background-color: transparent;
-        }
-
-        body > .grid {
             height: 100%;
+            overflow: hidden;
         }
 
-        .image {
-            margin-top: -100px;
+        .header-text {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: transparent !important;
+            -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+            outline: none;
+
+            text-shadow:
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000;
         }
 
-        .column {
-            max-width: 450px;
+        .toast {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .toast.toast-success {
+            background-color: #225222;
+        }
+
+        health-and-armor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 10%;
+        }
+
+        scoreboard {
+            width: 80%;
+            display: block;
+            margin: 0 auto;
         }
     </style>
-    <script>
-        // We need to wait for Gmod to add this JS function.
-        (function() {
-            setTimeout(function() {
-                riot.mount('*')
-
-            }, 1000)
-        })();
-    </script>
 </head>
 <body>
 
-<hud-health></hud-health>
+<health-and-armor></health-and-armor>
 
+<scoreboard></scoreboard>
+
+<script>
+    var EVENTS = riot.observable()
+
+    // We need to wait for Gmod to add this JS function.
+    $(document).ready(function () {
+        // For quicker testing locally, but we try again in a second or two anyway
+        riot.mount('*')
+        setTimeout(function() {
+            riot.mount('*')
+        }, 1000)
+    })
+</script>
 </body>
-
 </html>
