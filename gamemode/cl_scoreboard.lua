@@ -58,6 +58,8 @@ function GM:ScoreboardShow()
     -- Only inits on first attempt to draw
     scoreboard:init()
 
+    surface.PlaySound("ding.wav")
+
     HUD.html:QueueJavascript([[ EVENTS.trigger('show_scoreboard') ]])
 end
 

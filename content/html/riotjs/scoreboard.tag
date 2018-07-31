@@ -1,7 +1,7 @@
 <scoreboard show="{ show_scoreboard }">
 
     <div each="{ team in teams }" no-reorder>
-        <h1 class="scoreboard-title">{team.name} ({team.score} pts)</h1>
+        <h1 class="header-text scoreboard-title">{team.name} ({team.score} pts)</h1>
         <table class="ui striped table">
             <thead>
             <tr>

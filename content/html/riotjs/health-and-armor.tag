@@ -4,13 +4,13 @@
         <div class="bar">
             <div class="progress"></div>
         </div>
-        <div class="label">Health</div>
+        <div class="label header-text">Health</div>
     </div>
     <div class="ui active inverted small blue progress" id="armor">
         <div class="bar">
             <div class="progress"></div>
         </div>
-        <div class="label">Armor</div>
+        <div class="label header-text">Armor</div>
     </div>
     <script>
         var self = this
