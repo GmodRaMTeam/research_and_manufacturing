@@ -4,12 +4,12 @@
 --- DateTime: 5/26/2018 3:54 PM
 ---
 
-net.Receive("RMPrintToTeam", function(len, pl)
+net.Receive("RAM_PrintToTeam", function(len, pl)
     local stringMsg = net.ReadString()
     chat.AddText(stringMsg)
 end)
 
-net.Receive("RMClientStatusUpdate", function(len, pl)
+net.Receive("RAM_ClientStatusUpdate", function(len, pl)
     local intStatus = net.ReadInt(3)
     local intTeam = net.ReadInt(3)
     if LocalPlayer():Team() == intTeam then
@@ -56,7 +56,7 @@ local function ResearchMenu()
         DermaButton:Dock(TOP)
         DermaButton:SetSize(250, ScrH()/8)                    --// Set the size
         DermaButton.DoClick = function()
-            net.Start("RMRecordResearchVote")
+            net.Start("RAM_RecordResearchVote")
             net.WriteString("armor")
             net.WriteString(stringResearchIndex)
             net.SendToServer()
@@ -76,7 +76,7 @@ end
 --    ResearchMenu()
 --end)
 
-net.Receive('RMShowHelp', function()
+net.Receive('RAM_ShowHelp', function()
     local ply = LocalPlayer()
     local researchStatus = net.ReadInt(3)
     if ( ply:Team() ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then

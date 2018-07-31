@@ -6,8 +6,14 @@
 
 DEFINE_BASECLASS( "gamemode_base" )
 
-util.AddNetworkString("RMDynamicNotification")
-util.AddNetworkString("RMShowHelp")
+util.AddNetworkString("RAM_DynamicNotification")
+util.AddNetworkString("RAM_ShowHelp")
+util.AddNetworkString("RAM_RequestClientTechnologyUpdate")
+util.AddNetworkString("RAM_StartTeamResearch")
+util.AddNetworkString("RAM_RecordResearchVote")
+util.AddNetworkString("RAM_ClientStatusUpdate")
+util.AddNetworkString("RAM_PrintToTeam")
+util.AddNetworkString("RAM_ServerTechnologyUpdate")
 
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("cl_pickteam.lua")
@@ -15,6 +21,9 @@ AddCSLuaFile("cl_researchmenu.lua")
 AddCSLuaFile("cl_hud.lua")
 AddCSLuaFile("cl_scoreboard.lua")
 AddCSLuaFile("shared.lua")
+AddCSLuaFile("cl_research_manager.lua")
+AddCSLuaFile("cl_research_category.lua")
+AddCSLuaFile("cl_research_techology.lua")
 --AddCSLuaFile("utils.lua")
 
 include("shared.lua")
@@ -26,9 +35,9 @@ include("research_category.lua")
 include("research_technology.lua")
 
 -- Convars --
-CreateConVar("rm_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("rm_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("rm_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
 
 --[[All local spaced server functions]]
 
@@ -64,25 +73,16 @@ local function IsScientistSpawnpointSuitable(spawnpoint_pos, spawn_class)
 end
 
 local function ScientistSelectSpawn(team)
-
-    --	local SpawnPoints = team.GetSpawnPoints( TeamID )
-    --	if ( !SpawnPoints || table.Count( SpawnPoints ) == 0 ) then return end
-    --   local SpawnPoints = { 'info_scientist_spawn' }
-
     local spawn_class = ''
 
-    if team == 1 then
+    if team == TEAM_BLUE then
         spawn_class = 'info_scientist_blue_spawn'
     else
         spawn_class = 'info_scientist_orange_spawn'
     end
 
-
     local SpawnPoints = ents.FindByClass(spawn_class)
-
     local ChosenSpawnPoint = nil
-
---    local searcing_for_spawn = true
 
     for i=0,6 do
         ChosenSpawnPoint = table.Random(SpawnPoints)
@@ -92,8 +92,6 @@ local function ScientistSelectSpawn(team)
             end
         end
     end
-
---    return ChosenSpawnPoint:GetPos()
 end
 
 local function OverseerSelectSpawn(team)
@@ -134,7 +132,7 @@ local function InitGamemodeVariables()
 end
 
 local function SetRoundEnd(endtime)
-    SetGlobalFloat("rm_map_end", endtime)
+    SetGlobalFloat("ram_map_end", endtime)
 end
 
 --function IncRoundEnd(incr)
@@ -142,12 +140,12 @@ end
 --end
 
 local function InitMapEndTimer()
-    timer.Create('mapendtimer', GetConVar("rm_map_time_limit"):GetInt() * 60, 1, EndRound)
+    timer.Create('mapendtimer', GetConVar("ram_map_time_limit"):GetInt() * 60, 1, EndRound)
 end
 
 local function InitRoundEndTime()
     -- Init round values
-    local endtime = CurTime() + (GetConVar("rm_map_time_limit"):GetInt() * 60)
+    local endtime = CurTime() + (GetConVar("ram_map_time_limit"):GetInt() * 60)
 
     SetRoundEnd(endtime)
 end
@@ -156,20 +154,26 @@ local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
---            PrintTable(TeamInfo)
             local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
             local armorCat = newResearchManager:AddCategory('armor', 'Armor')
-            local armor_one = armorCat:AddTechnology('armor_one', 'Armor Type I', 'Decent Armor (20)', 60, 1)
+            local armor_one = armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
             local armor_two = armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
             local armor_three = armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
---            table.insert(armor_two.reqs, armor_one.key)
+            local armor_four = armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
+            local armor_five = armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
 
---            PrintTable(newResearchManager)
+            local healthCat = newResearchManager:AddCategory('health', 'Health')
+            local health_one = healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
+            local health_two = healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
+            local health_three = healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
+            local health_four = healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
+            local health_five = healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
+
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
             TeamInfo.Scientists = 3 -- Every team gets 3 to start
 
-            local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
+            local menu_vote_time = GetConVar("ram_vote_time_limit_seconds"):GetInt()
             timer.Create("Team" .. ID .. "VoteMenuTimeLimit", menu_vote_time, 1, function() newResearchManager:TallyVotes() end)
         end
     end
@@ -178,7 +182,7 @@ end
 local function PrintTimeLeft()
     --print(GetGlobalFloat("rm_round_end", 0) - CurTime())
     --print(util.SimpleTime( math.max(0, GetGlobalFloat("rm_map_end", 0)) - CurTime(), "%02i:%02i"))
-    local endtime = GetGlobalFloat("rm_map_end", 0) - CurTime()
+    local endtime = GetGlobalFloat("ram_map_end", 0) - CurTime()
     local text = util.SimpleTime(math.max(0, endtime), "%02i:%02i")
     --   print(text)
 end
@@ -186,9 +190,6 @@ end
 --[[All GM: spaced functions]]
 
 function GM:Initialize()
-
---    GAMEMODE.playermodel = "models/player/phoenix.mdl"
-
     InitGamemodeVariables()
     InitTeamVariables()
 
@@ -203,16 +204,11 @@ function GM:Initialize()
 end
 
 function GM:ShowHelp(ply) -- This hook is called everytime F1 is pressed.
-    --    umsg.Start( "OpenResearchMenu", ply ) -- Sending a message to the client.
-    --    umsg.End()
     local AllTeams = team.GetAllTeams()
-    --   PrintTable(AllTeams)
-    --   PrintTable(AllTeams[ply:Team()])
-
     if (ply:Team() == 1 or ply:Team() == 2) then
         local status = AllTeams[ply:Team()]['ResearchManager'].status
         if status ~= RESEARCH_STATUS_IN_PROGRESS then
-            net.Start("RMShowHelp")
+            net.Start("RAM_ShowHelp")
             net.WriteInt(status, 3)
             net.Send(ply)
         end
@@ -305,7 +301,7 @@ end
 -- I don't like it any more than you do, dear reader.
 -- Saw this in TTT, seems like a good idea to replicate for our timer.
 function GM:SyncGlobals()
-    SetGlobalInt("rm_map_time_limit", GetConVar("rm_map_time_limit"):GetInt())
+    SetGlobalInt("ram_map_time_limit", GetConVar("ram_map_time_limit"):GetInt())
 end
 
 --[[All global server functions]]
@@ -320,21 +316,23 @@ function DynamicStatusUpdate(team_index, message, status, specific_player)
     if team_index ~= nil then
         for k, ply in pairs(player.GetAll()) do
             if IsValid(ply) and ply:Team() == team_index then
-                net.Start("RMDynamicNotification")
+                net.Start("RAM_DynamicNotification")
                 net.WriteString(message)
                 net.WriteString(status)
                 net.Send(ply)
             end
         end
     elseif specific_player ~= nil and specific_player:IsValid() and team_index == nil then
-        net.Start("RMDynamicNotification")
+        net.Start("RAM_DynamicNotification")
         net.WriteString(message)
         net.WriteString(status)
         net.Send(ply)
+        print("We sent player: "..ply:Nick().." A dynamic update!")
     else
-        net.Start("RMDynamicNotification")
+        net.Start("RAM_DynamicNotification")
         net.WriteString(message)
         net.WriteString(status)
         net.Broadcast()
+        print("We sent team"..team_index.." A dynamic update!")
     end
 end

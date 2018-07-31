@@ -93,7 +93,7 @@ function PLAYER:Loadout()
 --	self.Player:SetColor(COLOR_WHITE)
 --
 	self.Player:Give( "weapon_crowbar" )
-	self.Player:Give( "rm_pistol" )
+	self.Player:Give( "ram_pistol" )
 
 
 	--if ( cvars.Bool( "sbox_weapons", true ) ) then

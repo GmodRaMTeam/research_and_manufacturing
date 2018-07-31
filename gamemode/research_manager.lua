@@ -8,11 +8,6 @@
 
 include( "research_category.lua" )
 
-util.AddNetworkString("RMStartTeamResearch")
-util.AddNetworkString("RMRecordResearchVote")
-util.AddNetworkString("RMClientStatusUpdate")
-util.AddNetworkString("RMPrintToTeam")
-
 -------------------------------------------------
 
 local ResearchManagerClass = {}
@@ -23,6 +18,49 @@ ResearchManagerClass.last_vote_time = CurTime() -- Last vote time, defaults to t
 ResearchManagerClass.status = RESEARCH_STATUS_WAITING -- Status, defaults to waiting
 ResearchManagerClass.current_cost = 0 -- Current research time cost, defaults to 0
 ResearchManagerClass.categories = {} -- Array of categories.
+
+net.Receive("RAM_RequestClientTechnologyUpdate", function(len, pl)
+    -- Make sur ethe player calling this is a valid entity, and a valid player, on a team.
+    if (IsValid(pl) and pl:IsPlayer()) and (pl:Team() == TEAM_BLUE or pl:Team() == TEAM_ORANGE) then
+        local cat_key = net.ReadString()
+        local tech_key = net.ReadString()
+        local plyTeamResearchManager = team.GetAllTeams()[pl:Team()].ResearchManager
+        if plyTeamResearchManager:IsValidCategoryAndTechnology(cat_key, tech_key) then
+            plyTeamResearchManager:SendClientStatusUpdate(cat_key, tech_key, pl)
+        end
+    end
+end)
+
+-- This might be an expensive dumb idea
+function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_ply)
+    net.Start('RAM_ServerTechnologyUpdate', true)
+    net.WriteInt(calling_ply:Team(), 12)
+    net.WriteString(cat_key)
+    net.WriteString(tech_key)
+    net.WriteBool(boolResearched)
+    net.WriteInt(intVoteCount, 8)
+    net.Send(calling_ply)
+end
+
+
+function ResearchManagerClass:IsValidCategoryAndTechnology(cat_key, tech_key)
+    if cat_key ~= nil and #cat_key > 0 then
+        if tech_key ~= nil and #tech_key > 0 then
+            local cat_keys = table.GetKeys( self.categories )
+            for index_cat, temp_cat_key in ipairs(cat_keys) do
+                if cat_key == temp_cat_key then
+                    local tech_keys = table.GetKeys( self.categories[temp_cat_key].techs )
+                    for index_tech, temp_tech_key in ipairs(tech_keys) do
+                        if tech_key == temp_tech_key then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 
 function ResearchManagerClass:AddCategory(key, name)
     local newResearchCategory = ResearchCategory(key, name, self)
@@ -51,6 +89,15 @@ end
 
 
 function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
+    -- Update all of our players
+    for k ,v in pairs(player.GetAll()) do
+        if v:IsValid() and v:IsPlayer() then
+            if v:Team() == self.team_index then
+                self:SendClientStatusUpdate(cat_key, tech_key, v)
+            end
+        end
+    end
+
     local technology = self.categories[cat_key].techs[tech_key]
 
     local msg = "Team " .. self.team_name .. " has completed research " .. technology.name .. "!"
@@ -63,8 +110,8 @@ function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
     self:ResetVoteCount()
 --    local auto_vote_time = GetConVar("rm_auto_vote_time_seconds"):GetInt()
 --    timer.Create("Team" .. self.team_index .. "ResearchAutoTimer", auto_vote_time, 1, function() self:TeamAutoPickResearch() end)
-    local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
-    timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
+    local menu_vote_time = GetConVar("ram_vote_time_limit_seconds"):GetInt()
+    timer.Create("Team"..self.team_index.."VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
 end
 
 
@@ -167,7 +214,7 @@ end
 --                                                                                                                    --
 --====================================================================================================================--
 
-net.Receive("RMRecordResearchVote", function(len, ply)
+net.Receive("RAM_RecordResearchVote", function(len, ply)
 --    DynamicStatusUpdate(ply:Team(), 'Test', 'success', nil)
 
 	local research_cat = net.ReadString()

@@ -53,7 +53,7 @@ local function DrawHud()
     HUD:Draw()
 end
 
-net.Receive("RMDynamicNotification", function(len, pl)
+net.Receive("RAM_DynamicNotification", function(len, pl)
     -- Play cute annoying sound
     local stringMsg = net.ReadString()
     local stringStatus = net.ReadString()

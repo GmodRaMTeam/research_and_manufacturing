@@ -27,7 +27,7 @@ function PrintToTeam(teamIndex, stringMsg)
     for k, ply in pairs(player.GetAll()) do
         if ply:Team() == teamIndex then
             --ply:ChatPrint(stringMsg)
-            net.Start("RMPrintToTeam")
+            net.Start("RAM_PrintToTeam")
             net.WriteString(stringMsg)
             net.Send(ply)
         end
@@ -35,7 +35,7 @@ function PrintToTeam(teamIndex, stringMsg)
 end
 
 function ClientStatusUpdate(intStatus, intTeam)
-    net.Start("RMClientStatusUpdate")
+    net.Start("RAM_ClientStatusUpdate")
     --net.WriteString("some text")
     net.WriteInt(intStatus, 3)
     net.WriteInt(intTeam, 3)

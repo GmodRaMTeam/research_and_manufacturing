@@ -6,21 +6,21 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-include( "research_technology.lua" )
+include( "cl_research_technology.lua" )
 
-local ResearchCategoryClass = {}
-ResearchCategoryClass.key = '' -- Default empty string
-ResearchCategoryClass.name = '' -- Default empty string
-ResearchCategoryClass.techs = {} -- Default empty array
-ResearchCategoryClass.manager = nil
+local ClientResearchCategoryClass = {}
+ClientResearchCategoryClass.key = '' -- Default empty string
+ClientResearchCategoryClass.name = '' -- Default empty string
+ClientResearchCategoryClass.techs = {} -- Default empty array
+ClientResearchCategoryClass.manager = nil
 
-function ResearchCategoryClass:AddTechnology(key, cost, tier, reqs)
-    local newResearchTechnology = ResearchTechnology(key, cost, tier, reqs, self)
+function ClientResearchCategoryClass:AddTechnology(key, cost, tier, reqs)
+    local newResearchTechnology = ClientResearchTechnology(key, cost, tier, reqs, self)
     self.techs[key] = newResearchTechnology-- Add to our categories
     return newResearchTechnology-- Return our category to do something with it
 end
 
-function ResearchCategoryClass:GetHighestTechResearched()
+function ClientResearchCategoryClass:GetHighestTechResearched()
     local last_researched = nil
     print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     PrintTable(self.techs)
@@ -48,7 +48,7 @@ function ResearchCategoryClass:GetHighestTechResearched()
     return last_researched
 end
 
-function ResearchCategoryClass:HasAtLeastOneTechUnlocked()
+function ClientResearchCategoryClass:HasAtLeastOneTechUnlocked()
     for tech_key, technology in pairs(self.techs) do
         if technology.researched then
             return true
@@ -57,16 +57,16 @@ function ResearchCategoryClass:HasAtLeastOneTechUnlocked()
     return false
 end
 
-function ResearchCategory(key, name, manager)
-    assert(key ~= nil, "ResearchCategory must be passed a valid key")
-    assert(name ~= nil, "ResearchCategory must be passed a valid name")
-    assert(manager ~= nil, "ResearchCategory must be passed a valid manager table/object")
-    assert(type(manager) == 'table', "ResearchCategory must be passed a valid manager table/object")
-    local newResearchCategory = table.Copy(ResearchCategoryClass)
-    newResearchCategory.key = key
-    newResearchCategory.name = name
-    newResearchCategory.manager = manager
+function ClientResearchCategory(key, name, manager)
+    assert(key ~= nil, "ClientResearchCategory must be passed a valid key")
+    assert(name ~= nil, "ClientResearchCategory must be passed a valid name")
+    assert(manager ~= nil, "ClientResearchCategory must be passed a valid manager table/object")
+    assert(type(manager) == 'table', "ClientResearchCategory must be passed a valid manager table/object")
+    local newClientResearchCategory = table.Copy(ClientResearchCategoryClass)
+    newClientResearchCategory.key = key
+    newClientResearchCategory.name = name
+    newClientResearchCategory.manager = manager
     --Return our new Object.
-    return newResearchCategory
+    return newClientResearchCategory
 end
 

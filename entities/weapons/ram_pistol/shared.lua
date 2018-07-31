@@ -1,5 +1,5 @@
 -- Variables that are used on both client and server
-SWEP.Gun = ("rm_pistol") -- must be the name of your swep but NO CAPITALS!
+SWEP.Gun = ("ram_pistol") -- must be the name of your swep but NO CAPITALS!
 SWEP.Category = "R&M" --Category where you will find your weapons
 SWEP.Author = "Комерад"
 SWEP.Contact = ""
