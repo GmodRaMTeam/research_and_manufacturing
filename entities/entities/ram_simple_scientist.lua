@@ -111,7 +111,8 @@ function ENT:RunBehaviour()
 	while ( true ) do
 		self:StartActivity( ACT_WALK )			-- Walk anmimation
 		self.loco:SetDesiredSpeed( 100 )		-- Walk speed
-		self:MoveToPos( self:GetPos() + Vector( math.Rand( -1, 1 ), math.Rand( -1, 1 ), 0 ) * 50 ) -- Walk to a random place within about 400 units ( yielding )
+		self:MoveToPos( self:GetPos() + Vector( math.Rand( -1, 1 ), math.Rand( -1, 1 ), 0 ) * 32 ) -- Walk to a random place within about 32 units ( yielding )
+		self:HandleStuck()
 		self:StartActivity( ACT_IDLE )
 		coroutine.wait( math.random(1, 2) )
 		self:StartActivity( ACT_BUSY_QUEUE )
