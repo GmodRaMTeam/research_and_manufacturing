@@ -14,8 +14,9 @@ ResearchCategoryClass.name = '' -- Default empty string
 ResearchCategoryClass.techs = {} -- Default empty array
 ResearchCategoryClass.manager = nil
 
-function ResearchCategoryClass:AddTechnology(key, cost, tier, reqs)
-    local newResearchTechnology = ResearchTechnology(key, cost, tier, reqs, self)
+function ResearchCategoryClass:AddTechnology(key, name, description, cost, tier, reqs)
+    -- function ResearchTechnology(key, name, description, cost, tier, reqs, category)
+    local newResearchTechnology = ResearchTechnology(key, name, description, cost, tier, reqs, self)
     self.techs[key] = newResearchTechnology-- Add to our categories
     return newResearchTechnology-- Return our category to do something with it
 end

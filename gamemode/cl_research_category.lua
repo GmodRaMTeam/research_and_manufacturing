@@ -14,8 +14,9 @@ ClientResearchCategoryClass.name = '' -- Default empty string
 ClientResearchCategoryClass.techs = {} -- Default empty array
 ClientResearchCategoryClass.manager = nil
 
-function ClientResearchCategoryClass:AddTechnology(key, cost, tier, reqs)
-    local newResearchTechnology = ClientResearchTechnology(key, cost, tier, reqs, self)
+function ClientResearchCategoryClass:AddTechnology(key, name, description, cost, tier, reqs)
+    -- ClientResearchTechnology(key, name, description, cost, tier, reqs, category)
+    local newResearchTechnology = ClientResearchTechnology(key, name, description, cost, tier, reqs, self)
     self.techs[key] = newResearchTechnology-- Add to our categories
     return newResearchTechnology-- Return our category to do something with it
 end

@@ -20,16 +20,16 @@ SWEP.HoldType = "pistol"        -- how others view you carrying the weapon
 -- you're mostly going to use ar2, smg, shotgun or pistol. rpg makes for good sniper rifles
 
 SWEP.ViewModelFOV = 70
-SWEP.ViewModelFlip = true
+SWEP.ViewModelFlip = false
 SWEP.ViewModel = "models/weapons/v_Pistol.mdl"    -- Weapon view model
-SWEP.WorldModel = "models/weapons/v_Pistol.mdl"    -- Weapon world model
+SWEP.WorldModel = "models/weapons/w_Pistol.mdl"    -- Weapon world model
 SWEP.ShowWorldModel = false
 SWEP.Base = "komerads_gun_base" --the Base this weapon will work on. PLEASE RENAME THE BASE!
 SWEP.Spawnable = true
 SWEP.AdminSpawnable = true
 SWEP.FiresUnderwater = true
 
-SWEP.Primary.Sound = Sound("Weapon_Usp.Single")        -- Script that calls the primary fire sound
+SWEP.Primary.Sound = Sound("Weapon_Pistol.Single")        -- Script that calls the primary fire sound
 SWEP.Primary.SilencedSound = Sound( "Weapon_USP.SilencedShot" )        -- Sound if the weapon is silenced
 SWEP.Primary.RPM = 625            -- This is in Rounds Per Minute
 SWEP.Primary.ClipSize = 15        -- Size of a clip
@@ -42,7 +42,7 @@ SWEP.Primary.Ammo = "pistol"            -- pistol, 357, smg1, ar2, buckshot, sla
 -- Pistol, buckshot, and slam always ricochet. 
 --Use AirboatGun for a light metal peircing shotgun pellets
 SWEP.SelectiveFire = false
-SWEP.CanBeSilenced = true
+SWEP.CanBeSilenced = false
 
 SWEP.Secondary.IronFOV = 55        -- How much you 'zoom' in. Less is more!
 
@@ -59,6 +59,6 @@ SWEP.IronSightsAng = Vector(0, -0.222, 0)
 SWEP.RunSightsPos = Vector(-4.803, -7.331, 0)
 SWEP.RunSightsAng = Vector(-7.807, -70, 0)
 
-SWEP.WElements = {
-    ["gun"] = { type = "Model", model = "models/weapons/w_pist_usp_silencer.mdl", bone = "ValveBiped.Bip01_R_Hand", rel = "", pos = Vector(0, 0.323, 0), angle = Angle(-176.958, -180, 0), size = Vector(1, 1, 1), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
-}
+--SWEP.WElements = {
+--    ["gun"] = { type = "Model", model = "models/weapons/w_pist_usp_silencer.mdl", bone = "ValveBiped.Bip01_R_Hand", rel = "", pos = Vector(0, 0.323, 0), angle = Angle(-176.958, -180, 0), size = Vector(1, 1, 1), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
+--}

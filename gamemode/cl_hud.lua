@@ -18,6 +18,7 @@ function HUD:Init()
     hud_frame:Center()
     --hud_frame:SetPos(0, ScrH() - ScrH() * 0.15)
     hud_frame:ShowCloseButton(false)
+    hud_frame:SetDraggable( false )
     hud_frame:SetSizable(false)
     hud_frame:SetPaintShadow(true)
     function hud_frame:Paint()
@@ -38,6 +39,24 @@ function HUD:Init()
         --        print(util.TableToJSON(player_data))
         return util.TableToJSON(player_data)
     end)
+
+    self.html:AddFunction("researchMenu", "update", function()
+        local ply = LocalPlayer()
+        if ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE then
+            local AllTeams = team.GetAllTeams()
+            local ResearchManager = AllTeams[ply:Team()].ResearchManager
+            local json_data = ResearchManager:ToJSON()
+            if json_data ~= nil then
+                return json_data
+            else
+                return util.TableToJSON({})
+            end
+        end
+    end)
+
+--    self.html:AddFunction("console", "printjs_to_lua", function(var_as_string)
+--        print(var_as_string)
+--    end)
 
 
     print("-- RM HUD Initialized --")
@@ -128,3 +147,37 @@ hook.Add("HUDPaint", "ShowNPCHealthAboveHead", function() -- Get the entity we'r
         end
     end
 end)
+
+net.Receive('RAM_ShowResearchMenu', function()
+--    print("wtf")
+    if HUD.html ~= nil then
+        print("SHOW ME THE RESEARCH MENU")
+        HUD.html:QueueJavascript([[ EVENTS.trigger('toggle_research_menu') ]])
+        local current_cursor_status = vgui.CursorVisible()
+        gui.EnableScreenClicker( (not current_cursor_status) )
+    end
+end)
+
+net.Receive('RAM_ShowHelp', function()
+    local ply = LocalPlayer()
+    local researchStatus = net.ReadInt(3)
+    if ( ply:Team() ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
+        if researchStatus ~= RESEARCH_STATUS_IN_PROGRESS then
+--            ResearchMenu()
+            if HUD.html ~= nil then
+                print("SHOW ME THE RESEARCH MENU")
+                HUD.html:QueueJavascript([[ EVENTS.trigger('toggle_research_menu') ]])
+                local current_cursor_status = vgui.CursorVisible()
+                gui.EnableScreenClicker((not current_cursor_status))
+            end
+        end
+    end
+end)
+
+--net.Receive('RAM_HideResearchMenu', function()
+--    print("wtf")
+--    if HUD.html ~= nil then
+--        print("HIDE ME THE RESEARCH MENU")
+--        HUD.html:QueueJavascript([[ EVENTS.trigger('hide_research_menu') ]])
+--    end
+--end)

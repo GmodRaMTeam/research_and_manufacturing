@@ -33,6 +33,8 @@ end)
 
 -- This might be an expensive dumb idea
 function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_ply)
+    local boolResearched = self.categories[cat_key].techs[tech_key].researched
+    local intVoteCount = #self.categories[cat_key].techs[tech_key].votes
     net.Start('RAM_ServerTechnologyUpdate', true)
     net.WriteInt(calling_ply:Team(), 12)
     net.WriteString(cat_key)
@@ -80,8 +82,14 @@ function ResearchManagerClass:TeamAutoPickResearch()
                 local research_cost = technology.cost
                 self:TeamDoResearch(cat_key, tech_key)
 --                PrintMessage( HUD_PRINTTALK, self.team_name.." team has started research: "..technology.name.."!" )
+                local team_to_msg = nil
+                if self.team_index == TEAM_BLUE then
+                    team_to_msg = TEAM_ORANGE
+                else
+                    team_to_msg = TEAM_BLUE
+                end
                 local msg = self.team_name .. " team has started research: " .. technology.name .. "!"
-                DynamicStatusUpdate(nil, msg, 'success', nil)
+                DynamicStatusUpdate(team_to_msg, msg, 'success', nil)
             end
         end
     end
@@ -165,8 +173,14 @@ function ResearchManagerClass:TallyVotes()
     else
         local technology = self.categories[temp_current_winner.cat_key].techs[temp_current_winner.tech_key]
 --        PrintMessage( HUD_PRINTTALK, self.team_name.." team has started research: "..technology.name.."!" )
+        local team_to_msg = nil
+        if self.team_index == TEAM_BLUE then
+            team_to_msg = TEAM_ORANGE
+        else
+            team_to_msg = TEAM_BLUE
+        end
         local msg = self.team_name.." team has started research: "..technology.name.."!"
-        DynamicStatusUpdate(nil, msg, 'success', nil)
+        DynamicStatusUpdate(team_to_msg, msg, 'success', nil)
         -- Remove our timer if it is there
         if timer.Exists("Team" .. self.team_index .. "ResearchAutoTimer") then
             timer.Remove("Team" .. self.team_index .. "ResearchAutoTimer")

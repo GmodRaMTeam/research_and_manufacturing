@@ -46,15 +46,15 @@ function ResearchTechnologyClass:CanDoResearch()
             if self:MeetsRequirements() then
                 return true
             else
-                local msg = "Cannot start research! You need to research the requirements!"
-                PrintToTeam(manager.team_index, msg)
+--                local msg = "Cannot start research! You need to research the requirements!"
+--                PrintToTeam(manager.team_index, msg)
                 return false
             end
         end
     else
-        local difference = round(manager.current_cost - (CurTime() - (manager.last_time)), 1)
-        local msg = "Cannot start research! Please wait " .. difference .. " more seconds."
-        PrintToTeam(manager.team_index, msg)
+--        local difference = round(manager.current_cost - (CurTime() - (manager.last_time)), 1)
+--        local msg = "Cannot start research! Please wait " .. difference .. " more seconds."
+--        PrintToTeam(manager.team_index, msg)
         return false
     end
 end

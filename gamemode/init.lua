@@ -8,6 +8,8 @@ DEFINE_BASECLASS( "gamemode_base" )
 
 util.AddNetworkString("RAM_DynamicNotification")
 util.AddNetworkString("RAM_ShowHelp")
+util.AddNetworkString("RAM_ShowResearchMenu")
+util.AddNetworkString("RAM_HideResearchMenu")
 util.AddNetworkString("RAM_RequestClientTechnologyUpdate")
 util.AddNetworkString("RAM_StartTeamResearch")
 util.AddNetworkString("RAM_RecordResearchVote")
@@ -23,7 +25,7 @@ AddCSLuaFile("cl_scoreboard.lua")
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_research_manager.lua")
 AddCSLuaFile("cl_research_category.lua")
-AddCSLuaFile("cl_research_techology.lua")
+AddCSLuaFile("cl_research_technology.lua")
 --AddCSLuaFile("utils.lua")
 
 include("shared.lua")
@@ -205,7 +207,7 @@ end
 
 function GM:ShowHelp(ply) -- This hook is called everytime F1 is pressed.
     local AllTeams = team.GetAllTeams()
-    if (ply:Team() == 1 or ply:Team() == 2) then
+    if (ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE) then
         local status = AllTeams[ply:Team()]['ResearchManager'].status
         if status ~= RESEARCH_STATUS_IN_PROGRESS then
             net.Start("RAM_ShowHelp")
@@ -214,6 +216,24 @@ function GM:ShowHelp(ply) -- This hook is called everytime F1 is pressed.
         end
     end
 end
+
+--function GM:PlayerButtonDown(ply, button)
+--    BaseClass.PlayerButtonDown(self, ply, button)
+--    if button == KEY_F1 then
+----        HUD.html:QueueJavascript([[ EVENTS.trigger('show_research_menu') ]])
+--        net.Start("RAM_ShowResearchMenu")
+--        net.Send(ply)
+--    end
+--end
+
+--function GM:PlayerButtonUp(ply, button)
+--    BaseClass.PlayerButtonDown(self, ply, button)
+--    if button == KEY_F1 then
+----        HUD.html:QueueJavascript([[ EVENTS.trigger('hide_research_menu') ]])
+--        net.Start("RAM_HideResearchMenu")
+--        net.Send(ply)
+--    end
+--end
 
 --[[---------------------------------------------------------
    Name: gamemode:PlayerSpawn( )
@@ -333,6 +353,8 @@ function DynamicStatusUpdate(team_index, message, status, specific_player)
         net.WriteString(message)
         net.WriteString(status)
         net.Broadcast()
-        print("We sent team"..team_index.." A dynamic update!")
+        if team_index ~= nil then
+            print("We sent team"..team_index.." A dynamic update!")
+        end
     end
 end

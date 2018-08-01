@@ -94,6 +94,7 @@ function PLAYER:Loadout()
 --
 	self.Player:Give( "weapon_crowbar" )
 	self.Player:Give( "ram_pistol" )
+	self.Player:GiveAmmo( 256,	"Pistol", 		true )
 
 
 	--if ( cvars.Bool( "sbox_weapons", true ) ) then

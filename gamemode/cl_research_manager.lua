@@ -20,9 +20,55 @@ ClientResearchManagerClass.current_cost = 0 -- Current research time cost, defau
 ClientResearchManagerClass.categories = {} -- Array of categories.
 
 function ClientResearchManagerClass:AddCategory(key, name)
-    local newClientResearchCategory = ClientClientResearchCategory(key, name, self)
+    local newClientResearchCategory = ClientResearchCategory(key, name, self)
     self.categories[key] = newClientResearchCategory -- Add to our categories
     return newClientResearchCategory -- Return our category to do something with it
+end
+
+
+function ClientResearchManagerClass:ToJSON()
+    local temp_data = {}
+    for cat_key, category in pairs(self.categories) do
+--        local cat_data_index = table.insert(temp_data, {
+--            key=cat_key,
+--            name=category.name,
+--            techs = {},
+--        })
+        temp_data[cat_key] = {
+            key=cat_key,
+            name=category.name,
+            techs={},
+        }
+        for tech_key, technology in pairs(self.categories[cat_key].techs) do
+            local temp_list_reqs = {}
+            for index, req_key in ipairs(technology.reqs) do
+                table.insert(temp_list_reqs, category.techs[req_key].name)
+            end
+--            local tech_data_index = table.insert(temp_data[cat_data_index].techs, {
+--                key=tech_key,
+--                name=technology.name,
+--                description=technology.description,
+--                cost=technology.cost,
+--                reqs=temp_list_reqs,
+--                votes=technology.votes
+--            })
+            temp_data[cat_key]['techs'][tech_key] = {
+                key=tech_key,
+                name=technology.name,
+                description=technology.description,
+                cost=technology.cost,
+                reqs=temp_list_reqs,
+                votes=technology.votes,
+            }
+        end
+    end
+    print("Printing temp_data table: ")
+    print("----------------------------------------------------------------------------------------------")
+    PrintTable(temp_data)
+    print("----------------------------------------------------------------------------------------------")
+    local temp_data_json = util.TableToJSON(temp_data)
+    print(temp_data_json)
+    return temp_data_json
 end
 
 
