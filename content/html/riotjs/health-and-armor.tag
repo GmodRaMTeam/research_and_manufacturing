@@ -131,6 +131,13 @@
             bottom: 0;
             right: 0;
         }
+        #armor .bar {
+            background-color: gold !important;
+        }
+
+        .ui.progress {
+            background: rgba(0, 0, 0, .03);
+        }
 
         .header-text {
             color: #b1b1b1 !important;
