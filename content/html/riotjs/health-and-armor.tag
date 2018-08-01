@@ -142,5 +142,10 @@
             /*margin-top: 3px;*/
             color: #b1b1b1;
         }
+
+        .bar .progress {
+            /* Hide % text in progress bar */
+            font-size: 0 !important;
+        }
     </style>
 </health-and-armor>
