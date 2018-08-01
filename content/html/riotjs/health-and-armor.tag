@@ -5,41 +5,31 @@
 
     <!-- Health -->
     <!--<div class="ui indicating green progress" id="health">-->
-        <!--<div class="bar">-->
-            <!--<div class="progress"></div>-->
-        <!--</div>-->
-        <!--&lt;!&ndash;<div class="label header-text">Health</div>&ndash;&gt;-->
+    <!--<div class="bar">-->
+    <!--<div class="progress"></div>-->
+    <!--</div>-->
+    <!--&lt;!&ndash;<div class="label header-text">Health</div>&ndash;&gt;-->
     <!--</div>-->
 
 
-    <div class="ui grid" id="health-container">
-        <div class="two wide column">
-            <div class="progress-bar-icon">
-                <i class="plus alternate icon"></i>
-            </div>
+    <div id="health-container">
+        <div class="progress-bar-icon">
+            <i class="plus alternate icon"></i>
         </div>
-        <div class="thirteen wide column">
-            <div class="ui indicating green progress" id="health">
-                <div class="bar">
-                    <div class="progress"></div>
-                </div>
-                <!--<div class="label header-text">Armor</div>-->
+        <div class="ui indicating green progress" id="health">
+            <div class="bar">
+                <div class="progress"></div>
             </div>
         </div>
     </div>
 
-    <div class="ui grid">
-        <div class="three wide column">
-            <div class="progress-bar-icon">
-                <i class="shield alternate icon"></i>
-            </div>
+    <div id="armor-container">
+        <div class="progress-bar-icon">
+            <i class="shield alternate icon"></i>
         </div>
-        <div class="thirteen wide column">
-            <div class="ui indicating warning progress" id="armor">
-                <div class="bar">
-                    <div class="progress"></div>
-                </div>
-                <!--<div class="label header-text">Armor</div>-->
+        <div class="ui indicating warning progress" id="armor">
+            <div class="bar">
+                <div class="progress"></div>
             </div>
         </div>
     </div>
@@ -116,9 +106,30 @@
         }
     </script>
     <style scoped>
-        #health-container {
-            /* Line up the health bar on top of the armor bar */
-            margin-bottom: -4rem;
+        #health-container .icon {
+            position: absolute;
+            top: -92px;
+            left: 3px;
+        }
+
+        #health {
+            position: absolute;
+            left: 28px;
+            bottom: 50px;
+            right: 0;
+        }
+
+        #armor-container .icon {
+            position: absolute;
+            top: -43px;
+            left: 3px;
+        }
+
+        #armor {
+            position: absolute;
+            left: 28px;
+            bottom: 0;
+            right: 0;
         }
 
         .header-text {
@@ -126,9 +137,9 @@
         }
 
         .progress-bar-icon {
-            display: inline-block;
+            /*display: inline-block;*/
             font-size: 20px;
-            margin-top: 3px;
+            /*margin-top: 3px;*/
             color: #b1b1b1;
         }
     </style>
