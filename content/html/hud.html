@@ -35,17 +35,17 @@
             -webkit-font-smoothing: antialiased;
             outline: none;
 
-            text-shadow:
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000;
+            text-shadow: -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
         }
 
         .toast {
             border-radius: 0 !important;
             box-shadow: none !important;
         }
+
         .toast.toast-success {
             background-color: #225222;
         }
@@ -79,9 +79,11 @@
     $(document).ready(function () {
         // For quicker testing locally, but we try again in a second or two anyway
         riot.mount('*')
-        setTimeout(function() {
+        setTimeout(function () {
             riot.mount('*')
         }, 1000)
+
+        window.IS_IN_GAME = window.navigator.userAgent.indexOf("Valve Source Client") > 0
     })
 </script>
 </body>

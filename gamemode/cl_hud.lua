@@ -46,6 +46,7 @@ function HUD:Init()
             local AllTeams = team.GetAllTeams()
             local ResearchManager = AllTeams[ply:Team()].ResearchManager
             local json_data = ResearchManager:ToJSON()
+            --print(json_data)
             if json_data ~= nil then
                 return json_data
             else

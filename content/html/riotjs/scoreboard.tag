@@ -66,8 +66,9 @@
                 }
             }
 
-            // UNCOMMENT to enter test mode when using a browser window!
-            //enter_test_mode()
+            if(!IS_IN_GAME) {
+                enter_test_mode()
+            }
         })
 
         /**********************************************************************
