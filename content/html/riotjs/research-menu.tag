@@ -1,6 +1,6 @@
 <research-menu>
     <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 10px; bottom: 10px;" onclick="{ toggle }">
-        Show research menu
+        Research menu?
     </button>
     <div class="ui grid" show="{ show_research_menu }">
         <div class="ui row">
@@ -23,13 +23,12 @@
         /**********************************************************************
          * Init
          *********************************************************************/
-        self.on('mount', function () {
+        self.one('mount', function () {
             update_loop();
 
             $('.menu .item').tab()
 
-            var enter_test_mode = function () {
-                self.show_scoreboard = true
+            if (!IS_IN_GAME) {
                 window.researchMenu = {
                     update: function () {
                         return JSON.stringify({
@@ -145,10 +144,6 @@
                     }
                 }
             }
-
-            if (!IS_IN_GAME) {
-                enter_test_mode()
-            }
         })
 
         /**********************************************************************
@@ -169,7 +164,7 @@
             }
         }
 
-        self.toggle = function() {
+        self.toggle = function () {
             self.show_research_menu = !self.show_research_menu
             self.update()
         }
