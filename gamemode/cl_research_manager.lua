@@ -62,12 +62,12 @@ function ClientResearchManagerClass:ToJSON()
             }
         end
     end
-    print("Printing temp_data table: ")
-    print("----------------------------------------------------------------------------------------------")
-    PrintTable(temp_data)
-    print("----------------------------------------------------------------------------------------------")
+    --print("Printing temp_data table: ")
+    --print("----------------------------------------------------------------------------------------------")
+    --PrintTable(temp_data)
+    --print("----------------------------------------------------------------------------------------------")
     local temp_data_json = util.TableToJSON(temp_data)
-    print(temp_data_json)
+    --print(temp_data_json)
     return temp_data_json
 end
 
