@@ -1,7 +1,11 @@
-<scoreboard show="{ show_scoreboard }">
+<scoreboard>
 
-    <div each="{ team in teams }" no-reorder>
-        <h1 class="header-text scoreboard-title">{team.name} ({team.score} pts)</h1>
+    <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 165px; bottom: 10px;" onclick="{ toggle }">
+        Scoreboard?
+    </button>
+
+    <div each="{ team in teams }" show="{ show_scoreboard }">
+        <h1 class="header-text scoreboard-title">{team.name} (${team.money})</h1>
         <table class="ui striped table">
             <thead>
             <tr>
@@ -34,11 +38,11 @@
         /**********************************************************************
          * Init
          *********************************************************************/
-        self.on('mount', function () {
+        self.one('mount', function () {
             update_loop();
 
-            var enter_test_mode = function () {
-                self.show_scoreboard = true
+            if(!IS_IN_GAME) {
+                // Test mode!
                 window.player = {
                     getAll: function () {
                         return JSON.stringify([{
@@ -65,9 +69,6 @@
                     }
                 }
             }
-
-            // UNCOMMENT to enter test mode when using a browser window!
-            //enter_test_mode()
         })
 
         /**********************************************************************
@@ -76,11 +77,14 @@
         var update_loop = function () {
             // player may not exist if we're testing in local browser, wait for it
             if (typeof player !== 'undefined' && typeof player.getAll !== 'undefined') {
-                self.update({
-                    teams: JSON.parse(player.getAll()),
-                })
+                self.teams = JSON.parse(player.getAll())
+                self.update()
             }
-            window.setTimeout(update_loop, 25);
+            window.setTimeout(update_loop, 25)
+        }
+        self.toggle = function() {
+            self.show_scoreboard = !self.show_scoreboard
+            self.update()
         }
 
         /**********************************************************************

@@ -51,7 +51,7 @@ function GM:PlayerSpawn(pl)
 
     -- Call item loadout function
     hook.Call("PlayerLoadout", GAMEMODE, pl)
-    --    pl:Give("rm_pistol", false)
+    --    pl:Give("weapon_ram_pistol", false)
     --    pl:GiveAmmo( 125, 3, false )
 
     -- Set player model

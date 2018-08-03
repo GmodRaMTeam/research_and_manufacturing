@@ -7,24 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/semantic.min.css">
+    <!--<link rel="stylesheet" href="css/semantic.min.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.css">
     <link rel="stylesheet" href="css/toastr.min.css">
 
     <!-- JS -->
     <script src="js/jquery.min.js"></script>
-    <script src="js/semantic.min.js"></script>
+    <!--<script src="js/semantic.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.js"></script>
+
     <script src="js/riot+compiler.min.js"></script>
     <script src="js/toastr.min.js"></script>
 
     <!-- Riot tags -->
     <script src="riotjs/health-and-armor.tag" type="riot/tag"></script>
+    <script src="riotjs/time-left.tag" type="riot/tag"></script>
     <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
+    <script src="riotjs/research-menu.tag" type="riot/tag"></script>
 
     <style>
         html, body {
             background-color: transparent;
             height: 100%;
             overflow: hidden;
+            position: relative;
         }
 
         .header-text {
@@ -34,17 +40,17 @@
             -webkit-font-smoothing: antialiased;
             outline: none;
 
-            text-shadow:
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000;
+            text-shadow: -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
         }
 
         .toast {
             border-radius: 0 !important;
             box-shadow: none !important;
         }
+
         .toast.toast-success {
             background-color: #225222;
         }
@@ -53,7 +59,7 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 10%;
+            width: 300px;
         }
 
         scoreboard {
@@ -61,13 +67,35 @@
             display: block;
             margin: 0 auto;
         }
+
+        time-left {
+            position: absolute;
+            width: 100%;
+            /*top: 0;*/
+            left: 48%;
+            /*!*left: 45vw;*!*/
+            /*!*right: 45vw;*!*/
+            top: 0;
+            /*position: center;*/
+        }
+
+        /*research-menu {*/
+            /*height: 80% !important;*/
+            /*min-height: 80% !important;*/
+            /*max-height: 80% !important;*/
+        /*}*/
+
     </style>
 </head>
 <body>
 
 <health-and-armor></health-and-armor>
 
+<time-left></time-left>
+
 <scoreboard></scoreboard>
+
+<research-menu></research-menu>
 
 <script>
     var EVENTS = riot.observable()
@@ -76,9 +104,8 @@
     $(document).ready(function () {
         // For quicker testing locally, but we try again in a second or two anyway
         riot.mount('*')
-        setTimeout(function() {
-            riot.mount('*')
-        }, 1000)
+
+        window.IS_IN_GAME = window.navigator.userAgent.indexOf("Valve Source Client") > 0
     })
 </script>
 </body>

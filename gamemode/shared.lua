@@ -8,7 +8,7 @@ include( "komerad_autorun.lua" )
 AddCSLuaFile( "komerad_autorun.lua" )
 
 if SERVER then
-	include("utils.lua")
+	include("shd_utils.lua")
 end
 include( "player_class/player_ram.lua" )
 
@@ -21,6 +21,9 @@ GM.TeamBased = true
 
 RESEARCH_STATUS_WAITING = 0
 RESEARCH_STATUS_IN_PROGRESS = 1
+RESEARCH_STATUS_VOTING = 2
+RESEARCH_STATUS_PREP = 3
+RESEARCH_STATUS_MAP_END = 4
 
 --[[---------------------------------------------------------
    Name: gamemode:CreateTeams()

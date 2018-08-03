@@ -21,6 +21,19 @@ function ENT:SetupDataTables()
     self:NetworkVar("Int", 0, "Team")
 end
 
+function ENT:OnInjured( damageInfo )
+	local attacker = damageInfo:GetAttacker()
+	local inflictor = damageInfo:GetInflictor()
+    damageInfo:SetDamage(0) -- WE NEVER GUNNA DIE
+	if attacker:IsValid() and attacker:IsPlayer() then
+		if attacker:Team() == self:GetTeam() then
+			local message = "This Overseer is on your team idiot!"
+			DynamicStatusUpdate(nil, message, 'error', attacker.Player)
+--			damageInfo:SetDamage(0)
+		end -- WHY YO HITTING OUR SCIENTISTS
+	end
+end
+
 function ENT:RunBehaviour()
 
     while (true) do -- Here is the loop, it will run forever
@@ -35,10 +48,7 @@ end
 
 function ENT:OnContact(ent)
     if ent:IsValid() and ent:IsPlayer() then
---        print(self:GetTeam())
---        print(ent:Team())
         if ent:Team() == self:GetTeam() then
---            print("@@@@@@@@@@@@@@@@@@@@@")
             local data = ent:RemoveScientist()
             local status = data['status']
             local name = data['name']
@@ -52,16 +62,9 @@ function ENT:OnContact(ent)
                     print("Overseer is sending name"..name..".")
                     CaptureScientist(self:GetTeam(), name, cost, original_team)
                 else
---                    print("@@@@@@@@@@@@@@@@@@@@@")
---                    print("Something failed")
---                    print(status)
---                    print(name)
---                    print(cost)
---                    print(original_team)
---                    print("@@@@@@@@@@@@@@@@@@@@@")
+
                 end
             else
---                print("Status returned false")
             end
         end
     end

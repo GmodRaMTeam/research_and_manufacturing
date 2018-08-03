@@ -32,8 +32,6 @@ end
 ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 ENT.Health = 100
---ENT.Team = nil -- This needs set after being made
---ENT.Name = ''
 ENT.Cost = 0
 
 function ENT:Initialize()
@@ -47,11 +45,8 @@ function ENT:Initialize()
 	if SERVER then
 		self:SetDisplayName(SelectName())
 	end
---	print("Init got called, current name is "..self:GetDisplayName()..".")
---	print(self.Name)
 
 	self.Cost = math.random(10000, 35000)
---	print(self.Cost)
 
 end
 
@@ -66,38 +61,28 @@ function ENT:SetCost(cost)
 	self.Cost = cost
 end
 
---function ENT:Use( plyActivator, entCaller, numUseType, numInteger )
-----	print(plyActivator)
-----	print(entCaller)
-----	print(numUseType)
-----	print(numInteger)
---end
-
---function ENT:OnTakeDamage( damageInfo )
-----	print(damageInfo)
-----	PrintTable(damageInfo)
---end
-
 function ENT:OnInjured( damageInfo )
 	local attacker = damageInfo:GetAttacker()
 	local inflictor = damageInfo:GetInflictor()
+	damageInfo:SetDamage(0) -- WE NEVER GUNNA DIE
 	if attacker:IsValid() and attacker:IsPlayer() then
-		if attacker:Team() == self:GetTeam() then
-			local message = "This scientist is on your team idiot!"
-			DynamicStatusUpdate(nil, message, 'error', attacker.Player)
-			return
-		end -- WHY YO HITTING OUR SCIENTISTS
-		local weapon = attacker:GetActiveWeapon()
---		print(weapon)
-		if weapon:GetClass() == "weapon_crowbar" then
---			print(attacker.has_scientist)
---			PrintTable(attacker.scientist)
-			local success = attacker:PickUpScientist(self:GetDisplayName(), self.Cost, self:GetTeam())
-			if success then
-				self:Remove()
+		local TeamInfo = team.GetAllTeams()[attacker:Team()]
+		if TeamInfo.ResearchManager.status ~= RESEARCH_STATUS_PREP then
+			if attacker:Team() == self:GetTeam() then
+				local message = "This scientist is on your team!"
+				DynamicStatusUpdate(nil, message, 'error', attacker.Player)
+			else
+				local weapon = attacker:GetActiveWeapon()
+				if weapon:GetClass() == "weapon_crowbar" then
+					local success = attacker:PickUpScientist(self:GetDisplayName(), self.Cost, self:GetTeam())
+					if success then
+						self:Remove()
+					end
+				end
 			end
---			print(attacker.has_scientist)
---			PrintTable(attacker.scientist)
+		else
+			local message = "Please wait for prep to end!"
+			DynamicStatusUpdate(nil, message, 'error', attacker.Player)
 		end
 	end
 end
@@ -120,18 +105,6 @@ function ENT:RunBehaviour()
 	end
 
 end
-
---function ENT:OnStuck()
---
---	--local dmginfo = DamageInfo()
---	--dmginfo:SetAttacker( self )
---    --
---	--self:OnKilled( dmginfo )
---
---	--self:MoveToPos( self:GetPos() + Vector( math.Rand( -1, 1 ), math.Rand( -1, 1 ), 0 ) * 200 ) -- Walk to a random place within about 400 units ( yielding )
---	self:StartActivity( ACT_IDLE )
---
---end
 
 list.Set( "NPC", "ram_simple_scientist", {
 	Name = "Simple Scientist",

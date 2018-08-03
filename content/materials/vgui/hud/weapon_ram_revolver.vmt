@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/hud/weapon_ram_revolver"
+	"$nolod" 1
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}
