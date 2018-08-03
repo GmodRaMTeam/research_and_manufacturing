@@ -2,8 +2,8 @@
 local icol = Color( 255, 255, 255, 255 ) 
 if CLIENT then
 
---	killicon.Add(  "ram_pistol",		"vgui/hud/ram_pistol", icol  )
-	killicon.AddFont( "ram_pistol", "HL2MPTypeDeath", "0", icol )
+--	killicon.Add(  "weapon_ram_pistol",		"vgui/hud/weapon_ram_pistol", icol  )
+	killicon.AddFont( "weapon_ram_pistol", "HL2MPTypeDeath", "0", icol )
 	--			weapon name			location of weapon's kill icon, I just used the hud icon
 
 end

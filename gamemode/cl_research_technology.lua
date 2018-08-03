@@ -20,6 +20,7 @@ ClientResearchTechnologyClass.category = nil
 
 
 net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
+    print("Got server update")
     -- Make sur ethe player calling this is a valid entity, and a valid player, on a team.
     local int_team = net.ReadInt(12)
     local cat_key = net.ReadString()
@@ -28,12 +29,13 @@ net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
     local vote_count = net.ReadInt(8)
 
     local researchManager = team.GetAllTeams()[int_team].ResearchManager
-    researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer()
+    researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer(is_researched, vote_count)
 
 end)
 
 
 function ClientResearchTechnologyClass:RequestServerUpdate()
+    print("Requesting server update")
     net.Start("RAM_RequestClientTechnologyUpdate")
     net.WriteString(self.category.key)
     net.WriteString(self.key)
@@ -42,6 +44,7 @@ end
 
 
 function ClientResearchTechnologyClass:UpdateFromServer(is_researched, vote_count)
+    print("Update from server")
     self.researched = is_researched
     self.votes = vote_count
 end
@@ -64,28 +67,20 @@ end
 
 function ClientResearchTechnologyClass:CanDoResearch()
     local manager = self.category.manager
-    if (CurTime() >= manager.last_time) and (manager.status ~= RESEARCH_STATUS_IN_PROGRESS) then
-        -- If we have researched it, return false, if not keep going
-        if self.researched then
---            local msg = "Cannot start research! You already have this researched."
---            DynamicStatusUpdate(manager.team_index, msg, 'error', nil)
---            PrintToTeam(manager.team_index, msg)
-            return false
-        else
-            if self:MeetsRequirements() then
-                return true
-            else
---                local msg = "Cannot start research! You need to research the requirements!"
---                PrintToTeam(manager.team_index, msg)
-                return false
-            end
-        end
-    else
---        local difference = round(manager.current_cost - (CurTime() - (manager.last_time)), 1)
---        local msg = "Cannot start research! Please wait " .. difference .. " more seconds."
---        PrintToTeam(manager.team_index, msg)
+    --    if (manager.status == RESEARCH_STATUS_VOTING) then
+    -- If we have researched it, return false, if not keep going
+    if self.researched then
         return false
+    else
+        if self:MeetsRequirements() then
+            return true
+        else
+            return false
+        end
     end
+    --    else
+    --        return false
+    --    end
 end
 
 function ClientResearchTechnology(key, name, description, cost, tier, reqs, category)

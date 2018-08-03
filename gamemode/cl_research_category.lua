@@ -23,29 +23,18 @@ end
 
 function ClientResearchCategoryClass:GetHighestTechResearched()
     local last_researched = nil
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    PrintTable(self.techs)
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     for tech_key, technology in pairs(self.techs) do
-        print(tech_key)
-        PrintTable(technology)
         if technology.researched then
             if last_researched == nil then
                 last_researched = technology
             else
-                print("IS "..technology.tier.." GREATER THAN "..last_researched.tier.."????")
                 if technology.tier > last_researched.tier then
                     last_researched = technology
                 else
-                    print("WE DUN NOTHING")
                 end
             end
         end
     end
-    print("LAST RESEARCHED IS")
---    PrintTable(last_researched)
-    print(last_researched.key)
-    PrintTable(last_researched)
     return last_researched
 end
 

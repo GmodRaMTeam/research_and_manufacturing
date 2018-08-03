@@ -4,14 +4,47 @@
 --- DateTime: 5/22/2018 10:16 PM
 ---
 
-include( "shared.lua" )
-include( "cl_pickteam.lua" )
-include( "cl_researchmenu.lua" )
-include( "cl_hud.lua" )
-include( "cl_scoreboard.lua" )
+--include( "cl_research_category.lua" )
+--include( "cl_research_technology.lua" )
+
 include( "cl_research_manager.lua" )
-include( "cl_research_category.lua" )
-include( "cl_research_technology.lua" )
+include( "cl_utils.lua" )
+include( "shared.lua" )
+include( "shd_utils.lua" )
+include( "cl_player_ext.lua" )
+
+include( "vgui/cl_hud.lua" )
+include( "vgui/cl_pickteam.lua" )
+include( "vgui/cl_research_menu.lua" )
+include( "vgui/cl_scoreboard.lua" )
+
+local function EndMap()
+    -- Yay we're a placeholder
+end
+
+local function EndPrep()
+    -- Yay we're a placeholder
+end
+
+local function InitMapEndTimer()
+    net.Start("RAM_RequestSyncMapTimer")
+    net.SendToServer()
+end
+
+local function InitPrepEndTimer()
+    net.Start("RAM_RequestSyncPrepTimer")
+    net.SendToServer()
+end
+
+net.Receive("RAM_SyncMapTimer", function()
+    local time = net.ReadFloat()
+    timer.Create('RAM_TimerMapEnd', time , 1, EndMap)
+end)
+
+net.Receive("RAM_SyncPrepTimer", function()
+    local time = net.ReadFloat()
+    timer.Create('RAM_TimerPrepEnd', time, 1, EndPrep)
+end)
 
 local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
@@ -20,20 +53,29 @@ local function InitTeamVariables()
             -- These should be client objects.
             local newResearchManager = ClientResearchManager(ID, TeamInfo['Name'])
             local armorCat = newResearchManager:AddCategory('armor', 'Armor')
-            local armor_one = armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
-            local armor_two = armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
-            local armor_three = armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
-            local armor_four = armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
-            local armor_five = armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
+            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
+            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
+            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
+            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
+            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
 
             local healthCat = newResearchManager:AddCategory('health', 'Health')
-            local health_one = healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
-            local health_two = healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
-            local health_three = healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
-            local health_four = healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
-            local health_five = healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
+            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
+            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
+            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
+            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
+            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
+
+            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
+            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 70, 1)
+            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 65, 2)
+            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 65, 3, {'revolver'})
+            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 70, 3, {'shotgun'})
+            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 80, 4, {'smg'})
+            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 85, 5, {'ar'})
 
             TeamInfo.ResearchManager = newResearchManager
+            TeamInfo.Money = 30000 -- Every team gets $30,000 to start
             TeamInfo.ResearchManager:ToJSON()
         end
     end
@@ -47,3 +89,85 @@ function GM:Initialize()
 
     InitTeamVariables()
 end
+
+-- Hide the standard HUD stuff
+local hud = { ["CHudHealth"] = true, ["CHudBattery"] = true, ["CHudAmmo"] = false, ["CHudSecondaryAmmo"] = false }
+function GM:HUDShouldDraw(name)
+    if hud[name] then return false end
+
+    -- Allow the weapon to override this
+    local ply = LocalPlayer()
+    if (IsValid(ply)) then
+        local wep = ply:GetActiveWeapon()
+        local team = ply:Team()
+--        if team ~= TEAM_ORANGE or team ~= TEAM_BLUE then
+        if ply:Team() == TEAM_SPECTATOR or ply:Team() == TEAM_UNASSIGNED or ply:Team() == TEAM_CONNECTING then
+            return false
+        end
+        if (IsValid(wep) and wep.HUDShouldDraw ~= nil) then
+            return wep.HUDShouldDraw(wep, name)
+        end
+    end
+
+    return true
+end
+
+hook.Add("HUDPaint", "PaintOurHud", function()
+    HUD:Draw()
+end);
+
+hook.Add("InitPostEntity", "PlayerSpawnSyncTimers", function()
+    InitPrepEndTimer()
+    InitMapEndTimer()
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+end)
+
+hook.Add("HUDPaint", "ShowNPCHealthAboveHead", function() -- Get the entity we're looking at
+    local ent = LocalPlayer():GetEyeTrace().Entity
+    -- check if it's really an NPC and the class we want
+    if IsValid(ent) and ent:GetClass() == 'ram_simple_scientist' then
+        local pos = (ent:GetPos() + Vector(0,-2,80)):ToScreen()
+        local team = ''
+        local color = Color(255, 255, 255)
+        if ent:GetTeam() == TEAM_BLUE then
+            team = 'Blue Team'
+            color = Color(0, 0, 255)
+        else
+            team = 'Orange Team'
+            color = Color(255, 160, 0)
+        end
+        -- check we can actually see this part of the entity
+        if pos.visible and LocalPlayer():GetPos():Distance(ent:GetPos()) < 100 then -- what info to draw
+            draw.DrawText(
+                tostring(ent:GetDisplayName()),
+                "Trebuchet18",
+                pos.x, pos.y,
+                color,
+                -- how to align the text
+                TEXT_ALIGN_CENTER
+            )
+            draw.DrawText(
+                tostring(team),
+                "Trebuchet18",
+                pos.x, pos.y + 10,
+                color,
+                -- how to align the text
+                TEXT_ALIGN_CENTER
+            )
+        end
+    end
+end)
+
+net.Receive('RAM_ShowHelp', function()
+    local ply = LocalPlayer()
+    local researchStatus = net.ReadInt(4)
+    if ( ply:Team() ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
+        if researchStatus == RESEARCH_STATUS_VOTING then
+            if HUD.html ~= nil then
+                HUD.html:QueueJavascript([[ EVENTS.trigger('toggle_research_menu') ]])
+                local current_cursor_status = vgui.CursorVisible()
+                gui.EnableScreenClicker((not current_cursor_status))
+            end
+        end
+    end
+end)

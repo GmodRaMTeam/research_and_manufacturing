@@ -5,7 +5,7 @@
     </button>
 
     <div each="{ team in teams }" show="{ show_scoreboard }">
-        <h1 class="header-text scoreboard-title">{team.name} ({team.score} pts)</h1>
+        <h1 class="header-text scoreboard-title">{team.name} (${team.money})</h1>
         <table class="ui striped table">
             <thead>
             <tr>

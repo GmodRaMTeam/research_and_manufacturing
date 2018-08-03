@@ -98,9 +98,11 @@
          *********************************************************************/
         var update_loop = function () {
             if (typeof player !== 'undefined' && typeof player.getInfo !== 'undefined') {
-                self.player_data = JSON.parse(player.getInfo())
-                self.set_progress_bars(self.player_data)
-
+                var result = player.getInfo()
+                if (result !== null && typeof result !== 'undefined') {
+                    self.player_data = JSON.parse(result)
+                    self.set_progress_bars(self.player_data)
+                }
             }
             window.setTimeout(update_loop, 25)
         }

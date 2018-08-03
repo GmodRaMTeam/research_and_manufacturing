@@ -11,6 +11,7 @@ local ResearchTechnologyClass = {}
 ResearchTechnologyClass.key = '' -- Default empty string
 ResearchTechnologyClass.name = '' -- Default empty string
 ResearchTechnologyClass.description = '' -- Default empty string
+ResearchTechnologyClass.class = '' -- Default empty string
 ResearchTechnologyClass.cost = 60 -- Default of 60
 ResearchTechnologyClass.tier = 60 -- Default of 60
 ResearchTechnologyClass.researched = false -- Default of false
@@ -35,31 +36,23 @@ end
 
 function ResearchTechnologyClass:CanDoResearch()
     local manager = self.category.manager
-    if (CurTime() >= manager.last_time) and (manager.status ~= RESEARCH_STATUS_IN_PROGRESS) then
+    if (manager.status == RESEARCH_STATUS_VOTING) then
         -- If we have researched it, return false, if not keep going
         if self.researched then
-            local msg = "Cannot start research! You already have this researched."
-            DynamicStatusUpdate(manager.team_index, msg, 'error', nil)
---            PrintToTeam(manager.team_index, msg)
             return false
         else
             if self:MeetsRequirements() then
                 return true
             else
---                local msg = "Cannot start research! You need to research the requirements!"
---                PrintToTeam(manager.team_index, msg)
                 return false
             end
         end
     else
---        local difference = round(manager.current_cost - (CurTime() - (manager.last_time)), 1)
---        local msg = "Cannot start research! Please wait " .. difference .. " more seconds."
---        PrintToTeam(manager.team_index, msg)
         return false
     end
 end
 
-function ResearchTechnology(key, name, description, cost, tier, reqs, category)
+function ResearchTechnology(key, name, description, class, cost, tier, reqs, category)
     assert(key ~= nil, "ResearchTechnology must be passed a valid key")
     assert(name ~= nil, "ResearchTechnology must be passed a valid name")
     assert(tier ~= nil, "ResearchTechnology must be passed a valid tier")
@@ -79,6 +72,10 @@ function ResearchTechnology(key, name, description, cost, tier, reqs, category)
     if reqs ~= nil then
         assert(type(reqs) == 'table', "ResearchTechnology must be passed a valid table/object for reqs")
         newResearchTechnology.reqs = reqs
+    end
+    if class ~= nil then
+        assert(type(class) == 'string', "ResearchTechnology must be passed a valid string for field class.")
+        newResearchTechnology.class = class
     end
     --Return our new Object.
     return newResearchTechnology

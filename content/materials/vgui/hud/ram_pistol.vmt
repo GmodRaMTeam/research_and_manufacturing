@@ -1,7 +1,0 @@
-"UnlitGeneric"
-{
-	"$basetexture" "vgui/entities/ram_pistol"
-	"$nolod" 1
-	"$vertexalpha" 1
-	"$vertexcolor" 1
-}

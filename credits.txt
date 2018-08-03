@@ -1,3 +1,21 @@
-Bob - M9K Weapon base (Murderthon9000)
-Garry Newman - Sandbox & Base
-Science And Industry Developers/Admins: ie, grome, GuyonthecoucH, Lez, Parasite, pears - Gameplay ideaas/etc. Still seeking explicit permissions. These are the admins listed on the wiki. The original moddb poster was: TheROsingleB
+Bob (Murderthon9000)
+    M9K Weapon base
+Garry Newman
+    Sandbox & Base
+ie, grome, GuyonthecoucH, Lez, Parasite, pears
+    Science and Industry Maintainers: Gameplay ideaas/etc.
+    Considering seeking explicit permissions. These are the admins listed on the wiki.
+    The original moddb poster was: TheROsingleB
+Silverlan: https://steamcommunity.com/id/silverlan
+    Made great contributions to GMod over the years with different contents/addons.
+    I used parts of Half Life Renaissance weapon's code to re-create specific HL1 weapons.
+    Not seeking explicit permission for custom re-write as steam profile stats:
+
+        "Don't add me about anything gmod-related or related to my workshop addons."
+
+        and content says:
+
+        "I'm done with gmod and I don't take requests, so please stop spamming the comment section.
+        There won't be any updates or new packs."
+
+    And Code was non-functional as it existed.
