@@ -25,7 +25,7 @@ For anyone wanting to take a look into mapping, included is the .vmf for the tes
 
 .fgd: ```ram.fgd (It's in the base gamemode dir)```
 
-#### Credits:
+## Credits:
 
 #### Bob (Murderthon9000)
  - M9K Weapon base
@@ -36,7 +36,7 @@ For anyone wanting to take a look into mapping, included is the .vmf for the tes
     These are the admins listed on the wiki/discord.
     The original moddb poster was: TheROsingleB
 #### Silverlan: https://steamcommunity.com/id/silverlan
-    Made great contributions to GMod over the years with different contents/addons.
+    Made great contributions to Gmod over the years with different contents/addons.
     I used parts of Half Life Renaissance weapon's code to re-create specific HL1 weapons.
     Not seeking explicit permission for custom use as steam profile stats:
 
@@ -57,7 +57,7 @@ For anyone wanting to take a look into mapping, included is the .vmf for the tes
     permission to use them or they are re-makes. If this is not the case I will gladly remove these assets and require HL:S for this 
     content
 
-### Project Contributors:
+## Project Contributors:
 
 #### CKCollab: 
     UI/HTML/RiotJS work
