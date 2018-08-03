@@ -24,8 +24,6 @@ function plymeta:InitScientistVars()
 end
 
 function plymeta:PrintScientistVars()
---   print(self.has_scientist)
---   PrintTable(self.scientist)
 end
 
 function plymeta:CanPickUpScientist()
@@ -83,6 +81,71 @@ function plymeta:DropScientist(victim_pos)
       self.scientist = {}
    end
 end
+
+local tblAmmoCount = {}
+local tblAmmoTypeNames = {
+	[1] = "ar2",
+	[2] = "ar2altfire",
+	[3] = "pistol",
+	[4] = "smg1",
+	[5] = "357",
+	[6] = "xbowbolt",
+	[7] = "buckshot",
+	[8] = "rpg_round",
+	[9] = "smg1_grenade",
+	[10] = "grenade",
+	[11] = "slam",
+	[12] = "alyxgun",
+	[13] = "sniperround",
+	[14] = "sniperpenetratedround",
+	[15] = "thumper",
+	[16] = "gravity",
+	[17] = "battery",
+	[18] = "gaussenergy",
+	[19] = "combinecannon",
+	[20] = "airboatgun",
+	[21] = "striderminigun",
+	[22] = "helicoptergun"
+}
+local function ToAmmoName(i)
+	return tblAmmoTypeNames[i] or ""
+end
+function plymeta:GetAmmunition(ammo)
+	if type(ammo) == "number" then ammo = ToAmmoName(ammo) end
+	if util.IsDefaultAmmoType(ammo) then return self:GetAmmoCount(ammo) end
+	return tblAmmoCount[self] and tblAmmoCount[self][ammo] or 0
+end
+
+function plymeta:SetAmmoCount(iAmount, ammo) -- A replacement for the broken player.SetAmmo
+	local iAmmo = self:GetAmmoCount(ammo)
+	if iAmmo == iAmount then return end
+	if iAmmo > iAmount then
+		self:RemoveAmmo(iAmmo -iAmount, ammo)
+		return
+	end
+	self:GiveAmmo(iAmount -iAmmo, ammo, true)
+end
+
+function plymeta:SetAmmunition(ammo, iAmount)
+	if iAmount < 0 then iAmount = 0 end
+	if util.IsDefaultAmmoType(ammo) then
+		self:SetAmmoCount(iAmount, ammo)
+		return
+	end
+	umsg.Start("SLV_SetAmmunition", self)
+		umsg.String(ammo)
+		umsg.Short(iAmount)
+	umsg.End()
+	tblAmmoCount[self] = tblAmmoCount[self] or {}
+	tblAmmoCount[self][ammo] = iAmount
+end
+
+function plymeta:AddAmmunition(ammo, iAmount)
+	local _iAmmo = self:GetAmmunition(ammo)
+	if _iAmmo +iAmount < 0 then iAmount = -_iAmmo end
+	self:SetAmmunition(ammo, _iAmmo +iAmount)
+end
+
 
 hook.Add("PlayerDeath", "RMPlayerDropScientistOnDeath", function(victim, inflictor, attacker)
    victim:DropScientist(victim:GetPos())

@@ -6,16 +6,37 @@
 
 DEFINE_BASECLASS( "gamemode_base" )
 
-util.AddNetworkString("RMDynamicNotification")
-util.AddNetworkString("RMShowHelp")
+util.AddNetworkString("RAM_DynamicNotification")
+util.AddNetworkString("RAM_ShowHelp")
+util.AddNetworkString("RAM_HideResearchMenu")
+util.AddNetworkString("RAM_RequestClientTechnologyUpdate")
+util.AddNetworkString("RAM_StartTeamResearch")
+util.AddNetworkString("RAM_RecordResearchVote")
+util.AddNetworkString("RAM_ClientStatusUpdate")
+util.AddNetworkString("RAM_PrintToTeam")
+util.AddNetworkString("RAM_ServerTechnologyUpdate")
+util.AddNetworkString("RAM_SyncMapTimer")
+util.AddNetworkString("RAM_SyncPrepTimer")
+util.AddNetworkString("RAM_RequestSyncMapTimer")
+util.AddNetworkString("RAM_RequestSyncPrepTimer")
+util.AddNetworkString("RAM_MakeMoney")
 
 AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("cl_pickteam.lua")
-AddCSLuaFile("cl_researchmenu.lua")
-AddCSLuaFile("cl_hud.lua")
-AddCSLuaFile("cl_scoreboard.lua")
+
+AddCSLuaFile("vgui/cl_hud.lua")
+AddCSLuaFile("vgui/cl_pickteam.lua")
+AddCSLuaFile("vgui/cl_research_menu.lua")
+AddCSLuaFile("vgui/cl_scoreboard.lua")
+
 AddCSLuaFile("shared.lua")
---AddCSLuaFile("utils.lua")
+
+AddCSLuaFile("cl_research_manager.lua")
+AddCSLuaFile("cl_research_category.lua")
+AddCSLuaFile("cl_research_technology.lua")
+
+AddCSLuaFile("shd_utils.lua")
+AddCSLuaFile("cl_utils.lua")
+AddCSLuaFile("cl_player_ext.lua")
 
 include("shared.lua")
 include("player.lua")
@@ -24,11 +45,14 @@ include("komerad_autorun.lua")
 include("research_manager.lua")
 include("research_category.lua")
 include("research_technology.lua")
+include("shd_utils.lua")
+include("sv_utils.lua")
 
 -- Convars --
-CreateConVar("rm_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("rm_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("rm_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_prep_time_limit", "1", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
 
 --[[All local spaced server functions]]
 
@@ -64,25 +88,16 @@ local function IsScientistSpawnpointSuitable(spawnpoint_pos, spawn_class)
 end
 
 local function ScientistSelectSpawn(team)
-
-    --	local SpawnPoints = team.GetSpawnPoints( TeamID )
-    --	if ( !SpawnPoints || table.Count( SpawnPoints ) == 0 ) then return end
-    --   local SpawnPoints = { 'info_scientist_spawn' }
-
     local spawn_class = ''
 
-    if team == 1 then
+    if team == TEAM_BLUE then
         spawn_class = 'info_scientist_blue_spawn'
     else
         spawn_class = 'info_scientist_orange_spawn'
     end
 
-
     local SpawnPoints = ents.FindByClass(spawn_class)
-
     local ChosenSpawnPoint = nil
-
---    local searcing_for_spawn = true
 
     for i=0,6 do
         ChosenSpawnPoint = table.Random(SpawnPoints)
@@ -92,8 +107,6 @@ local function ScientistSelectSpawn(team)
             end
         end
     end
-
---    return ChosenSpawnPoint:GetPos()
 end
 
 local function OverseerSelectSpawn(team)
@@ -116,108 +129,90 @@ local function OverseerSelectSpawn(team)
     end
 end
 
-local function EndRound()
-    --   print("THE ROUND HAS ENDED!!!!!!!!")
-    local text = "The round has ended"
+------------------------------------------------------------------------------------------------------------
 
-    -- announce to players
-    for k, ply in pairs(player.GetAll()) do
-        if IsValid(ply) then
-            ply:PrintMessage(HUD_PRINTTALK, text)
-        end
-    end
+
+local function EndMap()
+    DynamicStatusUpdate(nil, 'The map has ended!', 'warning', nil)
 
     timer.Simple(15, function() game.LoadNextMap() end)
 end
 
-local function InitGamemodeVariables()
+function EndPrep()
+    if timer.Exists("RAM_TimerPrepEnd") then
+        timer.Remove("RAM_TimerPrepEnd")
+    end
+    DynamicStatusUpdate(nil, 'Preparation has ended! Begin voting!', 'success', nil)
+    local AllTeams = team.GetAllTeams()
+    for ID, TeamInfo in pairs(AllTeams) do
+        if ID == TEAM_BLUE or ID == TEAM_ORANGE then
+            TeamInfo.ResearchManager:StartResearchAndMoneyMaking()
+        end
+    end
 end
-
-local function SetRoundEnd(endtime)
-    SetGlobalFloat("rm_map_end", endtime)
-end
-
---function IncRoundEnd(incr)
---   SetRoundEnd(GetGlobalFloat("rm_round_end", 0) + incr)
---end
 
 local function InitMapEndTimer()
-    timer.Create('mapendtimer', GetConVar("rm_map_time_limit"):GetInt() * 60, 1, EndRound)
+    timer.Create('RAM_TimerMapEnd', GetConVar("ram_map_time_limit"):GetInt() * 60, 1, EndMap)
 end
 
-local function InitRoundEndTime()
-    -- Init round values
-    local endtime = CurTime() + (GetConVar("rm_map_time_limit"):GetInt() * 60)
-
-    SetRoundEnd(endtime)
+local function InitPrepEndTimer()
+    timer.Create('RAM_TimerPrepEnd', GetConVar("ram_prep_time_limit"):GetInt() * 60, 1, EndPrep)
 end
 
 local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
-        if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
---            PrintTable(TeamInfo)
+        if ID == TEAM_BLUE or ID == TEAM_ORANGE then
             local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
             local armorCat = newResearchManager:AddCategory('armor', 'Armor')
-            local armor_one = armorCat:AddTechnology('armor_one', 'Armor Type I', 'Decent Armor (20)', 60, 1)
-            local armor_two = armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
-            local armor_three = armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
---            table.insert(armor_two.reqs, armor_one.key)
+            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', nil, 60, 1)
+            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', nil, 65, 2, {'armor_one'})
+            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', nil, 70, 3, {'armor_two'})
+            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor (80)', nil, 75, 4, {'armor_three'})
+            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor (100)', nil, 75, 5, {'armor_four'})
 
---            PrintTable(newResearchManager)
+            local healthCat = newResearchManager:AddCategory('health', 'Health')
+            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', nil, 60, 1)
+            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', nil, 65, 2, {'health_one'})
+            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', nil, 70, 3, {'health_two'})
+            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Health (80)', nil, 75, 4, {'health_three'})
+            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Health (100)', nil, 75, 5, {'health_four'})
+
+            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
+            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 'weapon_ram_revolver', 70, 1)
+            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 'weapon_ram_shotgun', 65, 2)
+            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 'weapon_ram_smg', 65, 3, {'revolver'})
+            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 'weapon_ram_ar2', 70, 3, {'shotgun'})
+            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 'weapon_ram_gauss', 80, 4, {'smg'})
+            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 'weapon_ram_egon', 85, 5, {'ar'})
+
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
             TeamInfo.Scientists = 3 -- Every team gets 3 to start
-
-            local menu_vote_time = GetConVar("rm_vote_time_limit_seconds"):GetInt()
-            timer.Create("Team" .. ID .. "VoteMenuTimeLimit", menu_vote_time, 1, function() newResearchManager:TallyVotes() end)
         end
     end
-end
-
-local function PrintTimeLeft()
-    --print(GetGlobalFloat("rm_round_end", 0) - CurTime())
-    --print(util.SimpleTime( math.max(0, GetGlobalFloat("rm_map_end", 0)) - CurTime(), "%02i:%02i"))
-    local endtime = GetGlobalFloat("rm_map_end", 0) - CurTime()
-    local text = util.SimpleTime(math.max(0, endtime), "%02i:%02i")
-    --   print(text)
 end
 
 --[[All GM: spaced functions]]
 
 function GM:Initialize()
-
---    GAMEMODE.playermodel = "models/player/phoenix.mdl"
-
-    InitGamemodeVariables()
     InitTeamVariables()
-
-    local AllTeams = team.GetAllTeams()
-
-    -- Do stuff
+    InitPrepEndTimer()
     InitMapEndTimer()
-    --local ptime = GetConVar("ttt_preptime_seconds"):GetInt()
-    InitRoundEndTime()
-
-    --hook.Add("Tick", "PrintTimeLeft", PrintTimeLeft )
 end
 
 function GM:ShowHelp(ply) -- This hook is called everytime F1 is pressed.
-    --    umsg.Start( "OpenResearchMenu", ply ) -- Sending a message to the client.
-    --    umsg.End()
     local AllTeams = team.GetAllTeams()
-    --   PrintTable(AllTeams)
-    --   PrintTable(AllTeams[ply:Team()])
-
-    if (ply:Team() == 1 or ply:Team() == 2) then
+    if (ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE) then
         local status = AllTeams[ply:Team()]['ResearchManager'].status
-        if status ~= RESEARCH_STATUS_IN_PROGRESS then
-            net.Start("RMShowHelp")
-            net.WriteInt(status, 3)
+        if status == RESEARCH_STATUS_VOTING and not AllTeams[ply:Team()].ResearchManager:HasUserVoted(ply:SteamID()) then
+            net.Start("RAM_ShowHelp")
+            net.WriteInt(status, 4)
             net.Send(ply)
         end
     end
 end
+
 
 --[[---------------------------------------------------------
    Name: gamemode:PlayerSpawn( )
@@ -231,22 +226,8 @@ function GM:PlayerSpawn( pl )
 
 end
 
---Ends function
-
---function GM:PlayerInitialSpawn( ply )
---   ply:PrintScientistVars()
---   ply:InitScientistVars()
---   ply:PrintScientistVars()
---end
-
-hook.Add("PlayerInitialSpawn", "InitScientistVarsForPlayer", function(ply)
-    ply:PrintScientistVars()
-    ply:InitScientistVars()
-    ply:PrintScientistVars()
-end)
 
 hook.Add("InitPostEntity", "SpawnRMNPCS", function()
-    --	print( "Initialization hook called" )
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
@@ -278,63 +259,50 @@ hook.Add("InitPostEntity", "SpawnRMNPCS", function()
     end
 end)
 
+
 function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_original_team)
---    print("CaptureScientist got value "..scientist_name.." for scientist name!")
---    print("Original team is "..scientist_original_team.."!")
     local new_scientist = ents.Create("ram_simple_scientist")
     if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
-    --                button:SetModel("models/dav0r/buttons/button.mdl")
-    -- Create a new scientist with the same name/cost and new team
     new_scientist:SetPos(ScientistSelectSpawn(new_team))
     new_scientist:Spawn()
---    print("Setting name "..scientist_name.." on scientist.")
     new_scientist:SetTeam(new_team)
     new_scientist:SetDisplayName(scientist_name)
---    print("New scientist name is "..new_scientist:GetDisplayName().."!")
     new_scientist:SetCost(scientist_cost)
 
-    -- Remove one from the count of the old team, and add one to the new team
     local AllTeams = team.GetAllTeams()
---    PrintTable(AllTeams)
     AllTeams[new_team].Scientists = AllTeams[new_team].Scientists + 1
     AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
---    PrintTable(AllTeams)
 end
+
+net.Receive("RAM_RequestSyncMapTimer", function(len, ply)
+    local time_left = nil
+    if timer.Exists("RAM_TimerMapEnd") then
+        time_left = timer.TimeLeft("RAM_TimerMapEnd")
+    else
+        time_left = 0
+    end
+    net.Start("RAM_SyncMapTimer")
+    net.WriteFloat(time_left)
+    net.Send(ply)
+end)
+
+net.Receive("RAM_RequestSyncPrepTimer", function(len, ply)
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    local time_left = nil
+    if timer.Exists("RAM_TimerPrepEnd") then
+        time_left = timer.TimeLeft("RAM_TimerPrepEnd")
+    else
+        time_left = 0
+    end
+    net.Start("RAM_SyncPrepTimer")
+    net.WriteFloat(time_left)
+    net.Send(ply)
+end)
+
 
 -- Convar replication is broken in gmod, so we do this.
 -- I don't like it any more than you do, dear reader.
 -- Saw this in TTT, seems like a good idea to replicate for our timer.
-function GM:SyncGlobals()
-    SetGlobalInt("rm_map_time_limit", GetConVar("rm_map_time_limit"):GetInt())
-end
-
---[[All global server functions]]
-
-function GetTeamInfoTable(teamIndex)
-    local AllTeams = team.GetAllTeams()
-    return AllTeams[teamIndex]
-end
-
-function DynamicStatusUpdate(team_index, message, status, specific_player)
-    -- Status can be: 'warning', 'success', 'error'
-    if team_index ~= nil then
-        for k, ply in pairs(player.GetAll()) do
-            if IsValid(ply) and ply:Team() == team_index then
-                net.Start("RMDynamicNotification")
-                net.WriteString(message)
-                net.WriteString(status)
-                net.Send(ply)
-            end
-        end
-    elseif specific_player ~= nil and specific_player:IsValid() and team_index == nil then
-        net.Start("RMDynamicNotification")
-        net.WriteString(message)
-        net.WriteString(status)
-        net.Send(ply)
-    else
-        net.Start("RMDynamicNotification")
-        net.WriteString(message)
-        net.WriteString(status)
-        net.Broadcast()
-    end
-end
+--function GM:SyncGlobals()
+--    SetGlobalInt("ram_map_time_limit", GetConVar("ram_map_time_limit"):GetInt())
+--end

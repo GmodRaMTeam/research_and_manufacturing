@@ -58,23 +58,14 @@ end
 
 
 function PLAYER:Loadout()
---	print("@@@@@@@@@@@@@@@@@@@@@")
-
 	self.Player:RemoveAllAmmo()
 
 	-- If we're on one of the two teams we made...
 	if self.Player:Team() == TEAM_BLUE or self.Player:Team() == TEAM_ORANGE then
-		local AllTeams = team.GetAllTeams()
-		local TeamInfo = AllTeams[self.Player:Team()]
-		local ResearchManager = TeamInfo.ResearchManager
-
+		local ResearchManager = team.GetAllTeams()[self.Player:Team()].ResearchManager
 		if ResearchManager.categories['armor']:HasAtLeastOneTechUnlocked() then
---			print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 			local tech = ResearchManager.categories['armor']:GetHighestTechResearched()
---			PrintTable(tech)
 			if tech then
---				print("##############################################")
---				PrintTable(tech)
 				self.MaxArmor = tech.tier * 20
 				self.StartArmor = tech.tier * 20
 				self.Player:SetArmor(tech.tier * 20)
@@ -84,50 +75,29 @@ function PLAYER:Loadout()
 			self.StartArmor = 0
 			self.Player:SetArmor(0)
 		end
+
+		if ResearchManager.categories['weapons'].techs['shotgun'].researched then
+			self.Player:Give( "weapon_ram_shotgun" )
+		end
+		if ResearchManager.categories['weapons'].techs['revolver'].researched then
+			self.Player:Give( "weapon_ram_revolver" )
+		end
+		if ResearchManager.categories['weapons'].techs['smg'].researched then
+			self.Player:Give( "weapon_ram_smg" )
+		end
+		if ResearchManager.categories['weapons'].techs['ar'].researched then
+			self.Player:Give( "weapon_ram_ar2" )
+		end
+		if ResearchManager.categories['weapons'].techs['gauss'].researched then
+			self.Player:Give( "weapon_ram_gauss" )
+		end
+		if ResearchManager.categories['weapons'].techs['egon'].researched then
+			self.Player:Give( "weapon_ram_egon" )
+		end
 	end
---	local mdl = GAMEMODE.playermodel or "models/player/phoenix.mdl"
---	util.PrecacheModel(mdl)
---	self.Player:SetModel(mdl)
---
---	-- Always clear color state, may later be changed in TTTPlayerSetColor
---	self.Player:SetColor(COLOR_WHITE)
---
 	self.Player:Give( "weapon_crowbar" )
-	self.Player:Give( "rm_pistol" )
-
-
-	--if ( cvars.Bool( "sbox_weapons", true ) ) then
-    --
-	--	self.Player:GiveAmmo( 256,	"Pistol", 		true )
-	--	self.Player:GiveAmmo( 256,	"SMG1", 		true )
-	--	self.Player:GiveAmmo( 5,	"grenade", 		true )
-	--	self.Player:GiveAmmo( 64,	"Buckshot", 	true )
-	--	self.Player:GiveAmmo( 32,	"357", 			true )
-	--	self.Player:GiveAmmo( 32,	"XBowBolt", 	true )
-	--	self.Player:GiveAmmo( 6,	"AR2AltFire", 	true )
-	--	self.Player:GiveAmmo( 100,	"AR2", 			true )
-    --
-	--	self.Player:Give( "weapon_crowbar" )
-	--	self.Player:Give( "weapon_pistol" )
-	--	self.Player:Give( "weapon_smg1" )
-	--	self.Player:Give( "weapon_frag" )
-	--	self.Player:Give( "weapon_physcannon" )
-	--	self.Player:Give( "weapon_crossbow" )
-	--	self.Player:Give( "weapon_shotgun" )
-	--	self.Player:Give( "weapon_357" )
-	--	self.Player:Give( "weapon_rpg" )
-	--	self.Player:Give( "weapon_ar2" )
-    --
-	--	-- The only reason I'm leaving this out is because
-	--	-- I don't want to add too many weapons to the first
-	--	-- row because that's where the gravgun is.
-	--	--pl:Give( "weapon_stunstick" )
-    --
-	--end
-
-	--self.Player:Give( "gmod_tool" )
-	--self.Player:Give( "gmod_camera" )
-	--self.Player:Give( "weapon_physgun" )
+	self.Player:Give( "weapon_ram_pistol" )
+	self.Player:GiveAmmo( 60,	"Pistol", 		true )
 
 	self.Player:SwitchToDefaultWeapon()
 
@@ -156,14 +126,17 @@ function PLAYER:Spawn()
 
 	BaseClass.Spawn( self )
 
-	--local col = self.Player:GetInfo( "cl_playercolor" )
-	--self.Player:SetPlayerColor( Vector( col ) )
-    --
-	--local col = Vector( self.Player:GetInfo( "cl_weaponcolor" ) )
-	--if col:Length() == 0 then
-	--	col = Vector( 0.001, 0.001, 0.001 )
-	--end
-	--self.Player:SetWeaponColor( col )
+end
+
+
+--
+-- Called when the player spawns
+--
+function PLAYER:Death()
+
+	BaseClass.Death( self )
+	local TeamInfo = team.GetAllTeams()[self.Player:Team()]
+	TeamInfo.Money = TeamInfo.Money - 1000
 
 end
 
