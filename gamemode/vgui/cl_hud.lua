@@ -26,7 +26,7 @@ function HUD:Init()
     self.html:SetAllowLua(true)
 
     self.html:AddFunction("player", "getInfo", function()
-        if LocalPlayer():IsValid() and (LocalPlayer():Team() == TEAM_BLUE or LocalPlayer():Team() == ORANGE ) then
+        if LocalPlayer():IsValid() and (LocalPlayer():Team() == TEAM_BLUE or LocalPlayer():Team() == TEAM_ORANGE ) then
             local status = team.GetAllTeams()[LocalPlayer():Team()].ResearchManager.status
 --            print(status)
             local player_data = {
