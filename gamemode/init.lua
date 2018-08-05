@@ -17,9 +17,12 @@ util.AddNetworkString("RAM_PrintToTeam")
 util.AddNetworkString("RAM_ServerTechnologyUpdate")
 util.AddNetworkString("RAM_SyncMapTimer")
 util.AddNetworkString("RAM_SyncPrepTimer")
+util.AddNetworkString("RAM_SyncStatus")
 util.AddNetworkString("RAM_RequestSyncMapTimer")
 util.AddNetworkString("RAM_RequestSyncPrepTimer")
+util.AddNetworkString("RAM_RequestSyncStatus")
 util.AddNetworkString("RAM_MakeMoney")
+util.AddNetworkString("RAM_ScientistUpdate")
 
 AddCSLuaFile("cl_init.lua")
 
@@ -41,6 +44,8 @@ AddCSLuaFile("cl_player_ext.lua")
 include("shared.lua")
 include("player.lua")
 include("player_ext.lua")
+include("entity_ext.lua")
+include("physobj_ext.lua")
 include("komerad_autorun.lua")
 include("research_manager.lua")
 include("research_category.lua")
@@ -53,61 +58,9 @@ CreateConVar("ram_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("ram_prep_time_limit", "1", FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("ram_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("ram_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED)
 
 --[[All local spaced server functions]]
-
-local function IsScientistSpawnpointSuitable(spawnpoint_pos, spawn_class)
-
---	local Pos = spawnpointent:GetPos()
-
-	-- Note that we're searching the default hull size here for a player in the way of our spawning.
-	-- This seems pretty rough, seeing as our player's hull could be different.. but it should do the job
-	-- (HL2DM kills everything within a 128 unit radius)
-	local Ents = ents.FindInBox( spawnpoint_pos + Vector( -16, -16, 0 ), spawnpoint_pos + Vector( 16, 16, 64 ) )
-
---	if ( pl:Team() == TEAM_SPECTATOR ) then return true end
-
-	local Blockers = 0
-
-	for k, v in pairs( Ents ) do
-		if ( IsValid( v ) and v:GetClass() == "ram_simple_scientist" ) then
-
-			Blockers = Blockers + 1
-
---			if ( bMakeSuitable ) then
---				v:Kill()
---			end
-
-		end
-	end
-
---	if ( bMakeSuitable ) then return true end
-	if ( Blockers > 0 ) then return false end
-	return true
-
-end
-
-local function ScientistSelectSpawn(team)
-    local spawn_class = ''
-
-    if team == TEAM_BLUE then
-        spawn_class = 'info_scientist_blue_spawn'
-    else
-        spawn_class = 'info_scientist_orange_spawn'
-    end
-
-    local SpawnPoints = ents.FindByClass(spawn_class)
-    local ChosenSpawnPoint = nil
-
-    for i=0,6 do
-        ChosenSpawnPoint = table.Random(SpawnPoints)
-        if ChosenSpawnPoint ~= nil then
-            if (IsScientistSpawnpointSuitable(ChosenSpawnPoint:GetPos())) then
-                return ChosenSpawnPoint:GetPos()
-            end
-        end
-    end
-end
 
 local function OverseerSelectSpawn(team)
     local spawn_class = ''
@@ -125,7 +78,10 @@ local function OverseerSelectSpawn(team)
     if ChosenSpawnPoint == nil then
         return nil
     else
-        return ChosenSpawnPoint:GetPos()
+        return {
+            pos = ChosenSpawnPoint:GetPos(),
+            ang = ChosenSpawnPoint:GetAngles()
+        }
     end
 end
 
@@ -146,6 +102,7 @@ function EndPrep()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if ID == TEAM_BLUE or ID == TEAM_ORANGE then
+            ClientStatusUpdate(RESEARCH_STATUS_VOTING, ID)
             TeamInfo.ResearchManager:StartResearchAndMoneyMaking()
         end
     end
@@ -185,6 +142,15 @@ local function InitTeamVariables()
             weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 'weapon_ram_ar2', 70, 3, {'shotgun'})
             weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 'weapon_ram_gauss', 80, 4, {'smg'})
             weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 'weapon_ram_egon', 85, 5, {'ar'})
+
+            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets')
+            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 'weapon_ram_satchel', 60, 1)
+            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 'weapon_ram_handgrenade', 65, 2, {'satchel'})
+            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 'weapon_ram_tripmine', 70, 3, {'grenade'})
+
+            local implantCat = newResearchManager:AddCategory('implants', 'Implants')
+            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', nil, 60, 1)
+            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', nil, 65, 1, {'legs_one'})
 
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
@@ -235,7 +201,7 @@ hook.Add("InitPostEntity", "SpawnRMNPCS", function()
                 local new_scientist = ents.Create("ram_simple_scientist")
                 if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
                 --                button:SetModel("models/dav0r/buttons/button.mdl")
-                local spawnpoint_pos = ScientistSelectSpawn(ID)
+                local spawnpoint_pos = new_scientist:ScientistSelectSpawn(ID)
                 if spawnpoint_pos ~= nil then
                     new_scientist:SetPos(spawnpoint_pos)
                     new_scientist:SetTeam(ID)
@@ -247,9 +213,10 @@ hook.Add("InitPostEntity", "SpawnRMNPCS", function()
             local new_overseer = ents.Create("ram_overseer")
             if (not IsValid(new_overseer)) then return end -- Check whether we successfully made an entity, if not - bail
             --                button:SetModel("models/dav0r/buttons/button.mdl")
-            local spawnpoint_pos = OverseerSelectSpawn(ID)
-            if spawnpoint_pos ~= nil then
-                new_overseer:SetPos(spawnpoint_pos)
+            local spawnpoint_pos_data = OverseerSelectSpawn(ID)
+            if spawnpoint_pos_data ~= nil then
+                new_overseer:SetPos(spawnpoint_pos_data['pos'])
+                new_overseer:SetAngles(spawnpoint_pos_data['ang'])
                 new_overseer:SetTeam(ID)
                 new_overseer:Spawn()
             else
@@ -263,15 +230,30 @@ end)
 function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_original_team)
     local new_scientist = ents.Create("ram_simple_scientist")
     if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
-    new_scientist:SetPos(ScientistSelectSpawn(new_team))
-    new_scientist:Spawn()
-    new_scientist:SetTeam(new_team)
-    new_scientist:SetDisplayName(scientist_name)
-    new_scientist:SetCost(scientist_cost)
+    local pos = new_scientist:ScientistSelectSpawn(new_team)
+    if pos ~= nil then
+        new_scientist:SetPos(pos)
+        new_scientist:Spawn()
+        new_scientist:SetTeam(new_team)
+        new_scientist:SetDisplayName(scientist_name)
+        new_scientist:SetCost(scientist_cost)
+    else
+        new_scientist:Remove()
+    end
 
     local AllTeams = team.GetAllTeams()
     AllTeams[new_team].Scientists = AllTeams[new_team].Scientists + 1
     AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
+
+    net.Start("RAM_ScientistUpdate")
+--    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(AllTeams [TEAM_BLUE].Scientists)
+    print(AllTeams [TEAM_ORANGE].Scientists)
+--    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    net.WriteInt(AllTeams [TEAM_BLUE].Scientists, 4)
+    net.WriteInt(AllTeams [TEAM_ORANGE].Scientists, 4)
+    net.Broadcast()
+
 end
 
 net.Receive("RAM_RequestSyncMapTimer", function(len, ply)
@@ -287,7 +269,7 @@ net.Receive("RAM_RequestSyncMapTimer", function(len, ply)
 end)
 
 net.Receive("RAM_RequestSyncPrepTimer", function(len, ply)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+--    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     local time_left = nil
     if timer.Exists("RAM_TimerPrepEnd") then
         time_left = timer.TimeLeft("RAM_TimerPrepEnd")
@@ -299,10 +281,9 @@ net.Receive("RAM_RequestSyncPrepTimer", function(len, ply)
     net.Send(ply)
 end)
 
-
--- Convar replication is broken in gmod, so we do this.
--- I don't like it any more than you do, dear reader.
--- Saw this in TTT, seems like a good idea to replicate for our timer.
---function GM:SyncGlobals()
---    SetGlobalInt("ram_map_time_limit", GetConVar("ram_map_time_limit"):GetInt())
---end
+net.Receive("RAM_RequestSyncStatus", function(len, ply)
+    net.Start("RAM_SyncStatus")
+    net.WriteInt(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status, 4)
+    net.WriteInt(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status, 4)
+    net.Send(ply)
+end)

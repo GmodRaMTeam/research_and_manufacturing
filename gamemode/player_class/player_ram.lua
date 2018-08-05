@@ -31,8 +31,8 @@ PLAYER.TauntCam = TauntCamera()
 --PLAYER.WalkSpeed 			= 200
 --PLAYER.RunSpeed				= 400
 
-PLAYER.WalkSpeed			= 400		-- How fast to move when not running
-PLAYER.RunSpeed				= 600		-- How fast to move when running
+PLAYER.WalkSpeed			= 200		-- How fast to move when not running
+PLAYER.RunSpeed				= 400		-- How fast to move when running
 PLAYER.CrouchedWalkSpeed	= 0.3		-- Multiply move speed by this when crouching
 PLAYER.DuckSpeed			= 0.3		-- How fast to go from not ducking, to ducking
 PLAYER.UnDuckSpeed			= 0.3		-- How fast to go from ducking, to not ducking
@@ -54,6 +54,9 @@ function PLAYER:SetupDataTables()
 
 	BaseClass.SetupDataTables( self )
 
+	self.Player:NetworkVar( 'Bool', 21, 'HasScientist')
+	self.Player:SetHasScientist(false)
+
 end
 
 
@@ -71,9 +74,22 @@ function PLAYER:Loadout()
 				self.Player:SetArmor(tech.tier * 20)
 			end
 		else
-			self.MaxArmor = 100
+			self.MaxArmor = 0
 			self.StartArmor = 0
 			self.Player:SetArmor(0)
+		end
+
+		if ResearchManager.categories['health']:HasAtLeastOneTechUnlocked() then
+			local tech = ResearchManager.categories['health']:GetHighestTechResearched()
+			if tech then
+				self.MaxHealth = 100 + (tech.tier * 20)
+				self.StartHealth = 100 +  (tech.tier * 20)
+				self.Player:SetHealth(100 + (tech.tier * 20))
+			end
+		else
+			self.MaxHealth = 100
+			self.StartHealth = 100
+			self.Player:SetHealth(100)
 		end
 
 		if ResearchManager.categories['weapons'].techs['shotgun'].researched then
@@ -94,6 +110,31 @@ function PLAYER:Loadout()
 		if ResearchManager.categories['weapons'].techs['egon'].researched then
 			self.Player:Give( "weapon_ram_egon" )
 		end
+
+		if ResearchManager.categories['gadgets'].techs['satchel'].researched then
+			self.Player:Give( "weapon_ram_satchel" )
+		end
+		if ResearchManager.categories['gadgets'].techs['grenade'].researched then
+			self.Player:Give( "weapon_ram_handgrenade" )
+		end
+		if ResearchManager.categories['gadgets'].techs['tripmine'].researched then
+			self.Player:Give( "weapon_ram_tripmine" )
+		end
+
+		if ResearchManager.categories['implants'].techs['legs_one'].researched and not ResearchManager.categories['implants'].techs['legs_two'].researched then
+--			print("LEGS ONE IS RESEARCHED")
+			self.Player:SetRunSpeed( 500 )
+			self.Player:SetWalkSpeed( 250 )
+		elseif ResearchManager.categories['implants'].techs['legs_two'].researched then
+--			print("LEGS TWO IS RESEARCHED")
+			self.Player:SetRunSpeed( 600 )
+			self.Player:SetWalkSpeed( 300 )
+		else
+--			print("NO IMPLANTS")
+			self.Player:SetRunSpeed( 400 )
+			self.Player:SetWalkSpeed( 200 )
+		end
+
 	end
 	self.Player:Give( "weapon_crowbar" )
 	self.Player:Give( "weapon_ram_pistol" )

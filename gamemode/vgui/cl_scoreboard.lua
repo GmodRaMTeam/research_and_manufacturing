@@ -29,16 +29,20 @@ function scoreboard:init()
         local teams_tbl = {}
 
         for index, team in ipairs(team_table) do
---            print(team['Money'])
-            teams_tbl[index] = {
-                name = team['Name'],
-                score = team['Score'],
-                money = team['Money'],
-                color = team['Color'],
-                team_members = {},
-            }
+            if index == TEAM_BLUE or index == TEAM_ORANGE then
+                teams_tbl[index] = {
+                    index = index,
+                    name = team['Name'],
+                    score = team['Score'],
+                    money = team['Money'],
+                    scientists = team['Scientists'],
+                    color = team['Color'],
+                    team_members = {},
+                }
+            end
         end
         teams_tbl[999] = {
+            index = 999,
             name = 'Spectators/Unassigned',
             score = 0,
             color = Color(0,0,0,255),
@@ -51,21 +55,21 @@ function scoreboard:init()
             if ply:IsValid() then
                 -- For some reason when the ply is on the unassigned/spectator team it causes issues.
                 if ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE then
-                    teams_tbl[ply:Team()]['team_members'][ply:SteamID()] = {
+                    table.insert(teams_tbl[ply:Team()]['team_members'], {
                         nick = ply:Nick(),
                         steamid = ply:SteamID(),
                         frags = ply:Frags(),
                         deaths = ply:Deaths(),
                         ping = ply:Ping(),
-                    }
+                    })
                 else
-                    teams_tbl[999]['team_members'][ply:SteamID()] = {
+                    table.insert(teams_tbl[999]['team_members'], {
                         nick = ply:Nick(),
                         steamid = ply:SteamID(),
                         frags = ply:Frags(),
                         deaths = ply:Deaths(),
-                        ping = ply:Ping()
-                    }
+                        ping = ply:Ping(),
+                    })
                 end
             end
         end

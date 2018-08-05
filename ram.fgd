@@ -11,7 +11,7 @@
 	output OnPlayerTouch(void) : "Fires when the player touches this object"
 ]
 
-@PointClass base(Item) studio("models/items/boxsrounds.mdl")= ram_ammo_stock : "Box of ammo" []
+@PointClass base(Item) studio("models/items/item_item_crate.mdl")= ram_ammo_stock : "Box of ammo" []
 
 @PointClass base(Targetname, Origin, Angles) = info_blue_spawn :
 	"Point ent to act as a spawn"

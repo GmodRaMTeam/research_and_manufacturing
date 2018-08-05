@@ -11,6 +11,52 @@
     <!--&lt;!&ndash;<div class="label header-text">Health</div>&ndash;&gt;-->
     <!--</div>-->
 
+    <!--<div show="{show_scientist}" id="icon-container">-->
+        <!--<i class="ui massive inverted user secret icon"></i>-->
+        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
+    <!--</div>-->
+    <h2 show="{show_scientist}" class="ui small inverted icon header" id="icon-container">
+        <!--<i class="settings icon"></i>-->
+        <i class="user secret icon"></i>
+        <div class="content">
+            You Have
+            <div class="sub header">A Scientist</div>
+        </div>
+    </h2>
+
+    <!--<div show="{show_voting_status}" id="voting-container">-->
+        <!--<i show="{player_data.status === 1}" class="ui huge inverted cogs icon"></i>-->
+        <!--<i show="{player_data.status === 2}" class="ui huge inverted file alternate icon"></i>-->
+        <!--<i show="{player_data.status === 3}" class="ui huge inverted ellipsis horizontal icon"></i>-->
+        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
+    <!--</div>-->
+    <h2 class="ui small inverted icon header" id="voting-container">
+        <!--<i class="settings icon"></i>-->
+        <i show="{player_data.status === 1}" class="cogs icon"></i>
+        <i show="{player_data.status === 2}" class="file alternate icon"></i>
+        <i show="{player_data.status === 3}" class="ellipsis horizontal icon"></i>
+        <div class="content">
+            Status
+            <div show="{player_data.status === 1}" class="sub header">Researching</div>
+            <div show="{player_data.status === 2}" class="sub header">Voting</div>
+            <div show="{player_data.status === 3}" class="sub header">Waiting</div>
+        </div>
+    </h2>
+
+    <h2 class="ui small inverted icon header" id="scientist-container">
+        <!--<i class="settings icon"></i>-->
+        <i class="users icon"></i>
+        <div class="content">
+            Scientists
+            <div class="sub header">{player_data.team_scientist_count}</div>
+        </div>
+    </h2>
+
+    <!--<div show="{show_voting_status}" id="voting-container">-->
+        <!--<i class="ui massive inverted file alternate icon"></i>-->
+        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
+    <!--</div>-->
+
 
     <div id="health-container">
         <div class="progress-bar-icon">
@@ -41,6 +87,8 @@
             health: 100,
             armor: 100
         }
+        self.show_scientist = false
+        self.show_voting_status = true
 
         /**********************************************************************
          * Init
@@ -61,16 +109,15 @@
                     getInfo: function () {
                         return JSON.stringify({
                             health: 100,
-                            armor: 100
+                            armor: 100,
+                            has_scientist: true
                         })
                     }
                 }
             }
 
             // start recurring update loop
-            console.log('before')
             update_loop()
-            console.log('after')
         })
 
         self.randomness = function () {
@@ -102,6 +149,17 @@
                 if (result !== null && typeof result !== 'undefined') {
                     self.player_data = JSON.parse(result)
                     self.set_progress_bars(self.player_data)
+                    if (self.player_data['has_scientist'] === true) {
+                        self.show_scientist = true
+                    } else {
+                        self.show_scientist = false
+                    }
+                    // if (self.player_data['status'] === 2) {
+                    //     self.show_voting_status = true
+                    // } else {
+                    //     self.show_voting_status = false
+                    // }
+                    self.update()
                 }
             }
             window.setTimeout(update_loop, 25)
@@ -156,5 +214,32 @@
             /* Hide % text in progress bar */
             font-size: 0 !important;
         }
+
+        #icon-container {
+            position: fixed;
+            bottom: 45%;
+            left: 0px;
+
+            /*left: 3px;*/
+        }
+
+        #voting-container {
+            position: fixed;
+            bottom: 0;
+            left: 30%;
+            /*right: 50%;*/
+
+            /*left: 3px;*/
+        }
+
+        #scientist-container {
+            position: fixed;
+            bottom: 0;
+            right: 20%;
+            /*right: 50%;*/
+
+            /*left: 3px;*/
+        }
+        /*https://icons8.com/icon/set/secret/all*/
     </style>
 </health-and-armor>

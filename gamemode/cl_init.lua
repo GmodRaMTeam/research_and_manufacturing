@@ -36,6 +36,11 @@ local function InitPrepEndTimer()
     net.SendToServer()
 end
 
+function RequestStatus()
+    net.Start("RAM_RequestSyncStatus")
+    net.SendToServer()
+end
+
 net.Receive("RAM_SyncMapTimer", function()
     local time = net.ReadFloat()
     timer.Create('RAM_TimerMapEnd', time , 1, EndMap)
@@ -46,27 +51,36 @@ net.Receive("RAM_SyncPrepTimer", function()
     timer.Create('RAM_TimerPrepEnd', time, 1, EndPrep)
 end)
 
+net.Receive("RAM_SyncStatus", function()
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    local blue_status = net.ReadInt(4)
+    local orange_status = net.ReadInt(4)
+    team.GetAllTeams()[TEAM_BLUE].ResearchManager.status = blue_status
+    team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status = orange_status
+end)
+
 local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
             -- These should be client objects.
             local newResearchManager = ClientResearchManager(ID, TeamInfo['Name'])
-            local armorCat = newResearchManager:AddCategory('armor', 'Armor')
+            newResearchManager.status = RESEARCH_STATUS_PREP
+            local armorCat = newResearchManager:AddCategory('armor', 'Armor', "shield alternate icon")
             armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
             armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
             armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
             armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
             armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
 
-            local healthCat = newResearchManager:AddCategory('health', 'Health')
+            local healthCat = newResearchManager:AddCategory('health', 'Health', "plus alternate icon")
             healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
             healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
             healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
             healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
             healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
 
-            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
+            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons', "fighter jet icon")
             weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 70, 1)
             weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 65, 2)
             weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 65, 3, {'revolver'})
@@ -74,8 +88,18 @@ local function InitTeamVariables()
             weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 80, 4, {'smg'})
             weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 85, 5, {'ar'})
 
+            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets', "wrench icon")
+            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 60, 1)
+            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 65, 2, {'satchel'})
+            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 70, 3, {'grenade'})
+
+            local implantCat = newResearchManager:AddCategory('implants', 'Implants', "microchip icon")
+            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', 60, 1)
+            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', 65, 1, {'legs_one'})
+
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
+            TeamInfo.Scientists = 3 -- Every team gets $30,000 to start
             TeamInfo.ResearchManager:ToJSON()
         end
     end
@@ -119,6 +143,10 @@ end);
 hook.Add("InitPostEntity", "PlayerSpawnSyncTimers", function()
     InitPrepEndTimer()
     InitMapEndTimer()
+    RequestStatus()
+    if HUD.html == nil then
+        HUD:Init()
+    end
     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 end)
 
@@ -170,4 +198,9 @@ net.Receive('RAM_ShowHelp', function()
             end
         end
     end
+end)
+
+net.Receive("RAM_ScientistUpdate", function()
+    team.GetAllTeams()[TEAM_BLUE].Scientists = net.ReadInt(4)
+    team.GetAllTeams()[TEAM_ORANGE].Scientists = net.ReadInt(4)
 end)

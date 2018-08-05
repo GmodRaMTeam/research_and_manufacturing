@@ -6,147 +6,181 @@
 
 -- serverside extensions to player table
 
-local plymeta = FindMetaTable( "Player" )
+local plymeta = FindMetaTable("Player")
 if not plymeta then Error("FAILED TO FIND PLAYER TABLE") return end
 
 function plymeta:IsSpec() return self:Team() == TEAM_SPEC end
 
 -- Strips player of all equipment
 function plymeta:StripAll()
-   -- standard stuff
-   self:StripAmmo()
-   self:StripWeapons()
+    -- standard stuff
+    self:StripAmmo()
+    self:StripWeapons()
 end
 
 function plymeta:InitScientistVars()
-   self.has_scientist = false
-   self.scientist = {}
+--    self.has_scientist = false
+    self:SetHasScientist(false)
+    self.scientist = {}
 end
 
 function plymeta:PrintScientistVars()
 end
 
 function plymeta:CanPickUpScientist()
-   return not self.has_scientist
+--    local ply = self.Player
+--    print("Do we not have a networked scientist?: "..tostring(self:GetHasScientist()).." ?")
+--    return not self.has_scientist
+    return not self:GetHasScientist()
 end
 
 function plymeta:CanRemoveScientist()
-   return self.has_scientist
+--    local ply = self.Player
+--    print("Do we have a networked scientist?: "..tostring(self:GetHasScientist()).." ?")
+--    return self.has_scientist
+    return self:GetHasScientist()
 end
 
 function plymeta:PickUpScientist(scientist_name, scientist_cost, scientist_team)
-   if self:CanPickUpScientist() then
-      local message = "Your team-member " .. self:Nick() .. " has picked up a scientist!"
-      DynamicStatusUpdate(self:Team(), message, 'success', nil)
-      self.has_scientist = true
-      self.scientist = {name=scientist_name, cost=scientist_cost, original_team=scientist_team}
-      return true
-   else
-      local message = "You already have a scientist!"
-      local ply = self.Player
-      DynamicStatusUpdate(nil, message, 'warning', ply)
-      return false
-   end
+    if self:CanPickUpScientist() then
+        local message = "Your team-member " .. self:Nick() .. " has picked up a scientist!"
+        DynamicStatusUpdate(self:Team(), message, 'success', nil)
+--        self.has_scientist = true
+        self:SetHasScientist(true)
+        self.scientist = { name = scientist_name, cost = scientist_cost, original_team = scientist_team }
+        return true
+    else
+        local message = "You already have a scientist!"
+        local ply = self
+        DynamicStatusUpdate(nil, message, 'warning', ply)
+        return false
+    end
 end
 
 function plymeta:RemoveScientist()
-   if self:CanRemoveScientist() then
-      self.has_scientist = false
-      local data_table = {
-         status = true,
-         name = self.scientist['name'],
-         cost = self.scientist['cost'],
-         original_team = self.scientist['original_team']
-      }
-      self.scientist = {}
-      return data_table
-   else
-      return {status=false}
-   end
+    if self:CanRemoveScientist() then
+--        self.has_scientist = false
+        self:SetHasScientist(false)
+        local data_table = {
+            status = true,
+            name = self.scientist['name'],
+            cost = self.scientist['cost'],
+            original_team = self.scientist['original_team']
+        }
+        self.scientist = {}
+        return data_table
+    else
+        return { status = false }
+    end
 end
 
 function plymeta:DropScientist(victim_pos)
-   if self:CanRemoveScientist() then
-      self.has_scientist = false
+    if self:CanRemoveScientist() then
+--        self.has_scientist = false
+        self:SetHasScientist(false)
 
-      local new_scientist = ents.Create("ram_simple_scientist")
-      if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
-      --                button:SetModel("models/dav0r/buttons/button.mdl")
-      -- Create a new scientist with the same name/cost and new team
-      new_scientist:SetPos(victim_pos)
-      new_scientist:Spawn()
-      new_scientist:SetTeam(self.scientist['original_team'])
-      new_scientist:SetDisplayName(self.scientist['name'])
-      new_scientist:SetCost(self.scientist['cost'])
-      self.scientist = {}
-   end
+        local new_scientist = ents.Create("ram_simple_scientist")
+        if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
+        --                button:SetModel("models/dav0r/buttons/button.mdl")
+        -- Create a new scientist with the same name/cost and new team
+        new_scientist:SetPos(victim_pos)
+        new_scientist:Spawn()
+        new_scientist:SetTeam(self.scientist['original_team'])
+        new_scientist:SetDisplayName(self.scientist['name'])
+        new_scientist:SetCost(self.scientist['cost'])
+        new_scientist:ReturnToBase()
+
+        local message_attacker_team = "Your team-mate " .. self:Nick() .. " dropped a scientist!"
+        DynamicStatusUpdate(self:Team(), message_attacker_team, 'warning', nil)
+
+        local message_defender_team = "One of your scientists was dropped by a dead enemy!"
+        DynamicStatusUpdate(self.scientist['original_team'], message_defender_team, 'error', nil)
+
+        self.scientist = {}
+    end
 end
+
+------------------- SILVERLAN WEAPON UTILS -----------------------------
 
 local tblAmmoCount = {}
 local tblAmmoTypeNames = {
-	[1] = "ar2",
-	[2] = "ar2altfire",
-	[3] = "pistol",
-	[4] = "smg1",
-	[5] = "357",
-	[6] = "xbowbolt",
-	[7] = "buckshot",
-	[8] = "rpg_round",
-	[9] = "smg1_grenade",
-	[10] = "grenade",
-	[11] = "slam",
-	[12] = "alyxgun",
-	[13] = "sniperround",
-	[14] = "sniperpenetratedround",
-	[15] = "thumper",
-	[16] = "gravity",
-	[17] = "battery",
-	[18] = "gaussenergy",
-	[19] = "combinecannon",
-	[20] = "airboatgun",
-	[21] = "striderminigun",
-	[22] = "helicoptergun"
+    [1] = "ar2",
+    [2] = "ar2altfire",
+    [3] = "pistol",
+    [4] = "smg1",
+    [5] = "357",
+    [6] = "xbowbolt",
+    [7] = "buckshot",
+    [8] = "rpg_round",
+    [9] = "smg1_grenade",
+    [10] = "grenade",
+    [11] = "slam",
+    [12] = "alyxgun",
+    [13] = "sniperround",
+    [14] = "sniperpenetratedround",
+    [15] = "thumper",
+    [16] = "gravity",
+    [17] = "battery",
+    [18] = "gaussenergy",
+    [19] = "combinecannon",
+    [20] = "airboatgun",
+    [21] = "striderminigun",
+    [22] = "helicoptergun"
 }
 local function ToAmmoName(i)
-	return tblAmmoTypeNames[i] or ""
+    return tblAmmoTypeNames[i] or ""
 end
+
 function plymeta:GetAmmunition(ammo)
-	if type(ammo) == "number" then ammo = ToAmmoName(ammo) end
-	if util.IsDefaultAmmoType(ammo) then return self:GetAmmoCount(ammo) end
-	return tblAmmoCount[self] and tblAmmoCount[self][ammo] or 0
+    if type(ammo) == "number" then ammo = ToAmmoName(ammo) end
+    if util.IsDefaultAmmoType(ammo) then return self:GetAmmoCount(ammo) end
+    return tblAmmoCount[self] and tblAmmoCount[self][ammo] or 0
 end
 
 function plymeta:SetAmmoCount(iAmount, ammo) -- A replacement for the broken player.SetAmmo
-	local iAmmo = self:GetAmmoCount(ammo)
-	if iAmmo == iAmount then return end
-	if iAmmo > iAmount then
-		self:RemoveAmmo(iAmmo -iAmount, ammo)
-		return
-	end
-	self:GiveAmmo(iAmount -iAmmo, ammo, true)
+    local iAmmo = self:GetAmmoCount(ammo)
+    if iAmmo == iAmount then return end
+    if iAmmo > iAmount then
+        self:RemoveAmmo(iAmmo - iAmount, ammo)
+        return
+    end
+    self:GiveAmmo(iAmount - iAmmo, ammo, true)
 end
 
 function plymeta:SetAmmunition(ammo, iAmount)
-	if iAmount < 0 then iAmount = 0 end
-	if util.IsDefaultAmmoType(ammo) then
-		self:SetAmmoCount(iAmount, ammo)
-		return
-	end
-	umsg.Start("SLV_SetAmmunition", self)
-		umsg.String(ammo)
-		umsg.Short(iAmount)
-	umsg.End()
-	tblAmmoCount[self] = tblAmmoCount[self] or {}
-	tblAmmoCount[self][ammo] = iAmount
+    if iAmount < 0 then iAmount = 0 end
+    if util.IsDefaultAmmoType(ammo) then
+        self:SetAmmoCount(iAmount, ammo)
+        return
+    end
+    umsg.Start("SLV_SetAmmunition", self)
+    umsg.String(ammo)
+    umsg.Short(iAmount)
+    umsg.End()
+    tblAmmoCount[self] = tblAmmoCount[self] or {}
+    tblAmmoCount[self][ammo] = iAmount
 end
 
 function plymeta:AddAmmunition(ammo, iAmount)
-	local _iAmmo = self:GetAmmunition(ammo)
-	if _iAmmo +iAmount < 0 then iAmount = -_iAmmo end
-	self:SetAmmunition(ammo, _iAmmo +iAmount)
+    local _iAmmo = self:GetAmmunition(ammo)
+    if _iAmmo + iAmount < 0 then iAmount = -_iAmmo end
+    self:SetAmmunition(ammo, _iAmmo + iAmount)
 end
 
+----------------------- END SILVERLAN WEAPON UTILS --------------------------
 
-hook.Add("PlayerDeath", "RMPlayerDropScientistOnDeath", function(victim, inflictor, attacker)
-   victim:DropScientist(victim:GetPos())
+hook.Add("PlayerDeath", "RAM_PlayerDropScientistOnDeath", function(victim, inflictor, attacker)
+    victim:DropScientist(victim:GetPos())
+end)
+
+hook.Add("PlayerDeath", "RAM_PlayerTakeMoneyFromTeamOnDeath", function(victim, inflictor, attacker)
+    if IsValid(victim) and victim:IsPlayer() then
+        local team_index = victim:Team()
+        local team_table = team.GetAllTeams()[team_index]
+        if team_table.ResearchManager.status ~= RESEARCH_STATUS_PREP then
+            team.GetAllTeams()[team_index].Money = team_table.Money - GetConVar("ram_player_death_cost"):GetInt()
+            team_table.ResearchManager:SendTeamMoneyUpdate()
+--            print("A player caused a team to lose money!")
+        end
+    end
 end)

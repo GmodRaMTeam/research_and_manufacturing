@@ -18,7 +18,6 @@ function HUD:Init()
     hud_frame:SetSizable(false)
     hud_frame:SetPaintShadow(true)
     function hud_frame:Paint()
-        --    draw.RoundedBox(0, 0, 0, self:GetWide(), self:GetTall(), Color(0, 0, 0, 230))
     end
 
     self.html = vgui.Create("DHTML", hud_frame)
@@ -27,12 +26,18 @@ function HUD:Init()
     self.html:SetAllowLua(true)
 
     self.html:AddFunction("player", "getInfo", function()
-        local player_data = {
-            health = LocalPlayer():Health(),
-            armor = LocalPlayer():Armor(),
-            --has_scientist = LocalPlayer():has_scientist()
-        }
-        return util.TableToJSON(player_data)
+        if LocalPlayer():IsValid() and (LocalPlayer():Team() == TEAM_BLUE or LocalPlayer():Team() == ORANGE ) then
+            local status = team.GetAllTeams()[LocalPlayer():Team()].ResearchManager.status
+--            print(status)
+            local player_data = {
+                health = LocalPlayer():Health(),
+                armor = LocalPlayer():Armor(),
+                has_scientist = LocalPlayer():GetHasScientist(),
+                status = status,
+                team_scientist_count = team.GetAllTeams()[LocalPlayer():Team()].Scientists,
+            }
+            return util.TableToJSON(player_data)
+        end
     end)
 
     self.html:AddFunction("time", "left", function()
@@ -47,7 +52,6 @@ function HUD:Init()
         local time_data = {
             map = map_timer,
             prep = prep_timer,
-            --has_scientist = LocalPlayer():has_scientist()
         }
         return util.TableToJSON(time_data)
     end)
@@ -80,7 +84,7 @@ function HUD:Init()
 end
 
 function HUD:Draw()
-    if HUD.html == nil then
-        HUD:Init()
-    end
+--    if HUD.html == nil then
+--        HUD:Init()
+--    end
 end
