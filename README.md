@@ -52,6 +52,9 @@ For anyone wanting to take a look into mapping, included is the .vmf for the tes
     For:
         - HL1 Gluon Gun model (weapon_egon)
         - HL1 Gauss Gun model (weapon_gauss)
+        - HL1 Satchel model (weapon_satchel)
+        - HL1 Tripmine model (weapon_tripmine)
+        - HL1 Grenade model (weapon_grenade)
         - Associated viewmodels/worldmodels/textures/materials
     The associated assets are not my content, and were distributed with the code for said weapons. I'm assuming the author had   
     permission to use them or they are re-makes. If this is not the case I will gladly remove these assets and require HL:S for this 
