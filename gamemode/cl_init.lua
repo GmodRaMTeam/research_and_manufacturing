@@ -20,6 +20,7 @@ include( "vgui/cl_scoreboard.lua" )
 
 local function EndMap()
     -- Yay we're a placeholder
+    HUD.html:QueueJavascript([[ EVENTS.trigger('show_scoreboard') ]])
 end
 
 local function EndPrep()

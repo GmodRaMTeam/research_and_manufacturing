@@ -87,7 +87,7 @@ function ENT:OnInjured( damageInfo )
 			end
 		else
 			local message = "Please wait for prep to end!"
-			DynamicStatusUpdate(nil, message, 'error', attacker.Player)
+			DynamicStatusUpdate(nil, message, 'error', attacker)
 		end
 	end
 end

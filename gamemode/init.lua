@@ -245,6 +245,8 @@ function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_or
     AllTeams[new_team].Scientists = AllTeams[new_team].Scientists + 1
     AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
 
+    DynamicStatusUpdate(scientist_original_team, 'You have lost one of your scientists to your competitor!', 'error', nil)
+
     net.Start("RAM_ScientistUpdate")
     net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
     net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
@@ -281,9 +283,5 @@ net.Receive("RAM_RequestSyncStatus", function(len, ply)
     net.Start("RAM_SyncStatus")
     net.WriteInt(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status, 4)
     net.WriteInt(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status, 4)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    print(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status)
-    print(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status)
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     net.Send(ply)
 end)
