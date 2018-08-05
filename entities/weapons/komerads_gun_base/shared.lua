@@ -755,7 +755,7 @@ function SWEP:Reload()
                             self.IronSightsPos = self.SightsPos                                     -- Bring it up
                             self.IronSightsAng = self.SightsAng                                     -- Bring it up
                             self:SetIronsights(true, self.Owner)
-                            self.DrawCrosshair = false
+--                            self.DrawCrosshair = false
                         else
                             return
                         end
@@ -788,7 +788,7 @@ function SWEP:PostReloadScopeCheck()
             self.IronSightsPos = self.SightsPos                                     -- Bring it up
             self.IronSightsAng = self.SightsAng                                     -- Bring it up
             self:SetIronsights(true, self.Owner)
-            self.DrawCrosshair = false
+--            self.DrawCrosshair = false
         else
             return
         end
@@ -844,7 +844,7 @@ function SWEP:Silencer()
                             self.IronSightsPos = self.SightsPos                                     -- Bring it up
                             self.IronSightsAng = self.SightsAng                                     -- Bring it up
                             self:SetIronsights(true, self.Owner)
-                            self.DrawCrosshair = false
+--                            self.DrawCrosshair = false
                         else
                             return
                         end
@@ -930,7 +930,7 @@ function SWEP:IronSight()
         self.IronSightsAng = self.RunSightsAng                                  -- Hold it down
         self:SetIronsights(true, self.Owner)                                    -- Set the ironsight true
         self.Owner:SetFOV(0, 0.3)
-        self.DrawCrosshair = false
+--        self.DrawCrosshair = false
     end
 
     if self.Owner:KeyReleased(IN_SPEED) then
@@ -949,7 +949,7 @@ function SWEP:IronSight()
             self.IronSightsPos = self.SightsPos                                     -- Bring it up
             self.IronSightsAng = self.SightsAng                                     -- Bring it up
             self:SetIronsights(true, self.Owner)
-            self.DrawCrosshair = false
+--            self.DrawCrosshair = false
             -- //Set the ironsight true
 
             if CLIENT then

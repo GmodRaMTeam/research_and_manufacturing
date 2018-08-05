@@ -5,7 +5,7 @@ language.Add("weapon_ram_handgrenade", "Handgrenade")
 SWEP.PrintName = "Handgrenade"
 SWEP.Slot = 4
 SWEP.SlotPos = 1
-SWEP.DrawAmmo = false
+SWEP.DrawAmmo = true
 SWEP.DrawCrosshair = false
 SWEP.ViewModelFOV = 90
 SWEP.ViewModelFlip = false

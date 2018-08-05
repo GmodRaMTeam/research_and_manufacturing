@@ -1,8 +1,8 @@
 <scoreboard>
 
-    <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 165px; bottom: 10px;" onclick="{ toggle }">
-        Scoreboard?
-    </button>
+    <!--<button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 165px; bottom: 10px;" onclick="{ toggle }">-->
+        <!--Scoreboard?-->
+    <!--</button>-->
 
     <div each="{ team in teams }" show="{ show_scoreboard }">
         <!--<virtual show="{ team.index !== 999 && typeof team.team_members !== CONST_STR_UNDEFINED }">-->

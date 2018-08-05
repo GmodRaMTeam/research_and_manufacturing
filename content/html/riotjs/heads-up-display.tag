@@ -1,20 +1,26 @@
-<health-and-armor>
-    <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: -180px; bottom: 32px;" onclick="{ randomness }">
-        Random hp/armor?
-    </button>
+<heads-up-display>
+    <!--<button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: -180px; bottom: 32px;" onclick="{ randomness }">-->
+        <!--Random hp/armor?-->
+    <!--</button>-->
 
-    <!-- Health -->
-    <!--<div class="ui indicating green progress" id="health">-->
-    <!--<div class="bar">-->
-    <!--<div class="progress"></div>-->
-    <!--</div>-->
-    <!--&lt;!&ndash;<div class="label header-text">Health</div>&ndash;&gt;-->
-    <!--</div>-->
+    <h2 show="{player_data.ammo_data.show_crosshair}" class="ui tiny inverted icon header" id="cross-container">
+        <!--<i class="settings icon"></i>-->
+        <i class="crosshairs icon"></i>
+    </h2>
 
-    <!--<div show="{show_scientist}" id="icon-container">-->
-        <!--<i class="ui massive inverted user secret icon"></i>-->
-        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
-    <!--</div>-->
+    <div show="{player_data.ammo_data.show}" id="ammo-container" class="">
+        <h2 class="ui inverted header">
+            <!--<i class="plug icon"></i>-->
+            Ammo
+            <div class="content">
+                {player_data.ammo_data.clip_cur} / {player_data.ammo_data.clip_max}
+                <div class="sub header">
+                    Total: {player_data.ammo_data.ammo_total}
+                </div>
+            </div>
+        </h2>
+    </div>
+
     <h2 show="{show_scientist}" class="ui small inverted icon header" id="icon-container">
         <!--<i class="settings icon"></i>-->
         <i class="user secret icon"></i>
@@ -24,12 +30,6 @@
         </div>
     </h2>
 
-    <!--<div show="{show_voting_status}" id="voting-container">-->
-        <!--<i show="{player_data.status === 1}" class="ui huge inverted cogs icon"></i>-->
-        <!--<i show="{player_data.status === 2}" class="ui huge inverted file alternate icon"></i>-->
-        <!--<i show="{player_data.status === 3}" class="ui huge inverted ellipsis horizontal icon"></i>-->
-        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
-    <!--</div>-->
     <h2 class="ui small inverted icon header" id="voting-container">
         <!--<i class="settings icon"></i>-->
         <i show="{player_data.status === 1}" class="cogs icon"></i>
@@ -44,19 +44,12 @@
     </h2>
 
     <h2 class="ui small inverted icon header" id="scientist-container">
-        <!--<i class="settings icon"></i>-->
         <i class="users icon"></i>
         <div class="content">
             Scientists
             <div class="sub header">{player_data.team_scientist_count}</div>
         </div>
     </h2>
-
-    <!--<div show="{show_voting_status}" id="voting-container">-->
-        <!--<i class="ui massive inverted file alternate icon"></i>-->
-        <!--&lt;!&ndash;<img show="{show_scientist}" id="icon-container" src="images/icons8-detective-64.png">&ndash;&gt;-->
-    <!--</div>-->
-
 
     <div id="health-container">
         <div class="progress-bar-icon">
@@ -80,12 +73,17 @@
         </div>
     </div>
 
-
     <script>
         var self = this
         self.player_data = {
             health: 100,
-            armor: 100
+            armor: 100,
+            ammo_data: {
+                show: false,
+                clip_cur: 7,
+                clip_max: 15,
+                ammo_total: 63,
+            }
         }
         self.show_scientist = false
         self.show_voting_status = true
@@ -110,7 +108,13 @@
                         return JSON.stringify({
                             health: 100,
                             armor: 100,
-                            has_scientist: true
+                            has_scientist: true,
+                            ammo_data: {
+                                show: true,
+                                clip_cur: 7,
+                                clip_max: 15,
+                                ammo_total: 63,
+                            }
                         })
                     }
                 }
@@ -148,6 +152,7 @@
                 var result = player.getInfo()
                 if (result !== null && typeof result !== 'undefined') {
                     self.player_data = JSON.parse(result)
+                    console.log(result)
                     self.set_progress_bars(self.player_data)
                     if (self.player_data['has_scientist'] === true) {
                         self.show_scientist = true
@@ -235,11 +240,37 @@
         #scientist-container {
             position: fixed;
             bottom: 0;
-            right: 20%;
+            right: 15%;
+            /*right: 50%;*/
+
+            /*left: 3px;*/
+        }
+
+        #ammo-container {
+            position: fixed;
+            bottom: 2.5%;
+            right: 1.5%;
+            /*height: 15%;*/
+            /*width: 15%;*/
+
+            /*right: 50%;*/
+
+            /*left: 3px;*/
+        }
+
+        #cross-container {
+            position: fixed;
+            bottom: 45.70%;
+            right: 48.75%;
+            /*margin-top: -50px;*/
+            /*margin-left: -100px;*/
+            /*height: 15%;*/
+            /*width: 15%;*/
+
             /*right: 50%;*/
 
             /*left: 3px;*/
         }
         /*https://icons8.com/icon/set/secret/all*/
     </style>
-</health-and-armor>
+</heads-up-display>

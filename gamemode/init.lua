@@ -190,6 +190,8 @@ function GM:PlayerSpawn( pl )
 
 	BaseClass.PlayerSpawn( self, pl )
 
+    pl:CrosshairDisable()
+
 end
 
 
