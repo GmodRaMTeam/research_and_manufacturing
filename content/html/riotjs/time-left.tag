@@ -4,14 +4,14 @@
     <!--</button>-->
     <div>
         <!--<i class="clock outline icon"></i>-->
-        <h2 class="ui inverted icon header">
+        <h4 class="ui tiny inverted icon header">
             <!--<i class="settings icon"></i>-->
-            <i class="clock outline icon"></i>
+            <i class="clock icon"></i>
             <div show="{show_map}" class="content">
                 {time_data[CONST_MAP]}
                 <div show="{show_prep}" class="sub header">{time_data[CONST_PREP]}</div>
             </div>
-        </h2>
+        </h4>
     </div>
 
     <script>
@@ -45,32 +45,42 @@
             }
 
             // start recurring update loop
-            console.log('before')
+            // console.log('before')
             update_loop()
-            console.log('after')
+            // console.log('after')
         })
 
 
         /**********************************************************************
          * Methods
          *********************************************************************/
+        String.prototype.toHHMMSS = function () {
+            var sec_num = parseInt(this, 10); // don't forget the second param
+            var hours = Math.floor(sec_num / 3600);
+            var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+            var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+            if (hours < 10) {
+                hours = "0" + hours;
+            }
+            if (minutes < 10) {
+                minutes = "0" + minutes;
+            }
+            if (seconds < 10) {
+                seconds = "0" + seconds;
+            }
+            return hours + ':' + minutes + ':' + seconds;
+        }
+
         var update_loop = function () {
             if (typeof time !== 'undefined' && typeof time.left !== 'undefined') {
                 var result = time.left()
                 if (result !== null && typeof result !== 'undefined') {
-                    self.time_data = JSON.parse(result)
-                    // self.set_progress_bars(self.player_data)
-                    // if (result['map'] > 0) {
-                    //     self.show_map = true
-                    // } else{
-                    //     self.show_map = false
-                    // }
-                    //
-                    // if (result['prep'] > 0) {
-                    //     self.show_prep = true
-                    // } else{
-                    //     self.show_prep = false
-                    // }
+                    // self.time_data = JSON.parse(result)
+                    // console.log(result)
+                    var temp_json_result = JSON.parse(result)
+                    self.time_data.map = temp_json_result.map.toString().toHHMMSS()
+                    self.time_data.prep = temp_json_result.prep.toString().toHHMMSS()
                     self.update()
                     // console.log(result)
                 }

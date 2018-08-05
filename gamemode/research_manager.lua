@@ -44,7 +44,7 @@ end
 
 -- This might be an expensive dumb idea
 function ResearchManagerClass:SendClientTeamStatusUpdate(cat_key, tech_key)
-    print("Doing some team updates")
+--    print("Doing some team updates")
     for k, ply in pairs(player.GetAll()) do
         if IsValid(ply) and ply:Team() == self.team_index then
             self:SendClientStatusUpdate(cat_key, tech_key, ply)
@@ -87,14 +87,6 @@ function ResearchManagerClass:TeamAutoPickResearch()
         for tech_key, technology in pairs(category.techs) do
             if technology:CanDoResearch() then
                 self:TeamDoResearch(cat_key, tech_key)
-                local team_to_msg = nil
-                if self.team_index == TEAM_BLUE then
-                    team_to_msg = TEAM_ORANGE
-                else
-                    team_to_msg = TEAM_BLUE
-                end
-                local msg = self.team_name .. " team has started research: " .. technology.name .. "!"
-                DynamicStatusUpdate(team_to_msg, msg, 'success', nil)
             end
         end
     end
@@ -104,8 +96,8 @@ end
 function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
     local technology = self.categories[cat_key].techs[tech_key]
 
-    local msg = "Team " .. self.team_name .. " has completed research " .. technology.name .. "!"
-    DynamicStatusUpdate(nil, msg, 'success', nil)
+    local msg = "Completed research: " .. technology.name .. "!"
+    DynamicStatusUpdate(self.team_index, msg, 'success', nil)
 
     technology.researched = true
     self.status = RESEARCH_STATUS_VOTING
@@ -113,6 +105,7 @@ function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
     self:ResetVoteCount()
 
     self:SendClientTeamStatusUpdate(cat_key, tech_key)
+    ClientStatusUpdate(self.status, self.team_index)
 
     local menu_vote_time = GetConVar("ram_vote_time_limit_seconds"):GetInt()
     timer.Create("Team"..self.team_index.."VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
@@ -125,8 +118,9 @@ function ResearchManagerClass:TeamDoResearch(cat_key, tech_key)
     self.status = RESEARCH_STATUS_IN_PROGRESS
     local msg = "Research started on "..technology.name.."!"
     DynamicStatusUpdate(self.team_index, msg, 'success', nil)
+    ClientStatusUpdate(self.status, self.team_index)
     local research_cost = technology.cost - (5 * TeamInfo.Scientists)
-    print("RESEARCH COST WAS: "..research_cost.."!!!!")
+--    print("RESEARCH COST WAS: "..research_cost.."!!!!")
     timer.Create("Team" .. self.team_index .. "ResearchTimer", research_cost, 1, function() self:CompleteResearch(cat_key, tech_key) end)
 end
 
@@ -165,14 +159,6 @@ function ResearchManagerClass:TallyVotes()
         self:TeamAutoPickResearch()
     else
         local technology = self.categories[temp_current_winner.cat_key].techs[temp_current_winner.tech_key]
-        local team_to_msg = nil
-        if self.team_index == TEAM_BLUE then
-            team_to_msg = TEAM_ORANGE
-        else
-            team_to_msg = TEAM_BLUE
-        end
-        local msg = self.team_name.." team has started research: "..technology.name.."!"
-        DynamicStatusUpdate(team_to_msg, msg, 'success', nil)
         -- Remove our timer if it is there
         if timer.Exists("Team" .. self.team_index .. "ResearchAutoTimer") then
             timer.Remove("Team" .. self.team_index .. "ResearchAutoTimer")
@@ -206,7 +192,7 @@ end
 
 
 function ResearchManagerClass:MakeMoney()
-    print("Make money called")
+--    print("Make money called")
     local TeamInfo = team.GetAllTeams()[self.team_index]
     TeamInfo.Money = TeamInfo.Money + (200 + (100 * TeamInfo.Scientists))
     self:SendTeamMoneyUpdate()
@@ -214,29 +200,12 @@ end
 
 
 function ResearchManagerClass:SendTeamMoneyUpdate()
---    print("Make money send to team")
---    for k, ply in pairs(player.GetAll()) do
---        if IsValid(ply) and ply:Team() == self.team_index then
---            self:SendPlayerMoneyUpdate(ply)
---        end
---    end
-    print("Make money send player update")
     local TeamInfo = team.GetAllTeams()[self.team_index]
     net.Start("RAM_MakeMoney")
     net.WriteInt(self.team_index, 3)
     net.WriteInt(TeamInfo.Money, 21)
     net.Broadcast()
 end
-
-
---function ResearchManagerClass:SendPlayerMoneyUpdate(ply)
---    print("Make money send player update")
---    local TeamInfo = team.GetAllTeams()[self.team_index]
---    net.Start("RAM_MakeMoney")
---    net.WriteInt(self.team_index, 3)
---    net.WriteInt(TeamInfo.Money, 21)
---    net.Broadcast()
---end
 
 
 function ResearchManagerClass:StartResearchAndMoneyMaking()
@@ -275,13 +244,18 @@ net.Receive("RAM_RecordResearchVote", function(len, ply)
     local ply_has_voted = TeamInfo.ResearchManager:HasUserVoted(ply:SteamID())
     local tech = TeamInfo.ResearchManager.categories[research_cat].techs[research_index]
 
-    if not ply_has_voted and tech:CanDoResearch() and not tech.researched then
-        table.insert(tech.votes, ply:SteamID())
-        local research_name = tech.name
-        local msg = "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!"
-        DynamicStatusUpdate(ply:Team(), msg, 'success', nil)
+    if not ply_has_voted then
+        if tech:CanDoResearch() and not tech.researched then
+            table.insert(tech.votes, ply:SteamID())
+            local research_name = tech.name
+            local msg = "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!"
+            DynamicStatusUpdate(ply:Team(), msg, 'success', nil)
+        else
+            local msg = "That technology is already researched!"
+            DynamicStatusUpdate(nil, msg, 'error', ply)
+        end
     else
-        local msg = "Please wait until the next voting session!"
+        local msg = "Please wait until the next voting session to vote again!"
         DynamicStatusUpdate(nil, msg, 'error', ply)
     end
 end)

@@ -5,35 +5,45 @@
     </button>
 
     <div each="{ team in teams }" show="{ show_scoreboard }">
-        <h1 class="header-text scoreboard-title">{team.name} (${team.money})</h1>
-        <table class="ui striped table">
-            <thead>
-            <tr>
-                <th class="ui large"><i class="pencil icon"></i>Name</th>
-                <th class="ui large address-column" align="right"><i class="address card icon"></i>SteamID</th>
-                <th class="ui large number-column"><i class="shield alternate icon"></i>Kills</th>
-                <th class="ui large number-column"><i class="ambulance icon"></i>Deaths</th>
-                <th class="ui large number-column"><i class="computer icon"></i>Ping</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr show="{ team.team_members.length == 0}">
-                <td class="cowards" colspan="5">No cowards available</td>
-            </tr>
-            <tr each="{ player in team.team_members }" class="">
-                <td>{ player.nick }</td>
-                <td class="address-column">{ player.steamid }</td>
-                <td class="number-column">{ player.frags }</td>
-                <td class="number-column">{ player.deaths }</td>
-                <td class="number-column">{ player.ping }</td>
-            </tr>
-            </tbody>
-        </table>
+        <!--<virtual show="{ team.index !== 999 && typeof team.team_members !== CONST_STR_UNDEFINED }">-->
+            <!--<h1 class="header-text scoreboard-title">{team.name} (<i class="money bill alternate outline icon"></i>: ${team.money})</h1>-->
+            <h1 show="{ team.index !== 999 || team.team_members.length > 0 }" class="header-text scoreboard-title">
+                {team.name}
+                <span show="{team.index !== 999}">
+                    <virtual>(<i class="dollar sign icon"></i>: {team.money})</virtual>
+                    <virtual><i class="users icon"></i>: {team.scientists}</virtual>
+                </span>
+            </h1>
+            <table show="{ team.index !== 999 || team.team_members.length > 0 }" class="ui striped table">
+                <thead>
+                <tr>
+                    <th class="ui large"><i class="pencil icon"></i>Name</th>
+                    <th class="ui large address-column" align="right"><i class="address card icon"></i>SteamID</th>
+                    <th class="ui large number-column"><i class="shield alternate icon"></i>Kills</th>
+                    <th class="ui large number-column"><i class="ambulance icon"></i>Deaths</th>
+                    <th class="ui large number-column"><i class="computer icon"></i>Ping</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr show="{ team.team_members.length == 0}">
+                    <td class="cowards" colspan="5">No cowards available</td>
+                </tr>
+                <tr each="{ player in team.team_members }" class="">
+                    <td>{ player.nick }</td>
+                    <td class="address-column">{ player.steamid }</td>
+                    <td class="number-column">{ player.frags }</td>
+                    <td class="number-column">{ player.deaths }</td>
+                    <td class="number-column">{ player.ping }</td>
+                </tr>
+                </tbody>
+            </table>
+        <!--</virtual>-->
     </div>
 
     <script>
         var self = this;
         self.show_scoreboard = false
+        self.CONST_STR_UNDEFINED = 'undefined'
 
         /**********************************************************************
          * Init
@@ -46,6 +56,7 @@
                 window.player = {
                     getAll: function () {
                         return JSON.stringify([{
+                            index: 1,
                             name: "Oj",
                             score: "0",
                             team_members: [{
@@ -56,7 +67,20 @@
                                 ping: 20
                             }]
                         }, {
+                            index: 2,
                             name: "Blue with some words",
+                            score: "0",
+                            team_members: [{
+                                nick: "Testerino",
+                                steamid: "123asdf",
+                                frags: 0,
+                                deaths: 0,
+                                ping: 43
+                            }]
+                        },
+                        {
+                            index: 999,
+                            name: "Spectator",
                             score: "0",
                             team_members: [{
                                 nick: "Testerino",
@@ -86,6 +110,7 @@
             self.show_scoreboard = !self.show_scoreboard
             self.update()
         }
+
 
         /**********************************************************************
          * Events

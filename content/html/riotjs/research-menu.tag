@@ -4,17 +4,17 @@
         Research menu?
     </button>
     <div id="MAIN" class="" show="{ show_research_menu }">
-        <div class="ui bottom attached segment pushable">
+        <div style="background-color: #1B1C1D; padding-top" class="ui bottom attached segment pushable">
             <div class="ui visible inverted left vertical sidebar menu">
                 <a each="{category in categories}" onclick="{ toggle_key.bind(this, category.key) }" class="item">
-                    <i class="home icon"></i>
+                    <i class="{category.icon}"></i>
                     {category.name}
                 </a>
             </div>
-            <div class="pusher">
+            <div align="center" style="width: 76%" class="pusher">
                 <div id="no-margin" each="{category in categories}" show="{ show[category.key] }"
                      class="ui basic segment">
-                    <h1 class="ui centered header" style="margin-left: -13% !important;">{category.name}</h1>
+                    <h1 class="ui inverted header" style="">{category.name}</h1>
                     <div class="ui horizontal divider"></div>
                     <!--<button each="{tech in category.techs}" class="ui button" onclick="{ record_vote.bind(this, category.key, tech.key) }">{tech.name}</button>-->
                     <div class="ui grid">
@@ -187,11 +187,9 @@
 
         self.reset_shown = function (cat_key) {
             for (var key in self.show) {
-                console.log("Key: " + key + " in self.show")
                 // check if the property/key is defined in the object itself, not in parent
                 if (self.show.hasOwnProperty(key)) {
                     if (cat_key !== key && self.show[key] === true) {
-                        // console.log(key, dictionary[key]);
                         self.show[key] = false
                     }
                 }
@@ -199,11 +197,7 @@
         }
 
         self.record_vote = function (cat_key, tech_key) {
-            console.log("This got called")
             // check if the property/key is defined in the object itself, not in parent
-            console.log(cat_key)
-            console.log(tech_key)
-            // console.log(key, dictionary[key]);
             // self.show[key] = false
             vote.send(cat_key, tech_key)
 
@@ -262,7 +256,7 @@
                     })
                     self.update()
 
-                    console.log(JSON.stringify(self.categories))
+                    // console.log(JSON.stringify(self.categories))
                 }
             }
             }
@@ -277,7 +271,13 @@
     </script>
     <style scoped>
         #MAIN {
-            height: 80%;
+            height: 40%;
+            width: 80%;
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            top: 0;
+            background-color: #1B1C1D;;
             /*min-height: 80%;*/
             /*max-height: 80%;*/
         }

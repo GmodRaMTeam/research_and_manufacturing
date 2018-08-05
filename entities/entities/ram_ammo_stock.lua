@@ -1,6 +1,6 @@
 --
 -- Created by IntelliJ IDEA.
--- User: Tyler
+-- User: Комерад
 -- Date: 8/1/2018
 -- Time: 1:54 PM
 -- To change this template use File | Settings | File Templates.
@@ -16,7 +16,10 @@ ENT.RevolverAmmoMax = 48
 ENT.SMGAmmoMax = 240
 ENT.ARAmmoMax = 180
 ENT.GaussAmmoMax = 150
-ENT.Model = Model("models/items/boxsrounds.mdl")
+ENT.SatchelAmmoMax = 5
+ENT.GrenadeAmmoMax = 5
+ENT.TripmineAmmoMax = 5
+ENT.Model = Model("models/items/item_item_crate.mdl")
 ENT.RespawnTime = 10
 ENT.taken = false
 
@@ -57,12 +60,12 @@ function ENT:RemoveAndCreateRespawn()
     end )
 end
 
-function ENT:CheckTechRequirement(team_index, weapon_key)
-    local weaponTech = team.GetAllTeams()[team_index].ResearchManager.categories['weapons'].techs[weapon_key]
+function ENT:CheckTechRequirement(team_index, cat_key, weapon_key)
+    local weaponTech = team.GetAllTeams()[team_index].ResearchManager.categories[cat_key].techs[weapon_key]
     return weaponTech.researched
 end
 
-function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type)
+function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type, is_gadget)
     if use_alt_type == nil then
         use_alt_type = false
     end
@@ -74,14 +77,32 @@ function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type)
     else
         current_ammo = ply:GetAmmunition(ammo_type)
     end
-    if self[ammo_max_key] >= (current_ammo + math.ceil(self.AmmoAmount * 0.25)) then
-        local given = self.AmmoAmount
-        given = math.min(given, self[ammo_max_key] - current_ammo)
+
+    local current_can_add = nil
+
+    if is_gadget then
+        current_can_add = self[ammo_max_key] >= (current_ammo + 1)
+    else
+        current_can_add = self[ammo_max_key] >= (current_ammo + math.ceil(self.AmmoAmount * 0.25))
+    end
+
+    if current_can_add then
         if not use_alt_type then
+            local given = self.AmmoAmount
+            given = math.min(given, self[ammo_max_key] - current_ammo)
             ply:GiveAmmo(given, ammo_type)
         else
-            print("We alternatively gave: "..given.." amount of ammo type: "..ammo_type.."!")
-            ply:AddAmmunition(ammo_type, given)
+            if is_gadget then
+                local given = 1
+                given = math.min(given, self[ammo_max_key] - current_ammo)
+                print("We alternatively gave: "..given.." amount of gadget ammo type: "..ammo_type.."!")
+                ply:AddAmmunition(ammo_type, given)
+            else
+                local given = self.AmmoAmount
+                given = math.min(given, self[ammo_max_key] - current_ammo)
+                print("We alternatively gave: "..given.." amount of ammo type: "..ammo_type.."!")
+                ply:AddAmmunition(ammo_type, given)
+            end
         end
         self.taken = true
     end
@@ -93,30 +114,48 @@ function ENT:Touch(ent)
 
             self:GivePlayerAmmo(ent, 'Pistol', 'PistolAmmoMax')
 
-            if self:CheckTechRequirement(ent:Team(), 'shotgun') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'shotgun') then
                 self:GivePlayerAmmo(ent, 'Buckshot', 'ShotgunAmmoMax')
             end
 
-            if self:CheckTechRequirement(ent:Team(), 'revolver') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'revolver') then
                 self:GivePlayerAmmo(ent, '357', 'RevolverAmmoMax')
             end
 
-            if self:CheckTechRequirement(ent:Team(), 'smg') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'smg') then
                 self:GivePlayerAmmo(ent, 'smg1', 'SMGAmmoMax')
             end
 
-            if self:CheckTechRequirement(ent:Team(), 'ar') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'ar') then
                 self:GivePlayerAmmo(ent, 'ar2', 'ARAmmoMax')
             end
 
-            if self:CheckTechRequirement(ent:Team(), 'gauss') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'gauss') then
                 self:GivePlayerAmmo(ent, 'uranium', 'GaussAmmoMax', true)
 --                ent:AddAmmunition('uranium', 20)
             end
 
-            if self:CheckTechRequirement(ent:Team(), 'egon') then
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'egon') then
                 self:GivePlayerAmmo(ent, 'uranium', 'GaussAmmoMax', true)
 --                ent:AddAmmunition('uranium', 20)
+            end
+
+            if self:CheckTechRequirement(ent:Team(), 'gadgets', 'satchel') then
+--                print("Give satchels")
+                self:GivePlayerAmmo(ent, 'satchel', 'SatchelAmmoMax', true, true)
+                --                ent:AddAmmunition('uranium', 20)
+            end
+
+            if self:CheckTechRequirement(ent:Team(), 'gadgets', 'grenade') then
+--                print("Give grenades")
+                self:GivePlayerAmmo(ent, 'hgrenade', 'GrenadeAmmoMax', true, true)
+                --                ent:AddAmmunition('uranium', 20)
+            end
+
+            if self:CheckTechRequirement(ent:Team(), 'gadgets', 'tripmine') then
+--                print("Give tripmines")
+                self:GivePlayerAmmo(ent, 'tripmine', 'TripmineAmmoMax', true, true)
+                --                ent:AddAmmunition('uranium', 20)
             end
 
             if self.taken then

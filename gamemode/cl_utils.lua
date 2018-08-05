@@ -14,11 +14,13 @@ net.Receive("RAM_PrintToTeam", function(len, pl)
 end)
 
 net.Receive("RAM_ClientStatusUpdate", function(len, pl)
-    local intStatus = net.ReadInt(3)
+    local intStatus = net.ReadInt(4)
     local intTeam = net.ReadInt(3)
     if LocalPlayer():Team() == intTeam then
-        surface.PlaySound("garrysmod/save_load1.wav")
+--        surface.PlaySound("garrysmod/save_load1.wav")
+        team.GetAllTeams()[intTeam].ResearchManager.status = intStatus
     end
+
     --end
 end)
 

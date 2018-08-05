@@ -11,6 +11,7 @@ include( "cl_research_technology.lua" )
 local ClientResearchCategoryClass = {}
 ClientResearchCategoryClass.key = '' -- Default empty string
 ClientResearchCategoryClass.name = '' -- Default empty string
+ClientResearchCategoryClass.icon = '' -- Default empty string, set to a semantic ui icon
 ClientResearchCategoryClass.techs = {} -- Default empty array
 ClientResearchCategoryClass.manager = nil
 
@@ -47,14 +48,16 @@ function ClientResearchCategoryClass:HasAtLeastOneTechUnlocked()
     return false
 end
 
-function ClientResearchCategory(key, name, manager)
+function ClientResearchCategory(key, name, icon, manager)
     assert(key ~= nil, "ClientResearchCategory must be passed a valid key")
     assert(name ~= nil, "ClientResearchCategory must be passed a valid name")
+    assert(icon ~= nil, "ClientResearchCategory must be passed a valid icon")
     assert(manager ~= nil, "ClientResearchCategory must be passed a valid manager table/object")
     assert(type(manager) == 'table', "ClientResearchCategory must be passed a valid manager table/object")
     local newClientResearchCategory = table.Copy(ClientResearchCategoryClass)
     newClientResearchCategory.key = key
     newClientResearchCategory.name = name
+    newClientResearchCategory.icon = icon
     newClientResearchCategory.manager = manager
     --Return our new Object.
     return newClientResearchCategory

@@ -19,7 +19,7 @@ function GM:ShowTeam()
 		if ( ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED ) then
 	
 			local Team = vgui.Create( "DButton", self.TeamSelectFrame )
-			function Team.DoClick() self:HideTeam() RunConsoleCommand( "changeteam", ID ) end
+			function Team.DoClick() self:HideTeam() RunConsoleCommand( "changeteam", ID ) RequestStatus() end
 			Team:SetPos( 340, y )
 			Team:SetSize( 130*2, 20*2 )
 			Team:SetText( TeamInfo.Name )

@@ -20,7 +20,6 @@ ClientResearchTechnologyClass.category = nil
 
 
 net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
-    print("Got server update")
     -- Make sur ethe player calling this is a valid entity, and a valid player, on a team.
     local int_team = net.ReadInt(12)
     local cat_key = net.ReadString()
@@ -44,7 +43,6 @@ end
 
 
 function ClientResearchTechnologyClass:UpdateFromServer(is_researched, vote_count)
-    print("Update from server")
     self.researched = is_researched
     self.votes = vote_count
 end

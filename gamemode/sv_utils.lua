@@ -6,6 +6,50 @@
 -- To change this template use File | Settings | File Templates.
 --
 
+function util.CreateExplosion(pos,dmg,radius,inflictor,attacker)
+	radius = radius or 260
+	dmg = dmg or 85
+	local ang = Angle(0,0,0)
+	local entParticle = ents.Create("info_particle_system")
+	entParticle:SetKeyValue("start_active", "1")
+--	entParticle:SetKeyValue("effect_name", "dusty_explosion_rockets")--//svl_explosion")
+	entParticle:SetKeyValue("effect_name", "rocket_fx")--//svl_explosion")
+	entParticle:SetPos(pos)
+	entParticle:SetAngles(ang)
+	entParticle:Spawn()
+	entParticle:Activate()
+	timer.Simple(1, function() if IsValid(entParticle) then entParticle:Remove() end end)
+	sound.Play("weapons/explode" .. math.random(7,9) .. ".wav", pos, 110, 100)
+	util.BlastDamage(inflictor,attacker or inflictor, pos, radius, dmg)
+	util.ScreenShake(pos, 5, dmg, math.Clamp(dmg /100, 0.1, 2), radius *2)
+
+	local iDistMin = 26
+	local tr
+	for i = 1, 6 do
+		local posEnd = pos
+		if i == 1 then posEnd = posEnd +Vector(0,0,25)
+		elseif i == 2 then posEnd = posEnd -Vector(0,0,25)
+		elseif i == 3 then posEnd = posEnd +Vector(0,25,0)
+		elseif i == 4 then posEnd = posEnd -Vector(0,25,0)
+		elseif i == 5 then posEnd = posEnd +Vector(25,0,0)
+		elseif i == 6 then posEnd = posEnd -Vector(25,0,0) end
+		local tracedata = {
+			start = pos,
+			endpos = posEnd,
+			filter = {inflictor,attacker}
+		}
+		local trace = util.TraceLine(tracedata)
+		local iDist = pos:Distance(trace.HitPos)
+		if trace.HitWorld and iDist < iDistMin then
+			iDistMin = iDist
+			tr = trace
+		end
+	end
+	if tr then
+		util.Decal("Scorch",tr.HitPos +tr.HitNormal,tr.HitPos -tr.HitNormal)
+	end
+end
+
 ---------------------------------- All ServerSide Gamemode Utillity Functions ----------------------------------
 
 function GetMapTimeLeft()
@@ -62,7 +106,7 @@ end
 function ClientStatusUpdate(intStatus, intTeam)
     net.Start("RAM_ClientStatusUpdate")
     --net.WriteString("some text")
-    net.WriteInt(intStatus, 3)
+    net.WriteInt(intStatus, 4)
     net.WriteInt(intTeam, 3)
     net.Broadcast()
     -- We did something!

@@ -1,6 +1,6 @@
 
 ENT.Type 			= "anim"
-ENT.Base 			= "base_gmodentity"
+ENT.Base 			= "base_entity"
 ENT.PrintName		= "Beam"
 ENT.Author			= "Silverlan"
 
