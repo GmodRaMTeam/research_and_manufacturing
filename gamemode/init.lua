@@ -246,12 +246,8 @@ function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_or
     AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
 
     net.Start("RAM_ScientistUpdate")
---    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(AllTeams [TEAM_BLUE].Scientists)
-    print(AllTeams [TEAM_ORANGE].Scientists)
---    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    net.WriteInt(AllTeams [TEAM_BLUE].Scientists, 4)
-    net.WriteInt(AllTeams [TEAM_ORANGE].Scientists, 4)
+    net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
+    net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
     net.Broadcast()
 
 end
