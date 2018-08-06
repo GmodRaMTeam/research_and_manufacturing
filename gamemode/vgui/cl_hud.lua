@@ -44,10 +44,6 @@ function HUD:Init()
                 }
             end
 
---            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
---            PrintTable(research_timer)
---            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
             local clip_cur = nil
             local clip_max = nil
             local ammo_total = nil

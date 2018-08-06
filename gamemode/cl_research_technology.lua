@@ -11,7 +11,7 @@ local ClientResearchTechnologyClass = {}
 ClientResearchTechnologyClass.key = '' -- Default empty string
 ClientResearchTechnologyClass.name = '' -- Default empty string
 ClientResearchTechnologyClass.description = '' -- Default empty string
-ClientResearchTechnologyClass.cost = 60 -- Default of 60
+ClientResearchTechnologyClass.cost = GetConVar("ram_research_time_seconds"):GetInt() -- Default of 60
 ClientResearchTechnologyClass.tier = 60 -- Default of 60
 ClientResearchTechnologyClass.researched = false -- Default of false
 ClientResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
@@ -26,6 +26,14 @@ net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
     local tech_key = net.ReadString()
     local is_researched = net.ReadBool()
     local vote_count = net.ReadInt(8)
+
+    print("-----------------------------------------------------------------")
+    print("Receiving shit from server")
+    print(cat_key)
+    print(tech_key)
+    print(is_researched)
+    print(vote_count)
+    print("-----------------------------------------------------------------")
 
     local researchManager = team.GetAllTeams()[int_team].ResearchManager
     researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer(is_researched, vote_count)

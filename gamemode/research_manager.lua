@@ -47,6 +47,15 @@ function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_
     net.WriteBool(boolResearched)
     net.WriteInt(intVoteCount, 8)
     net.Send(calling_ply)
+    print("-----------------------------------------------------------------")
+    print("Sending shit from server")
+    print(cat_key)
+    print(tech_key)
+    print(calling_ply:Nick())
+    print(boolResearched)
+    print(intVoteCount)
+--    print(calling_ply:Nick())
+    print("-----------------------------------------------------------------")
 end
 
 -- This might be an expensive dumb idea
