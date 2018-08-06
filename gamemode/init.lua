@@ -170,7 +170,6 @@ local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if ID == TEAM_BLUE or ID == TEAM_ORANGE then
-
             local newResearchManager = ResearchManager({
                 team_index = ID,
                 team_name = TeamInfo['Name']
