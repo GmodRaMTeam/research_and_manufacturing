@@ -15,12 +15,14 @@ ENT.ShotgunAmmoMax = 96
 ENT.RevolverAmmoMax = 48
 ENT.SMGAmmoMax = 240
 ENT.ARAmmoMax = 180
+ENT.XBowAmmoMax = 10
+ENT.RPGAmmoMax = 10
 ENT.GaussAmmoMax = 150
 ENT.SatchelAmmoMax = 5
 ENT.GrenadeAmmoMax = 5
 ENT.TripmineAmmoMax = 5
 ENT.Model = Model("models/items/item_item_crate.mdl")
-ENT.RespawnTime = 10
+ENT.RespawnTime = 5
 ENT.taken = false
 
 local function CreateNewCopy(pos, ang)
@@ -63,6 +65,10 @@ end
 function ENT:CheckTechRequirement(team_index, cat_key, weapon_key)
     local weaponTech = team.GetAllTeams()[team_index].ResearchManager.categories[cat_key].techs[weapon_key]
     return weaponTech.researched
+end
+
+function ENT:CheckPlayerWeaponAndGive(ent, weapon_class)
+    if not ent:HasWeapon(weapon_class) then ent:Give(weapon_class) end
 end
 
 function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type, is_gadget)
@@ -115,44 +121,65 @@ function ENT:Touch(ent)
             self:GivePlayerAmmo(ent, 'Pistol', 'PistolAmmoMax')
 
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'shotgun') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_shotgun')
                 self:GivePlayerAmmo(ent, 'Buckshot', 'ShotgunAmmoMax')
             end
 
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'revolver') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_revolver')
                 self:GivePlayerAmmo(ent, '357', 'RevolverAmmoMax')
             end
 
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'smg') then
+                self:CheckPlayerWeaponAndGive(ent,'weapon_ram_smg')
                 self:GivePlayerAmmo(ent, 'smg1', 'SMGAmmoMax')
             end
 
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'ar') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_ar2')
                 self:GivePlayerAmmo(ent, 'ar2', 'ARAmmoMax')
             end
 
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'crossbow') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_crossbow')
+                self:GivePlayerAmmo(ent, 'XBowBolt', 'XBowAmmoMax', false, true)
+--                ent:AddAmmunition('uranium', 20)
+            end
+
+            if self:CheckTechRequirement(ent:Team(), 'weapons', 'rpg') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_rpg')
+                self:GivePlayerAmmo(ent, 'RPG_Round', 'RPGAmmoMax', false, true)
+--                ent:AddAmmunition('uranium', 20)
+            end
+
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'gauss') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_gauss')
                 self:GivePlayerAmmo(ent, 'uranium', 'GaussAmmoMax', true)
 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'weapons', 'egon') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_egon')
                 self:GivePlayerAmmo(ent, 'uranium', 'GaussAmmoMax', true)
 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'satchel') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_satchel')
 --                print("Give satchels")
                 self:GivePlayerAmmo(ent, 'satchel', 'SatchelAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'grenade') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_handgrenade')
 --                print("Give grenades")
                 self:GivePlayerAmmo(ent, 'hgrenade', 'GrenadeAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'tripmine') then
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_tripmine')
 --                print("Give tripmines")
                 self:GivePlayerAmmo(ent, 'tripmine', 'TripmineAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)

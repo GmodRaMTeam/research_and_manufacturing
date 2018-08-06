@@ -27,6 +27,8 @@ For anyone wanting to take a look into mapping, included is the .vmf for the tes
 
 ## Credits:
 
+### Modelers from Gamebannana (Will grab a list of specifics soon)
+ - All the replacement models/sounds/textures for the default HL2 weapons
 #### Bob (Murderthon9000)
  - M9K Weapon base
 #### Garry Newman

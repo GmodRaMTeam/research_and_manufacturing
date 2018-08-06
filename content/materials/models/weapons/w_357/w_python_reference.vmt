@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "Models/Weapons/W_357/w_python_reference"
+	"$bumpmap" "Models/Weapons/W_357/w_python_reference_normal"
+	"$envmap" "env_cubemap" 
+	$normalmapalphaenvmapmask 1
+}

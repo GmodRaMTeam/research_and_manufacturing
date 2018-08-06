@@ -14,7 +14,7 @@ function HUD:Init()
     hud_frame:Center()
     --hud_frame:SetPos(0, ScrH() - ScrH() * 0.15)
     hud_frame:ShowCloseButton(false)
-    hud_frame:SetDraggable( false )
+    hud_frame:SetDraggable(false)
     hud_frame:SetSizable(false)
     hud_frame:SetPaintShadow(true)
     function hud_frame:Paint()
@@ -26,15 +26,50 @@ function HUD:Init()
     self.html:SetAllowLua(true)
 
     self.html:AddFunction("player", "getInfo", function()
-        if LocalPlayer():IsValid() and (LocalPlayer():Team() == TEAM_BLUE or LocalPlayer():Team() == TEAM_ORANGE ) then
+        if LocalPlayer():IsValid() and (LocalPlayer():Team() == TEAM_BLUE or LocalPlayer():Team() == TEAM_ORANGE) then
             local status = team.GetAllTeams()[LocalPlayer():Team()].ResearchManager.status
---            print(status)
+            local weapon = LocalPlayer():GetActiveWeapon()
+            local ammo_data = {}
+
+            local clip_cur = nil
+            local clip_max = nil
+            local ammo_total = nil
+            local show_crosshair = nil
+
+            if IsValid(weapon) and weapon.DrawAmmo then
+                -- Egon and Gauss use ammo a bit differently...
+                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' then
+                    clip_cur = weapon:GetAmmoPrimary()
+                    clip_max = weapon:GetMaxClip1()
+                    ammo_total = weapon:Ammo1()
+                    show_crosshair = weapon.DrawCrosshair
+                else
+                    clip_cur = weapon:Clip1()
+                    clip_max = weapon:GetMaxClip1()
+                    ammo_total = weapon:Ammo1()
+                    show_crosshair = weapon.DrawCrosshair
+                end
+
+                ammo_data = {
+                    show = true,
+                    clip_cur = clip_cur,
+                    clip_max = clip_max,
+                    ammo_total = ammo_total,
+                    show_crosshair = show_crosshair,
+                }
+            else
+                ammo_data = {
+                    show = false
+                }
+            end
+            --            print(status)
             local player_data = {
                 health = LocalPlayer():Health(),
                 armor = LocalPlayer():Armor(),
                 has_scientist = LocalPlayer():GetHasScientist(),
                 status = status,
                 team_scientist_count = team.GetAllTeams()[LocalPlayer():Team()].Scientists,
+                ammo_data = ammo_data
             }
             return util.TableToJSON(player_data)
         end
@@ -76,7 +111,7 @@ function HUD:Init()
         net.WriteString(tech_key)
         net.SendToServer()
         HUD.html:QueueJavascript([[ EVENTS.trigger('toggle_research_menu') ]])
---        local current_cursor_status = vgui.CursorVisible()
+        --        local current_cursor_status = vgui.CursorVisible()
         gui.EnableScreenClicker((false))
     end)
 
@@ -84,7 +119,7 @@ function HUD:Init()
 end
 
 function HUD:Draw()
---    if HUD.html == nil then
---        HUD:Init()
---    end
+    --    if HUD.html == nil then
+    --        HUD:Init()
+    --    end
 end

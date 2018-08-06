@@ -11,7 +11,7 @@ local ClientResearchTechnologyClass = {}
 ClientResearchTechnologyClass.key = '' -- Default empty string
 ClientResearchTechnologyClass.name = '' -- Default empty string
 ClientResearchTechnologyClass.description = '' -- Default empty string
-ClientResearchTechnologyClass.cost = 60 -- Default of 60
+ClientResearchTechnologyClass.cost = GetConVar("ram_research_time_seconds"):GetInt() -- Default of 60
 ClientResearchTechnologyClass.tier = 60 -- Default of 60
 ClientResearchTechnologyClass.researched = false -- Default of false
 ClientResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
@@ -26,6 +26,14 @@ net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
     local tech_key = net.ReadString()
     local is_researched = net.ReadBool()
     local vote_count = net.ReadInt(8)
+
+    print("-----------------------------------------------------------------")
+    print("Receiving shit from server")
+    print(cat_key)
+    print(tech_key)
+    print(is_researched)
+    print(vote_count)
+    print("-----------------------------------------------------------------")
 
     local researchManager = team.GetAllTeams()[int_team].ResearchManager
     researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer(is_researched, vote_count)
@@ -81,26 +89,27 @@ function ClientResearchTechnologyClass:CanDoResearch()
     --    end
 end
 
-function ClientResearchTechnology(key, name, description, cost, tier, reqs, category)
-    assert(key ~= nil, "ClientResearchTechnology must be passed a valid key")
-    assert(name ~= nil, "ClientResearchTechnology must be passed a valid name")
-    assert(tier ~= nil, "ClientResearchTechnology must be passed a valid tier")
-    assert(description ~= nil, "ClientResearchTechnology must be passed a valid description")
-    assert(category ~= nil, "ClientResearchTechnology must be passed a valid ResearchCategory table/object")
-    assert(type(category) == 'table', "ClientResearchTechnology must be passed a valid ResearchCategory table/object")
+function ClientResearchTechnology(args)
+    -- key, name, description, cost, tier, reqs, category
+    assert(args.key ~= nil, "ClientResearchTechnology must be passed a valid key")
+    assert(args.name ~= nil, "ClientResearchTechnology must be passed a valid name")
+    assert(args.tier ~= nil, "ClientResearchTechnology must be passed a valid tier")
+    assert(args.description ~= nil, "ClientResearchTechnology must be passed a valid description")
+    assert(args.category ~= nil, "ClientResearchTechnology must be passed a valid ResearchCategory table/object")
+    assert(type(args.category) == 'table', "ClientResearchTechnology must be passed a valid ResearchCategory table/object")
     local newClientResearchTechnology = table.Copy(ClientResearchTechnologyClass)
-    newClientResearchTechnology.key = key
-    newClientResearchTechnology.name = name
-    newClientResearchTechnology.tier = tier
-    newClientResearchTechnology.description = description
-    newClientResearchTechnology.category = category
+    newClientResearchTechnology.key = args.key
+    newClientResearchTechnology.name = args.name
+    newClientResearchTechnology.tier = args.tier
+    newClientResearchTechnology.description = args.description
+    newClientResearchTechnology.category = args.category
     -- Cost is optional
-    if cost ~= nil then
-        newClientResearchTechnology.cost = cost
+    if args.cost ~= nil then
+        newClientResearchTechnology.cost = args.cost
     end
-    if reqs ~= nil then
-        assert(type(reqs) == 'table', "ClientResearchTechnology must be passed a valid table/object for reqs")
-        newClientResearchTechnology.reqs = reqs
+    if args.reqs ~= nil then
+        assert(type(args.reqs) == 'table', "ClientResearchTechnology must be passed a valid table/object for reqs")
+        newClientResearchTechnology.reqs = args.reqs
     end
     --Return our new Object.
     return newClientResearchTechnology

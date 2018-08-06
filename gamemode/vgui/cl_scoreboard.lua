@@ -45,7 +45,7 @@ function scoreboard:init()
             index = 999,
             name = 'Spectators/Unassigned',
             score = 0,
-            color = Color(0,0,0,255),
+            color = Color(255,255,255,255),
             team_members = {},
         }
 
