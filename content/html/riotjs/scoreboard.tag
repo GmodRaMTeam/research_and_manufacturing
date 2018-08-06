@@ -1,13 +1,13 @@
 <scoreboard>
 
-    <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 165px; bottom: 10px;" onclick="{ toggle }">
-        Scoreboard?
-    </button>
+    <!--<button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 165px; bottom: 10px;" onclick="{ toggle }">-->
+        <!--Scoreboard?-->
+    <!--</button>-->
 
     <div each="{ team in teams }" show="{ show_scoreboard }">
         <!--<virtual show="{ team.index !== 999 && typeof team.team_members !== CONST_STR_UNDEFINED }">-->
             <!--<h1 class="header-text scoreboard-title">{team.name} (<i class="money bill alternate outline icon"></i>: ${team.money})</h1>-->
-            <h1 show="{ team.index !== 999 || team.team_members.length > 0 }" class="header-text scoreboard-title">
+            <h1 style="color: rgba({team.color.r}, {team.color.g}, {team.color.b}, {team.color.a});" show="{ team.index !== 999 || team.team_members.length > 0 }" class="header-text scoreboard-title">
                 {team.name}
                 <span show="{team.index !== 999}">
                     <virtual>(<i class="dollar sign icon"></i>: {team.money})</virtual>

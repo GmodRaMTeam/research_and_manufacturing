@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/Weapons/V_IRifle/AR2_nrg"
+	"$selfillum" 1
+}

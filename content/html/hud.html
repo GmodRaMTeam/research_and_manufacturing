@@ -43,7 +43,7 @@
 
 
     <!-- Riot tags -->
-    <script src="riotjs/health-and-armor.tag" type="riot/tag"></script>
+    <script src="riotjs/heads-up-display.tag" type="riot/tag"></script>
     <script src="riotjs/time-left.tag" type="riot/tag"></script>
     <script src="riotjs/scoreboard.tag" type="riot/tag"></script>
     <script src="riotjs/research-menu.tag" type="riot/tag"></script>
@@ -78,8 +78,8 @@
             background-color: #225222;
         }
 
-        health-and-armor {
-            position: absolute;
+        heads-up-display {
+            position: fixed;
             bottom: 0;
             left: 0;
             width: 300px;
@@ -92,10 +92,10 @@
         }
 
         time-left {
-            position: absolute;
+            position: fixed;
             /*width: 50%;*/
             /*top: 0;*/
-            left: 350px;
+            left: 22%;
             /*!*left: 45vw;*!*/
             /*!*right: 45vw;*!*/
             bottom: 0;
@@ -113,7 +113,7 @@
 </head>
 <body>
 
-<health-and-armor></health-and-armor>
+<heads-up-display></heads-up-display>
 
 <time-left></time-left>
 

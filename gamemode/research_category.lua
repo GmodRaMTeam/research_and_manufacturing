@@ -14,10 +14,14 @@ ResearchCategoryClass.name = '' -- Default empty string
 ResearchCategoryClass.techs = {} -- Default empty array
 ResearchCategoryClass.manager = nil
 
-function ResearchCategoryClass:AddTechnology(key, name, description, class, cost, tier, reqs)
-    -- function ResearchTechnology(key, name, description, cost, tier, reqs, category)
-    local newResearchTechnology = ResearchTechnology(key, name, description, class, cost, tier, reqs, self)
-    self.techs[key] = newResearchTechnology-- Add to our categories
+function ResearchCategoryClass:AddTechnology(args)
+    -- key, name, description, class, cost, tier, reqs, category
+    if args.category == nil then
+        args.category = self
+    end
+    local newResearchTechnology = ResearchTechnology(args)
+    assert(newResearchTechnology ~= nil, 'Research Category failed to add a technology!')
+    self.techs[args.key] = newResearchTechnology-- Add to our categories
     return newResearchTechnology-- Return our category to do something with it
 end
 
@@ -47,15 +51,16 @@ function ResearchCategoryClass:HasAtLeastOneTechUnlocked()
     return false
 end
 
-function ResearchCategory(key, name, manager)
-    assert(key ~= nil, "ResearchCategory must be passed a valid key")
-    assert(name ~= nil, "ResearchCategory must be passed a valid name")
-    assert(manager ~= nil, "ResearchCategory must be passed a valid manager table/object")
-    assert(type(manager) == 'table', "ResearchCategory must be passed a valid manager table/object")
+function ResearchCategory(args)
+    -- key, name, manager
+    assert(args.key ~= nil, "ResearchCategory must be passed a valid key")
+    assert(args.name ~= nil, "ResearchCategory must be passed a valid name")
+    assert(args.manager ~= nil, "ResearchCategory must be passed a valid manager table/object")
+    assert(type(args.manager) == 'table', "ResearchCategory must be passed a valid manager table/object")
     local newResearchCategory = table.Copy(ResearchCategoryClass)
-    newResearchCategory.key = key
-    newResearchCategory.name = name
-    newResearchCategory.manager = manager
+    newResearchCategory.key = args.key
+    newResearchCategory.name = args.name
+    newResearchCategory.manager = args.manager
     --Return our new Object.
     return newResearchCategory
 end

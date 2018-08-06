@@ -6,13 +6,11 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-
 local ResearchTechnologyClass = {}
 ResearchTechnologyClass.key = '' -- Default empty string
 ResearchTechnologyClass.name = '' -- Default empty string
-ResearchTechnologyClass.description = '' -- Default empty string
 ResearchTechnologyClass.class = '' -- Default empty string
-ResearchTechnologyClass.cost = 60 -- Default of 60
+ResearchTechnologyClass.cost = 60
 ResearchTechnologyClass.tier = 60 -- Default of 60
 ResearchTechnologyClass.researched = false -- Default of false
 ResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
@@ -52,30 +50,31 @@ function ResearchTechnologyClass:CanDoResearch()
     end
 end
 
-function ResearchTechnology(key, name, description, class, cost, tier, reqs, category)
-    assert(key ~= nil, "ResearchTechnology must be passed a valid key")
-    assert(name ~= nil, "ResearchTechnology must be passed a valid name")
-    assert(tier ~= nil, "ResearchTechnology must be passed a valid tier")
-    assert(description ~= nil, "ResearchTechnology must be passed a valid description")
-    assert(category ~= nil, "ResearchTechnology must be passed a valid ResearchCategory table/object")
-    assert(type(category) == 'table', "ResearchTechnology must be passed a valid ResearchCategory table/object")
+function ResearchTechnology(args)
+    -- key, name, description, class, cost, tier, reqs, category
+    assert(args.key ~= nil, "ResearchTechnology must be passed a valid key")
+    assert(args.name ~= nil, "ResearchTechnology must be passed a valid name")
+    assert(args.tier ~= nil, "ResearchTechnology must be passed a valid tier")
+    assert(args.category ~= nil, "ResearchTechnology must be passed a valid ResearchCategory table/object")
+    assert(type(args.category) == 'table', "ResearchTechnology must be passed a valid ResearchCategory table/object")
     local newResearchTechnology = table.Copy(ResearchTechnologyClass)
-    newResearchTechnology.key = key
-    newResearchTechnology.name = name
-    newResearchTechnology.tier = tier
-    newResearchTechnology.description = description
-    newResearchTechnology.category = category
+    newResearchTechnology.key = args.key
+    newResearchTechnology.name = args.name
+    newResearchTechnology.tier = args.tier
+    newResearchTechnology.category = args.category
     -- Cost is optional
-    if cost ~= nil then
-        newResearchTechnology.cost = cost
+    if args.cost ~= nil then
+        newResearchTechnology.cost = args.cost
+    else
+        newResearchTechnology.cost = GetConVar("ram_research_time_seconds"):GetInt()
     end
-    if reqs ~= nil then
-        assert(type(reqs) == 'table', "ResearchTechnology must be passed a valid table/object for reqs")
-        newResearchTechnology.reqs = reqs
+    if args.reqs ~= nil then
+        assert(type(args.reqs) == 'table', "ResearchTechnology must be passed a valid table/object for reqs")
+        newResearchTechnology.reqs = args.reqs
     end
-    if class ~= nil then
-        assert(type(class) == 'string', "ResearchTechnology must be passed a valid string for field class.")
-        newResearchTechnology.class = class
+    if args.class ~= nil then
+        assert(type(args.class) == 'string', "ResearchTechnology must be passed a valid string for field class.")
+        newResearchTechnology.class = args.class
     end
     --Return our new Object.
     return newResearchTechnology

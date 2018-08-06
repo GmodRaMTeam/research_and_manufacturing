@@ -1,8 +1,8 @@
 <research-menu>
-    <button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 10px; bottom: 10px;"
-            onclick="{ toggle }">
-        Research menu?
-    </button>
+    <!--<button show="{ !IS_IN_GAME }" class="ui button" style="position: absolute; right: 10px; bottom: 10px;"-->
+            <!--onclick="{ toggle }">-->
+        <!--Research menu?-->
+    <!--</button>-->
     <div id="MAIN" class="" show="{ show_research_menu }">
         <div style="background-color: #1B1C1D; padding-top" class="ui bottom attached segment pushable">
             <div class="ui visible inverted left vertical sidebar menu">

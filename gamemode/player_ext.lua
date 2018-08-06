@@ -174,7 +174,7 @@ hook.Add("PlayerDeath", "RAM_PlayerDropScientistOnDeath", function(victim, infli
 end)
 
 hook.Add("PlayerDeath", "RAM_PlayerTakeMoneyFromTeamOnDeath", function(victim, inflictor, attacker)
-    if IsValid(victim) and victim:IsPlayer() then
+    if IsValid(victim) and victim:IsPlayer() and victim:Team() == TEAM_BLUE or victim:Team() == TEAM_ORANGE then
         local team_index = victim:Team()
         local team_table = team.GetAllTeams()[team_index]
         if team_table.ResearchManager.status ~= RESEARCH_STATUS_PREP then

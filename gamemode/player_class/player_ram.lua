@@ -38,10 +38,10 @@ PLAYER.DuckSpeed			= 0.3		-- How fast to go from not ducking, to ducking
 PLAYER.UnDuckSpeed			= 0.3		-- How fast to go from ducking, to not ducking
 PLAYER.JumpPower			= 200		-- How powerful our jump should be
 PLAYER.CanUseFlashlight		= true		-- Can we use the flashlight
-PLAYER.MaxHealth			= 100		-- Max health we can have
-PLAYER.StartHealth			= 100		-- How much health we start with
-PLAYER.StartArmor			= 0			-- How much armour we start with
-PLAYER.MaxArmor				= 100
+--PLAYER.MaxHealth			= 100		-- Max health we can have
+--PLAYER.StartHealth			= 100		-- How much health we start with
+--PLAYER.StartArmor			= 0			-- How much armour we start with
+--PLAYER.MaxArmor				= 100
 PLAYER.DropWeaponOnDie		= false		-- Do we drop our weapon when we die
 PLAYER.TeammateNoCollide	= true		-- Do we collide with teammates or run straight through them
 PLAYER.AvoidPlayers			= true		-- Automatically swerves around other players
@@ -69,26 +69,26 @@ function PLAYER:Loadout()
 		if ResearchManager.categories['armor']:HasAtLeastOneTechUnlocked() then
 			local tech = ResearchManager.categories['armor']:GetHighestTechResearched()
 			if tech then
-				self.MaxArmor = tech.tier * 20
-				self.StartArmor = tech.tier * 20
-				self.Player:SetArmor(tech.tier * 20)
+				self.Player.MaxArmor = tech.tier * 20
+--				self.Player.StartArmor = tech.tier * 20
+				self.Player:SetArmor(self.Player.MaxArmor)
 			end
 		else
-			self.MaxArmor = 0
-			self.StartArmor = 0
+			self.Player.MaxArmor = 0
+--			self.StartArmor = 0
 			self.Player:SetArmor(0)
 		end
 
 		if ResearchManager.categories['health']:HasAtLeastOneTechUnlocked() then
 			local tech = ResearchManager.categories['health']:GetHighestTechResearched()
 			if tech then
-				self.MaxHealth = 100 + (tech.tier * 20)
-				self.StartHealth = 100 +  (tech.tier * 20)
-				self.Player:SetHealth(100 + (tech.tier * 20))
+				self.Player.MaxHealth = 100 + (tech.tier * 10)
+--				self.StartHealth = 100 +  (tech.tier * 20)
+				self.Player:SetHealth(self.Player.MaxHealth)
 			end
 		else
-			self.MaxHealth = 100
-			self.StartHealth = 100
+			self.Player.MaxHealth = 100
+--			self.StartHealth = 100
 			self.Player:SetHealth(100)
 		end
 
@@ -104,6 +104,12 @@ function PLAYER:Loadout()
 		if ResearchManager.categories['weapons'].techs['ar'].researched then
 			self.Player:Give( "weapon_ram_ar2" )
 		end
+		if ResearchManager.categories['weapons'].techs['crossbow'].researched then
+			self.Player:Give( "weapon_crossbow" )
+		end
+		if ResearchManager.categories['weapons'].techs['rpg'].researched then
+			self.Player:Give( "weapon_rpg" )
+		end
 		if ResearchManager.categories['weapons'].techs['gauss'].researched then
 			self.Player:Give( "weapon_ram_gauss" )
 		end
@@ -115,7 +121,7 @@ function PLAYER:Loadout()
 			self.Player:Give( "weapon_ram_satchel" )
 		end
 		if ResearchManager.categories['gadgets'].techs['grenade'].researched then
-			self.Player:Give( "weapon_ram_handgrenade" )
+			self.Player:Give( "weapon_grenade" )
 		end
 		if ResearchManager.categories['gadgets'].techs['tripmine'].researched then
 			self.Player:Give( "weapon_ram_tripmine" )
@@ -123,12 +129,12 @@ function PLAYER:Loadout()
 
 		if ResearchManager.categories['implants'].techs['legs_one'].researched and not ResearchManager.categories['implants'].techs['legs_two'].researched then
 --			print("LEGS ONE IS RESEARCHED")
-			self.Player:SetRunSpeed( 500 )
-			self.Player:SetWalkSpeed( 250 )
+			self.Player:SetRunSpeed( 450 )
+			self.Player:SetWalkSpeed( 225 )
 		elseif ResearchManager.categories['implants'].techs['legs_two'].researched then
 --			print("LEGS TWO IS RESEARCHED")
-			self.Player:SetRunSpeed( 600 )
-			self.Player:SetWalkSpeed( 300 )
+			self.Player:SetRunSpeed( 500 )
+			self.Player:SetWalkSpeed( 250 )
 		else
 --			print("NO IMPLANTS")
 			self.Player:SetRunSpeed( 400 )
@@ -137,6 +143,7 @@ function PLAYER:Loadout()
 
 	end
 	self.Player:Give( "weapon_crowbar" )
+	self.Player:Give( "weapon_stunstick" ) -- Capture scientist tool
 	self.Player:Give( "weapon_ram_pistol" )
 	self.Player:GiveAmmo( 60,	"Pistol", 		true )
 

@@ -1,0 +1,16 @@
+VertexLitGeneric
+{
+	"$bumpmap" "models/weapons/v_grenade/handle_normal"
+	"$baseTexture" "Models/Weapons/V_grenade/handle"
+$normalmapalphaphongmask 1
+
+$phongboost "0.2"
+$phongexponent 15
+$phongfresnelranges "[10 10 40]"
+$ambientocclusion 1
+
+$halflambert 1
+$phong 1
+//"GPU>=2?$phong" 1
+}
+

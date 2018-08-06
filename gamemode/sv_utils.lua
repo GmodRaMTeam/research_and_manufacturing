@@ -65,7 +65,7 @@ function GetPrepTimeLeft()
 end
 
 function DynamicStatusUpdate(team_index, message, status, specific_player)
-    -- Status can be: 'warning', 'success', 'error'
+    -- Status can be: 'warning', 'success', 'error', voting, kidnap
     if team_index ~= nil then
         for k, ply in pairs(player.GetAll()) do
             if IsValid(ply) and ply:Team() == team_index then
@@ -109,5 +109,14 @@ function ClientStatusUpdate(intStatus, intTeam)
     net.WriteInt(intStatus, 4)
     net.WriteInt(intTeam, 3)
     net.Broadcast()
+    -- We did something!
+end
+
+function ClientStatusUpdateToPlayer(intStatus, intTeam, ply)
+    net.Start("RAM_ClientStatusUpdate")
+    --net.WriteString("some text")
+    net.WriteInt(intStatus, 4)
+    net.WriteInt(intTeam, 3)
+    net.Send(ply)
     -- We did something!
 end

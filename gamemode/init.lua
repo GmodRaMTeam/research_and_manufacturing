@@ -23,6 +23,7 @@ util.AddNetworkString("RAM_RequestSyncPrepTimer")
 util.AddNetworkString("RAM_RequestSyncStatus")
 util.AddNetworkString("RAM_MakeMoney")
 util.AddNetworkString("RAM_ScientistUpdate")
+util.AddNetworkString("RAM_RequestClientUpdateEntireResearchTable")
 
 AddCSLuaFile("cl_init.lua")
 
@@ -53,12 +54,14 @@ include("research_technology.lua")
 include("shd_utils.lua")
 include("sv_utils.lua")
 
+--DEFAULT_RESEARCH_TIME = 60 -- GetConvar was not working in a specific spot...
+
 -- Convars --
-CreateConVar("ram_map_time_limit", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("ram_prep_time_limit", "1", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("ram_auto_vote_time_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("ram_vote_time_limit_seconds", "60", FCVAR_NOTIFY + FCVAR_REPLICATED)
-CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED)
+CreateConVar("ram_map_time_limit_minutes", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Map time limit
+CreateConVar("ram_prep_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Prep time
+CreateConVar("ram_vote_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How long you have to vote
+CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How much money to lose on player death
+CreateConVar("ram_research_time_seconds", "35", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Research time in seconds. Do not go lower than 30
 
 --[[All local spaced server functions]]
 
@@ -85,6 +88,49 @@ local function OverseerSelectSpawn(team)
     end
 end
 
+local function SyncMapTimer(ply)
+    local time_left = nil
+    if timer.Exists("RAM_TimerMapEnd") then
+        time_left = timer.TimeLeft("RAM_TimerMapEnd")
+    else
+        time_left = 0
+    end
+    net.Start("RAM_SyncMapTimer")
+    net.WriteFloat(time_left)
+    net.Send(ply)
+end
+
+local function SyncPrepTimer(ply)
+    local time_left = nil
+    if timer.Exists("RAM_TimerPrepEnd") then
+        time_left = timer.TimeLeft("RAM_TimerPrepEnd")
+    else
+        time_left = 0
+    end
+    net.Start("RAM_SyncPrepTimer")
+    net.WriteFloat(time_left)
+    net.Send(ply)
+end
+
+local function SyncPrepTimerBroadcast()
+    local time_left = nil
+    if timer.Exists("RAM_TimerPrepEnd") then
+        time_left = timer.TimeLeft("RAM_TimerPrepEnd")
+    else
+        time_left = 0
+    end
+    net.Start("RAM_SyncPrepTimer")
+    net.WriteFloat(time_left)
+    net.Broadcast()
+end
+
+local function SyncStatus(ply)
+    net.Start("RAM_SyncStatus")
+    net.WriteInt(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status, 4)
+    net.WriteInt(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status, 4)
+    net.Send(ply)
+end
+
 ------------------------------------------------------------------------------------------------------------
 
 
@@ -97,60 +143,268 @@ end
 function EndPrep()
     if timer.Exists("RAM_TimerPrepEnd") then
         timer.Remove("RAM_TimerPrepEnd")
-    end
-    DynamicStatusUpdate(nil, 'Preparation has ended! Begin voting!', 'success', nil)
-    local AllTeams = team.GetAllTeams()
-    for ID, TeamInfo in pairs(AllTeams) do
-        if ID == TEAM_BLUE or ID == TEAM_ORANGE then
-            ClientStatusUpdate(RESEARCH_STATUS_VOTING, ID)
-            TeamInfo.ResearchManager:StartResearchAndMoneyMaking()
+        SyncPrepTimerBroadcast()
+        DynamicStatusUpdate(nil, 'Preparation has ended! Begin voting!', 'voting', nil)
+        local AllTeams = team.GetAllTeams()
+        for ID, TeamInfo in pairs(AllTeams) do
+            if ID == TEAM_BLUE or ID == TEAM_ORANGE then
+                ClientStatusUpdate(RESEARCH_STATUS_VOTING, ID)
+                TeamInfo.ResearchManager:StartResearchAndMoneyMaking()
+            end
         end
     end
 end
 
 local function InitMapEndTimer()
-    timer.Create('RAM_TimerMapEnd', GetConVar("ram_map_time_limit"):GetInt() * 60, 1, EndMap)
+    timer.Create('RAM_TimerMapEnd', GetConVar("ram_map_time_limit_minutes"):GetInt() * 60, 1, EndMap)
 end
 
 local function InitPrepEndTimer()
-    timer.Create('RAM_TimerPrepEnd', GetConVar("ram_prep_time_limit"):GetInt() * 60, 1, EndPrep)
+    timer.Create('RAM_TimerPrepEnd', GetConVar("ram_prep_time_limit_seconds"):GetInt(), 1, EndPrep)
 end
 
 local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if ID == TEAM_BLUE or ID == TEAM_ORANGE then
-            local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
-            local armorCat = newResearchManager:AddCategory('armor', 'Armor')
-            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', nil, 60, 1)
-            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', nil, 65, 2, {'armor_one'})
-            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', nil, 70, 3, {'armor_two'})
-            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor (80)', nil, 75, 4, {'armor_three'})
-            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor (100)', nil, 75, 5, {'armor_four'})
+--            local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
+--            local armorCat = newResearchManager:AddCategory('armor', 'Armor')
+            -- ResearchTechnology(key, name, class, tier, reqs, category)
+--            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', nil, 60, 1)
+--            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', nil, 65, 2, {'armor_one'})
+--            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', nil, 70, 3, {'armor_two'})
+--            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor (80)', nil, 75, 4, {'armor_three'})
+--            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor (100)', nil, 75, 5, {'armor_four'})
 
-            local healthCat = newResearchManager:AddCategory('health', 'Health')
-            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', nil, 60, 1)
-            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', nil, 65, 2, {'health_one'})
-            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', nil, 70, 3, {'health_two'})
-            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Health (80)', nil, 75, 4, {'health_three'})
-            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Health (100)', nil, 75, 5, {'health_four'})
+            -- New style
+            -- key, name, description, class, cost, tier, reqs, category
+--            armorCat:AddTechnology({
+--                key = 'armor_one', -- This is required
+--                name = 'Armor Type I', -- This is required
+--                class = nil, -- This is optional
+--                cost = 60, -- This is optional
+--                tier = 1, -- This is required
+--                reqs = nil, -- This is optional
+--                category = armorCat, -- This is optional
+--            })
 
-            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
-            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 'weapon_ram_revolver', 70, 1)
-            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 'weapon_ram_shotgun', 65, 2)
-            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 'weapon_ram_smg', 65, 3, {'revolver'})
-            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 'weapon_ram_ar2', 70, 3, {'shotgun'})
-            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 'weapon_ram_gauss', 80, 4, {'smg'})
-            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 'weapon_ram_egon', 85, 5, {'ar'})
+            local newResearchManager = ResearchManager({
+                team_index = ID,
+                team_name = TeamInfo['Name']
+            })
+            local armorCat = newResearchManager:AddCategory({
+                key = 'armor',
+                name = 'Armor',
+            })
 
-            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets')
-            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 'weapon_ram_satchel', 60, 1)
-            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 'weapon_ram_handgrenade', 65, 2, {'satchel'})
-            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 'weapon_ram_tripmine', 70, 3, {'grenade'})
+            armorCat:AddTechnology({
+                key = 'armor_one', -- This is required
+                name = 'Armor Type I', -- This is required
+                tier = 1, -- This is required
+            })
 
-            local implantCat = newResearchManager:AddCategory('implants', 'Implants')
-            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', nil, 60, 1)
-            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', nil, 65, 1, {'legs_one'})
+            armorCat:AddTechnology({
+                key = 'armor_two', -- This is required
+                name = 'Armor Type II', -- This is required
+                tier = 2, -- This is required
+                reqs = {'armor_one'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_three', -- This is required
+                name = 'Armor Type III', -- This is required
+                tier = 3, -- This is required
+                reqs = {'armor_two'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_four', -- This is required
+                name = 'Armor Type IV', -- This is required
+                tier = 4, -- This is required,
+                reqs = {'armor_three'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_five', -- This is required
+                name = 'Armor Type V', -- This is required
+                tier = 5, -- This is required,
+                reqs = {'armor_four'}
+            })
+
+            local healthCat = newResearchManager:AddCategory({
+                key = 'health',
+                name = 'Health',
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_one', -- This is required
+                name = 'Health Type I', -- This is required
+                tier = 1, -- This is required,
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_two', -- This is required
+                name = 'Health Type II', -- This is required
+                tier = 2, -- This is required
+                reqs = {'health_one'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_three', -- This is required
+                name = 'Health Type III', -- This is required
+                tier = 3, -- This is required
+                reqs = {'health_two'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_four', -- This is required
+                name = 'Health Type IV', -- This is required
+                tier = 4, -- This is required
+                reqs = {'health_three'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_five', -- This is required
+                name = 'Health Type V', -- This is required
+                tier = 5, -- This is required
+                reqs = {'health_four'}
+            })
+
+            local weapCat = newResearchManager:AddCategory({
+                key = 'weapons',
+                name = 'Weapons',
+            })
+            weapCat:AddTechnology({
+                key = 'revolver',
+                name = 'Revolver',
+                class = 'weapon_ram_revolver',
+                tier = 1
+            })
+
+            weapCat:AddTechnology({
+                key = 'shotgun',
+                name = 'Shotgun',
+                class = 'weapon_ram_shotgun',
+                tier = 2
+            })
+
+            weapCat:AddTechnology({
+                key = 'smg',
+                name = 'SMG',
+                class = 'weapon_ram_smg',
+                tier = 3,
+                reqs = { 'revolver' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'ar',
+                name = 'Ar2',
+                class = 'weapon_ram_ar2',
+                tier = 4,
+                reqs = { 'shotgun' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'crossbow',
+                name = 'Crossbow',
+                class = 'weapon_crossbow',
+                tier = 5,
+                reqs = { 'smg' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'rpg',
+                name = 'RPG',
+                class = 'weapon_rpg',
+                tier = 6,
+                reqs = { 'ar' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'gauss',
+                name = 'Gauss Gun',
+                class = 'weapon_ram_gauss',
+                tier = 7,
+                reqs = { 'crossbow' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'egon',
+                name = 'Gluon Gun',
+                class = 'weapon_ram_egon',
+                tier = 8,
+                reqs = { 'rpg' }
+            })
+
+            local gadgetCat = newResearchManager:AddCategory({
+                key = 'gadgets',
+                name = 'Gadgets'
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'satchel',
+                name = 'Satchel Charges',
+                class = 'weapon_ram_satchel',
+                tier = 1
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'grenade',
+                name = 'Grenades',
+                class = 'weapon_grenade',
+                tier = 2,
+                reqs = { 'satchel' }
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'tripmine',
+                name = 'Tripmines',
+                class = 'weapon_ram_tripmine',
+                tier = 3,
+                reqs = { 'grenade' }
+            })
+
+            local implantCat = newResearchManager:AddCategory({
+                key = 'implants',
+                name = 'Implants'
+            })
+
+            implantCat:AddTechnology({
+                key = 'legs_one',
+                name = 'Cybenetic Legs MKI',
+                tier = 1
+            })
+
+            implantCat:AddTechnology({
+                key = 'legs_two',
+                name = 'Cybenetic Legs MKII',
+                tier = 2,
+                reqs = { 'legs_one' }
+            })
+
+--            local healthCat = newResearchManager:AddCategory('health', 'Health')
+--            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', nil, 60, 1)
+--            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', nil, 65, 2, {'health_one'})
+--            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', nil, 70, 3, {'health_two'})
+--            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Health (80)', nil, 75, 4, {'health_three'})
+--            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Health (100)', nil, 75, 5, {'health_four'})
+--
+--            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
+--            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 'weapon_ram_revolver', 70, 1)
+--            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 'weapon_ram_shotgun', 65, 2)
+--            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 'weapon_ram_smg', 65, 3, {'revolver'})
+--            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 'weapon_ram_ar2', 70, 3, {'shotgun'})
+--            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 'weapon_ram_gauss', 80, 4, {'smg'})
+--            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 'weapon_ram_egon', 85, 5, {'ar'})
+--
+--            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets')
+--            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 'weapon_ram_satchel', 60, 1)
+--            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 'weapon_ram_handgrenade', 65, 2, {'satchel'})
+--            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 'weapon_ram_tripmine', 70, 3, {'grenade'})
+--
+--            local implantCat = newResearchManager:AddCategory('implants', 'Implants')
+--            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', nil, 60, 1)
+--            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', nil, 65, 1, {'legs_one'})
 
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
@@ -189,6 +443,8 @@ function GM:PlayerSpawn( pl )
 	player_manager.SetPlayerClass( pl, "player_ram" )
 
 	BaseClass.PlayerSpawn( self, pl )
+
+    pl:CrosshairDisable()
 
 end
 
@@ -245,7 +501,7 @@ function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_or
     AllTeams[new_team].Scientists = AllTeams[new_team].Scientists + 1
     AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
 
-    DynamicStatusUpdate(scientist_original_team, 'You have lost one of your scientists to your competitor!', 'error', nil)
+    DynamicStatusUpdate(scientist_original_team, 'You have lost one of your scientists to your competitor!', 'kidnap', nil)
 
     net.Start("RAM_ScientistUpdate")
     net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
@@ -255,33 +511,13 @@ function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_or
 end
 
 net.Receive("RAM_RequestSyncMapTimer", function(len, ply)
-    local time_left = nil
-    if timer.Exists("RAM_TimerMapEnd") then
-        time_left = timer.TimeLeft("RAM_TimerMapEnd")
-    else
-        time_left = 0
-    end
-    net.Start("RAM_SyncMapTimer")
-    net.WriteFloat(time_left)
-    net.Send(ply)
+    SyncMapTimer(ply)
 end)
 
 net.Receive("RAM_RequestSyncPrepTimer", function(len, ply)
---    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    local time_left = nil
-    if timer.Exists("RAM_TimerPrepEnd") then
-        time_left = timer.TimeLeft("RAM_TimerPrepEnd")
-    else
-        time_left = 0
-    end
-    net.Start("RAM_SyncPrepTimer")
-    net.WriteFloat(time_left)
-    net.Send(ply)
+    SyncPrepTimer(ply)
 end)
 
 net.Receive("RAM_RequestSyncStatus", function(len, ply)
-    net.Start("RAM_SyncStatus")
-    net.WriteInt(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status, 4)
-    net.WriteInt(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status, 4)
-    net.Send(ply)
+    SyncStatus(ply)
 end)

@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/Weapons/V_IRifle/AR2_mirror"
+	"$envmap" "env_cubemap"
+	"$surfaceprop" "metal"
+}
