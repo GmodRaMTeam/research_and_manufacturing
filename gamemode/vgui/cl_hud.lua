@@ -38,7 +38,7 @@ function HUD:Init()
 
             if IsValid(weapon) and weapon.DrawAmmo then
                 -- Egon and Gauss use ammo a bit differently...
-                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' then
+                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' or weapon:GetClass() == 'weapon_ram_tripmine' or weapon:GetClass() == 'weapon_ram_satchel' then
                     clip_cur = weapon:GetAmmoPrimary()
                     clip_max = weapon:GetMaxClip1()
                     ammo_total = weapon:Ammo1()

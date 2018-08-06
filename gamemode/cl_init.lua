@@ -285,7 +285,7 @@ local function InitTeamVariables()
                 key = 'grenade',
                 name = 'Grenades',
                 description = 'Classic Handgrenades',
-                class = 'weapon_grenade',
+                class = 'weapon_frag',
                 tier = 2,
                 reqs = { 'satchel' }
             })

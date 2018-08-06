@@ -351,7 +351,7 @@ local function InitTeamVariables()
             gadgetCat:AddTechnology({
                 key = 'grenade',
                 name = 'Grenades',
-                class = 'weapon_grenade',
+                class = 'weapon_frag',
                 tier = 2,
                 reqs = { 'satchel' }
             })

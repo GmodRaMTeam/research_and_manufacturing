@@ -121,7 +121,7 @@ function PLAYER:Loadout()
 			self.Player:Give( "weapon_ram_satchel" )
 		end
 		if ResearchManager.categories['gadgets'].techs['grenade'].researched then
-			self.Player:Give( "weapon_grenade" )
+			self.Player:Give( "weapon_frag" )
 		end
 		if ResearchManager.categories['gadgets'].techs['tripmine'].researched then
 			self.Player:Give( "weapon_ram_tripmine" )

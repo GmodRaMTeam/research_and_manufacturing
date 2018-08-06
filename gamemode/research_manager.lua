@@ -107,6 +107,7 @@ end
 
 
 function ResearchManagerClass:TeamAutoPickResearch()
+    local success = false
     -- If this gets called but we chose some research!
     if self.status == RESEARCH_STATUS_IN_PROGRESS then
         return
@@ -116,7 +117,11 @@ function ResearchManagerClass:TeamAutoPickResearch()
     for tech_key, technology in pairs(random_category.techs) do
         if technology:CanDoResearch() then
             self:TeamDoResearch(cat_key, tech_key)
+            success = true
         end
+    end
+    if not success then -- If we don't succeed, try again
+        self:TeamAutoPickResearch()
     end
 --    end
 end

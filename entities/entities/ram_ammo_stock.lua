@@ -172,9 +172,9 @@ function ENT:Touch(ent)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'grenade') then
-                self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_handgrenade')
+                self:CheckPlayerWeaponAndGive(ent, 'weapon_frag')
 --                print("Give grenades")
-                self:GivePlayerAmmo(ent, 'hgrenade', 'GrenadeAmmoMax', true, true)
+                self:GivePlayerAmmo(ent, 'Grenade', 'GrenadeAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)
             end
 
