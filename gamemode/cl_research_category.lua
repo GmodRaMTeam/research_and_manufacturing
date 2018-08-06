@@ -15,10 +15,13 @@ ClientResearchCategoryClass.icon = '' -- Default empty string, set to a semantic
 ClientResearchCategoryClass.techs = {} -- Default empty array
 ClientResearchCategoryClass.manager = nil
 
-function ClientResearchCategoryClass:AddTechnology(key, name, description, cost, tier, reqs)
-    -- ClientResearchTechnology(key, name, description, cost, tier, reqs, category)
-    local newResearchTechnology = ClientResearchTechnology(key, name, description, cost, tier, reqs, self)
-    self.techs[key] = newResearchTechnology-- Add to our categories
+function ClientResearchCategoryClass:AddTechnology(args)
+    -- key, name, description, cost, tier, reqs, category
+    if args.category == nil then
+        args.category = self
+    end
+    local newResearchTechnology = ClientResearchTechnology(args)
+    self.techs[args.key] = newResearchTechnology-- Add to our categories
     return newResearchTechnology-- Return our category to do something with it
 end
 
@@ -48,17 +51,18 @@ function ClientResearchCategoryClass:HasAtLeastOneTechUnlocked()
     return false
 end
 
-function ClientResearchCategory(key, name, icon, manager)
-    assert(key ~= nil, "ClientResearchCategory must be passed a valid key")
-    assert(name ~= nil, "ClientResearchCategory must be passed a valid name")
-    assert(icon ~= nil, "ClientResearchCategory must be passed a valid icon")
-    assert(manager ~= nil, "ClientResearchCategory must be passed a valid manager table/object")
-    assert(type(manager) == 'table', "ClientResearchCategory must be passed a valid manager table/object")
+function ClientResearchCategory(args)
+    -- key, name, icon, manager
+    assert(args.key ~= nil, "ClientResearchCategory must be passed a valid key")
+    assert(args.name ~= nil, "ClientResearchCategory must be passed a valid name")
+    assert(args.icon ~= nil, "ClientResearchCategory must be passed a valid icon")
+    assert(args.manager ~= nil, "ClientResearchCategory must be passed a valid manager table/object")
+    assert(type(args.manager) == 'table', "ClientResearchCategory must be passed a valid manager table/object")
     local newClientResearchCategory = table.Copy(ClientResearchCategoryClass)
-    newClientResearchCategory.key = key
-    newClientResearchCategory.name = name
-    newClientResearchCategory.icon = icon
-    newClientResearchCategory.manager = manager
+    newClientResearchCategory.key = args.key
+    newClientResearchCategory.name = args.name
+    newClientResearchCategory.icon = args.icon
+    newClientResearchCategory.manager = args.manager
     --Return our new Object.
     return newClientResearchCategory
 end

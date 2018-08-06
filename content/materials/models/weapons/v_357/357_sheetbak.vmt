@@ -1,0 +1,16 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models/Weapons/v_357/357_sheet"
+$phong 1
+$phongboost 4
+$phongexponent 120
+$phongfresnelranges "[.6 1 2]"
+$basealphaphongmask 1
+
+$basealphaenvmapmask 1
+$envmap env_cubemap
+$model 1
+
+$phongalbedotint 1
+$selfillum 1
+}

@@ -16,9 +16,13 @@ ClientResearchManagerClass.team_name = nil -- Changes on constructor
 ClientResearchManagerClass.status = RESEARCH_STATUS_PREP -- Status, defaults to waiting
 ClientResearchManagerClass.categories = {} -- Array of categories.
 
-function ClientResearchManagerClass:AddCategory(key, name, icon)
-    local newClientResearchCategory = ClientResearchCategory(key, name, icon, self)
-    self.categories[key] = newClientResearchCategory -- Add to our categories
+function ClientResearchManagerClass:AddCategory(args)
+    -- key, name, icon, manager
+    if args.manager == nil then
+        args.manager = self
+    end
+    local newClientResearchCategory = ClientResearchCategory(args)
+    self.categories[args.key] = newClientResearchCategory -- Add to our categories
     return newClientResearchCategory -- Return our category to do something with it
 end
 
@@ -54,12 +58,13 @@ function ClientResearchManagerClass:ToJSON()
 end
 
 
-function ClientResearchManager(team_index, team_name)
-    assert(team_index ~= nil, "ClientResearchManager must be passed a valid team_index")
-    assert(team_name ~= nil, "ClientResearchManager must be passed a valid team_name")
+function ClientResearchManager(args)
+    -- team_index, team_name
+    assert(args.team_index ~= nil, "ClientResearchManager must be passed a valid team_index")
+    assert(args.team_name ~= nil, "ClientResearchManager must be passed a valid team_name")
     local newClientResearchManager = table.Copy(ClientResearchManagerClass)
-    newClientResearchManager.team_index = team_index
-    newClientResearchManager.team_name = team_name
+    newClientResearchManager.team_index = args.team_index
+    newClientResearchManager.team_name = args.team_name
     --Return our new Object.
     return newClientResearchManager
 end

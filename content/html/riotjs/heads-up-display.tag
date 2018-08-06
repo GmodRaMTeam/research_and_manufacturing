@@ -3,43 +3,53 @@
         <!--Random hp/armor?-->
     <!--</button>-->
 
+    <div id="container-backgrounds" class="ui inverted segment">
+
+    </div>
+
     <h2 show="{player_data.ammo_data.show_crosshair}" class="ui tiny inverted icon header" id="cross-container">
         <!--<i class="settings icon"></i>-->
         <i class="crosshairs icon"></i>
     </h2>
 
-    <div show="{player_data.ammo_data.show}" id="ammo-container" class="">
+    <div show="{player_data.ammo_data.show}" id="ammo-container" class="ui inverted segment">
         <h2 class="ui inverted header">
             <!--<i class="plug icon"></i>-->
-            Ammo
+            Ammo:
             <div class="content">
                 {player_data.ammo_data.clip_cur} / {player_data.ammo_data.clip_max}
-                <div class="sub header">
+                <div show="{player_data.ammo_data.ammo_total > 0}" class="sub header">
                     Total: {player_data.ammo_data.ammo_total}
                 </div>
             </div>
         </h2>
     </div>
 
-    <h2 show="{show_scientist}" class="ui small inverted icon header" id="icon-container">
-        <!--<i class="settings icon"></i>-->
-        <i class="user secret icon"></i>
-        <div class="content">
-            You Have
-            <div class="sub header">A Scientist</div>
-        </div>
-    </h2>
+    <div style="fill-opacity: 0.5; opacity: 0.5;" show="{show_scientist}" class="ui inverted segment" id="icon-container">
+        <h2 class="ui small inverted icon header">
+            <!--<i class="settings icon"></i>-->
+            <i class="user secret icon"></i>
+            <div class="content">
+                You Have
+                <div class="sub header">A Scientist</div>
+            </div>
+        </h2>
+    </div>
 
     <h2 class="ui small inverted icon header" id="voting-container">
         <!--<i class="settings icon"></i>-->
         <i show="{player_data.status === 1}" class="cogs icon"></i>
-        <i show="{player_data.status === 2}" class="file alternate icon"></i>
+        <i show="{player_data.status === 2}" class="calendar icon"></i>
         <i show="{player_data.status === 3}" class="ellipsis horizontal icon"></i>
+        <i show="{player_data.status === 4}" class="exclamation icon"></i>
+        <i show="{player_data.status === 5}" class="calendar check icon"></i>
         <div class="content">
             Status
-            <div show="{player_data.status === 1}" class="sub header">Researching</div>
+            <div show="{player_data.status === 1}" class="sub header">In Progress</div>
             <div show="{player_data.status === 2}" class="sub header">Voting</div>
-            <div show="{player_data.status === 3}" class="sub header">Waiting</div>
+            <div show="{player_data.status === 3}" class="sub header">Preparing</div>
+            <div show="{player_data.status === 4}" class="sub header">Map End</div>
+            <div show="{player_data.status === 5}" class="sub header">Voted</div>
         </div>
     </h2>
 
@@ -59,6 +69,7 @@
             <div class="bar">
                 <div class="progress"></div>
             </div>
+            <div style="color: #21BA45;" class="label">{player_data.health}</div>
         </div>
     </div>
 
@@ -70,6 +81,7 @@
             <div class="bar">
                 <div class="progress"></div>
             </div>
+            <div style="color: gold;" class="label">{player_data.armor}</div>
         </div>
     </div>
 
@@ -152,7 +164,7 @@
                 var result = player.getInfo()
                 if (result !== null && typeof result !== 'undefined') {
                     self.player_data = JSON.parse(result)
-                    console.log(result)
+                    // console.log(result)
                     self.set_progress_bars(self.player_data)
                     if (self.player_data['has_scientist'] === true) {
                         self.show_scientist = true
@@ -239,8 +251,8 @@
 
         #scientist-container {
             position: fixed;
-            bottom: 0;
-            right: 15%;
+            bottom: -1%;
+            left: 38%;
             /*right: 50%;*/
 
             /*left: 3px;*/
@@ -248,7 +260,7 @@
 
         #ammo-container {
             position: fixed;
-            bottom: 2.5%;
+            bottom: 0;
             right: 1.5%;
             /*height: 15%;*/
             /*width: 15%;*/
@@ -262,6 +274,8 @@
             position: fixed;
             bottom: 45.70%;
             right: 48.75%;
+            opacity: 0.5;
+            fill-opacity: 0.5;
             /*margin-top: -50px;*/
             /*margin-left: -100px;*/
             /*height: 15%;*/
@@ -271,6 +285,14 @@
 
             /*left: 3px;*/
         }
+
+        #container-backgrounds {
+            position: fixed;
+            bottom: -2.5%;
+            width: 45%;
+            height: 14%;
+        }
+
         /*https://icons8.com/icon/set/secret/all*/
     </style>
 </heads-up-display>

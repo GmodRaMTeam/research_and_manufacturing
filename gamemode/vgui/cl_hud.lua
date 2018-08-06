@@ -30,13 +30,32 @@ function HUD:Init()
             local status = team.GetAllTeams()[LocalPlayer():Team()].ResearchManager.status
             local weapon = LocalPlayer():GetActiveWeapon()
             local ammo_data = {}
+
+            local clip_cur = nil
+            local clip_max = nil
+            local ammo_total = nil
+            local show_crosshair = nil
+
             if IsValid(weapon) and weapon.DrawAmmo then
+                -- Egon and Gauss use ammo a bit differently...
+                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' then
+                    clip_cur = weapon:GetAmmoPrimary()
+                    clip_max = weapon:GetMaxClip1()
+                    ammo_total = weapon:Ammo1()
+                    show_crosshair = weapon.DrawCrosshair
+                else
+                    clip_cur = weapon:Clip1()
+                    clip_max = weapon:GetMaxClip1()
+                    ammo_total = weapon:Ammo1()
+                    show_crosshair = weapon.DrawCrosshair
+                end
+
                 ammo_data = {
                     show = true,
-                    clip_cur = weapon:Clip1(),
-                    clip_max = weapon:GetMaxClip1(),
-                    ammo_total = weapon:Ammo1(),
-                    show_crosshair = weapon.DrawCrosshair,
+                    clip_cur = clip_cur,
+                    clip_max = clip_max,
+                    ammo_total = ammo_total,
+                    show_crosshair = show_crosshair,
                 }
             else
                 ammo_data = {

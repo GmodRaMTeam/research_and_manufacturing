@@ -15,7 +15,7 @@ SWEP.DrawCrosshair = true        -- set false if you want no crosshair
 SWEP.Weight = 10        -- rank relative ot other weapons. bigger is better
 SWEP.AutoSwitchTo = false       -- Auto switch to if we pick it up
 SWEP.AutoSwitchFrom = false        -- Auto switch from if you pick up a better weapon
-SWEP.HoldType = "pistol"        -- how others view you carrying the weapon
+SWEP.HoldType = "revolver"        -- how others view you carrying the weapon
 -- normal melee melee2 fist knife smg ar2 pistol rpg physgun grenade shotgun crossbow slam passive 
 -- you're mostly going to use ar2, smg, shotgun or pistol. rpg makes for good sniper rifles
 
@@ -30,6 +30,7 @@ SWEP.AdminSpawnable = true
 SWEP.FiresUnderwater = true
 
 SWEP.Primary.Sound = Sound("Weapon_Pistol.Single")        -- Script that calls the primary fire sound
+--SWEP.Primary.Sound = Sound("weapons/ram_pistol/magnum_single_shot.wav")        -- Script that calls the primary fire sound
 SWEP.Primary.SilencedSound = Sound( "Weapon_USP.SilencedShot" )        -- Sound if the weapon is silenced
 SWEP.Primary.RPM = 625            -- This is in Rounds Per Minute
 SWEP.Primary.ClipSize = 15        -- Size of a clip

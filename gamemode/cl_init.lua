@@ -65,38 +65,260 @@ local function InitTeamVariables()
     for ID, TeamInfo in pairs(AllTeams) do
         if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
             -- These should be client objects.
-            local newResearchManager = ClientResearchManager(ID, TeamInfo['Name'])
+            local newResearchManager = ClientResearchManager({
+                team_index = ID,
+                team_name = TeamInfo['Name']
+            })
             newResearchManager.status = RESEARCH_STATUS_PREP
-            local armorCat = newResearchManager:AddCategory('armor', 'Armor', "shield alternate icon")
-            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
-            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
-            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
-            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
-            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
+--            local armorCat = newResearchManager:AddCategory('armor', 'Armor', "shield alternate icon")
+--            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
+--            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
+--            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
+--            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
+--            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
 
-            local healthCat = newResearchManager:AddCategory('health', 'Health', "plus alternate icon")
-            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
-            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
-            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
-            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
-            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
+--            local healthCat = newResearchManager:AddCategory('health', 'Health', "plus alternate icon")
+--            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
+--            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
+--            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
+--            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
+--            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
+--
+--            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons', "fighter jet icon")
+--            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 70, 1)
+--            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 65, 2)
+--            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 65, 3, {'revolver'})
+--            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 70, 3, {'shotgun'})
+--            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 80, 4, {'smg'})
+--            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 85, 5, {'ar'})
+--
+--            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets', "wrench icon")
+--            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 60, 1)
+--            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 65, 2, {'satchel'})
+--            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 70, 3, {'grenade'})
+--
+--            local implantCat = newResearchManager:AddCategory('implants', 'Implants', "microchip icon")
+--            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', 60, 1)
+--            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', 65, 1, {'legs_one'})
 
-            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons', "fighter jet icon")
-            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 70, 1)
-            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 65, 2)
-            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 65, 3, {'revolver'})
-            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 70, 3, {'shotgun'})
-            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 80, 4, {'smg'})
-            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 85, 5, {'ar'})
+            -- key, name, description, cost, tier, reqs, category
+            local armorCat = newResearchManager:AddCategory({
+                key = 'armor',
+                name = 'Armor',
+                icon = "shield alternate icon"
+            })
 
-            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets', "wrench icon")
-            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 60, 1)
-            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 65, 2, {'satchel'})
-            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 70, 3, {'grenade'})
+            armorCat:AddTechnology({
+                key = 'armor_one', -- This is required
+                name = 'Armor Type I', -- This is required
+                description = '20 Armor',
+                tier = 1, -- This is required
+            })
 
-            local implantCat = newResearchManager:AddCategory('implants', 'Implants', "microchip icon")
-            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', 60, 1)
-            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', 65, 1, {'legs_one'})
+            armorCat:AddTechnology({
+                key = 'armor_two', -- This is required
+                name = 'Armor Type II', -- This is required
+                description = '40 Armor',
+                tier = 2, -- This is required
+                reqs = {'armor_one'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_three', -- This is required
+                name = 'Armor Type III', -- This is required
+                description = '60 Armor',
+                tier = 3, -- This is required
+                reqs = {'armor_two'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_four', -- This is required
+                name = 'Armor Type IV', -- This is required
+                description = '80 Armor',
+                tier = 4, -- This is required,
+                reqs = {'armor_three'}
+            })
+
+            armorCat:AddTechnology({
+                key = 'armor_five', -- This is required
+                name = 'Armor Type V', -- This is required
+                description = '100 Armor',
+                tier = 5, -- This is required,
+                reqs = {'armor_four'}
+            })
+
+            local healthCat = newResearchManager:AddCategory({
+                key = 'health',
+                name = 'Health',
+                icon = "plus alternate icon"
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_one', -- This is required
+                name = 'Health Type I', -- This is required
+                description = '110 Health',
+                tier = 1, -- This is required,
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_two', -- This is required
+                name = 'Health Type II', -- This is required
+                description = '120 Health',
+                tier = 2, -- This is required
+                reqs = {'health_one'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_three', -- This is required
+                name = 'Health Type III', -- This is required
+                description = '130 Health',
+                tier = 3, -- This is required
+                reqs = {'health_two'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_four', -- This is required
+                name = 'Health Type IV', -- This is required
+                description = '140 Health',
+                tier = 4, -- This is required
+                reqs = {'health_three'}
+            })
+
+            healthCat:AddTechnology({
+                key = 'health_five', -- This is required
+                name = 'Health Type V', -- This is required
+                description = '150 Health',
+                tier = 5, -- This is required
+                reqs = {'health_four'}
+            })
+
+            local weapCat = newResearchManager:AddCategory({
+                key = 'weapons',
+                name = 'Weapons',
+                icon = "fighter jet icon"
+            })
+            weapCat:AddTechnology({
+                key = 'revolver',
+                name = 'Revolver',
+                description = 'Mangum Revolver Pistol',
+                class = 'weapon_ram_revolver',
+                tier = 1
+            })
+
+            weapCat:AddTechnology({
+                key = 'shotgun',
+                name = 'Shotgun',
+                description = 'Basic singlebarrel shotgun',
+                class = 'weapon_ram_shotgun',
+                tier = 2
+            })
+
+            weapCat:AddTechnology({
+                key = 'smg',
+                name = 'SMG',
+                description = 'A low ROF high dmg SMG',
+                class = 'weapon_ram_smg',
+                tier = 3,
+                reqs = { 'revolver' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'ar',
+                name = 'Ar2',
+                description = 'A high ROF low dmg AR',
+                class = 'weapon_ram_ar2',
+                tier = 4,
+                reqs = { 'shotgun' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'crossbow',
+                name = 'Crossbow',
+                description = 'Classic Crossbow',
+                class = 'weapon_crossbow',
+                tier = 5,
+                reqs = { 'smg' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'rpg',
+                name = 'RPG',
+                description = 'Classic RPG',
+                class = 'weapon_rpg',
+                tier = 6,
+                reqs = { 'ar' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'gauss',
+                name = 'Gauss Gun',
+                description = 'The HL1 Gauss Gun',
+                class = 'weapon_ram_gauss',
+                tier = 7,
+                reqs = { 'crossbow' }
+            })
+
+            weapCat:AddTechnology({
+                key = 'egon',
+                name = 'Gluon Gun',
+                description = 'The HL1 Gluon Gun',
+                class = 'weapon_ram_egon',
+                tier = 8,
+                reqs = { 'rpg' }
+            })
+
+            local gadgetCat = newResearchManager:AddCategory({
+                key = 'gadgets',
+                name = 'Gadgets',
+                icon = "wrench icon"
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'satchel',
+                name = 'Satchel Charges',
+                description = 'Little surprises!',
+                class = 'weapon_ram_satchel',
+                tier = 1
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'grenade',
+                name = 'Grenades',
+                description = 'Classic Handgrenades',
+                class = 'weapon_grenade',
+                tier = 2,
+                reqs = { 'satchel' }
+            })
+
+            gadgetCat:AddTechnology({
+                key = 'tripmine',
+                name = 'Tripmines',
+                description = "Don't walk into the lasers!",
+                class = 'weapon_ram_tripmine',
+                tier = 3,
+                reqs = { 'grenade' }
+            })
+
+            local implantCat = newResearchManager:AddCategory({
+                key = 'implants',
+                name = 'Implants',
+                icon = "microchip icon"
+            })
+
+            implantCat:AddTechnology({
+                key = 'legs_one',
+                name = 'Cybenetic Legs MKI',
+                description = "Walk 25 units faster and run 50 units faster",
+                tier = 1
+            })
+
+            implantCat:AddTechnology({
+                key = 'legs_two',
+                name = 'Cybenetic Legs MKII',
+                description = "Walk 50 units faster and run 100 units faster",
+                tier = 2,
+                reqs = { 'legs_one' }
+            })
 
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start

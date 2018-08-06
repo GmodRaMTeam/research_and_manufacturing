@@ -29,6 +29,13 @@ net.Receive("RAM_RequestClientTechnologyUpdate", function(len, pl)
     end
 end)
 
+net.Receive("RAM_RequestClientUpdateEntireResearchTable", function(len, pl)
+    if (IsValid(pl) and pl:IsPlayer()) and (pl:Team() == TEAM_BLUE or pl:Team() == TEAM_ORANGE) then
+        local plyTeamResearchManager = team.GetAllTeams()[pl:Team()].ResearchManager
+        plyTeamResearchManager:UpdateClientTable(pl)
+    end
+end)
+
 -- This might be an expensive dumb idea
 function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_ply)
     local boolResearched = self.categories[cat_key].techs[tech_key].researched
@@ -40,6 +47,15 @@ function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_
     net.WriteBool(boolResearched)
     net.WriteInt(intVoteCount, 8)
     net.Send(calling_ply)
+    print("-----------------------------------------------------------------")
+    print("Sending shit from server")
+    print(cat_key)
+    print(tech_key)
+    print(calling_ply:Nick())
+    print(boolResearched)
+    print(intVoteCount)
+--    print(calling_ply:Nick())
+    print("-----------------------------------------------------------------")
 end
 
 -- This might be an expensive dumb idea
@@ -47,6 +63,14 @@ function ResearchManagerClass:SendClientTeamStatusUpdate(cat_key, tech_key)
 --    print("Doing some team updates")
     for k, ply in pairs(player.GetAll()) do
         if IsValid(ply) and ply:Team() == self.team_index then
+            self:SendClientStatusUpdate(cat_key, tech_key, ply)
+        end
+    end
+end
+
+function ResearchManagerClass:UpdateClientTable(ply)
+    for cat_key, category in pairs(self.categories) do
+        for tech_key, technology in pairs(category.techs) do
             self:SendClientStatusUpdate(cat_key, tech_key, ply)
         end
     end
@@ -71,9 +95,13 @@ function ResearchManagerClass:IsValidCategoryAndTechnology(cat_key, tech_key)
 end
 
 
-function ResearchManagerClass:AddCategory(key, name)
-    local newResearchCategory = ResearchCategory(key, name, self)
-    self.categories[key] = newResearchCategory -- Add to our categories
+function ResearchManagerClass:AddCategory(args)
+    --key, name, manager
+    if args.manager == nil then
+        args.manager = self
+    end
+    local newResearchCategory = ResearchCategory(args)
+    self.categories[args.key] = newResearchCategory -- Add to our categories
     return newResearchCategory -- Return our category to do something with it
 end
 
@@ -83,21 +111,22 @@ function ResearchManagerClass:TeamAutoPickResearch()
     if self.status == RESEARCH_STATUS_IN_PROGRESS then
         return
     end
-    for cat_key, category in pairs(self.categories) do
-        for tech_key, technology in pairs(category.techs) do
-            if technology:CanDoResearch() then
-                self:TeamDoResearch(cat_key, tech_key)
-            end
+    local random_category, cat_key = table.Random( self.categories )
+--    for cat_key, category in pairs(self.categories) do
+    for tech_key, technology in pairs(random_category.techs) do
+        if technology:CanDoResearch() then
+            self:TeamDoResearch(cat_key, tech_key)
         end
     end
+--    end
 end
 
 
 function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
     local technology = self.categories[cat_key].techs[tech_key]
 
-    local msg = "Completed research: " .. technology.name .. "!"
-    DynamicStatusUpdate(self.team_index, msg, 'success', nil)
+    local msg = "Completed research: " .. technology.name .. "! Begin voting for next tech!"
+    DynamicStatusUpdate(self.team_index, msg, 'voting', nil)
 
     technology.researched = true
     self.status = RESEARCH_STATUS_VOTING
@@ -218,12 +247,13 @@ function ResearchManagerClass:StartResearchAndMoneyMaking()
 end
 
 
-function ResearchManager(team_index, team_name)
-    assert(team_index ~= nil, "ResearchManager must be passed a valid team_index")
-    assert(team_name ~= nil, "ResearchManager must be passed a valid team_name")
+function ResearchManager(args)
+    -- team_index, team_name
+    assert(args.team_index ~= nil, "ResearchManager must be passed a valid team_index")
+    assert(args.team_name ~= nil, "ResearchManager must be passed a valid team_name")
     local newResearchManager = table.Copy(ResearchManagerClass)
-    newResearchManager.team_index = team_index
-    newResearchManager.team_name = team_name
+    newResearchManager.team_index = args.team_index
+    newResearchManager.team_name = args.team_name
 
     --Return our new Object.
     return newResearchManager
@@ -250,8 +280,9 @@ net.Receive("RAM_RecordResearchVote", function(len, ply)
             local research_name = tech.name
             local msg = "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!"
             DynamicStatusUpdate(ply:Team(), msg, 'success', nil)
+            ClientStatusUpdateToPlayer(RESEARCH_STATUS_CLIENT_VOTED, ply:Team(), ply)
         else
-            local msg = "That technology is already researched!"
+            local msg = "You are un-able to currently research that!"
             DynamicStatusUpdate(nil, msg, 'error', ply)
         end
     else

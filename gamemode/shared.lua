@@ -24,6 +24,7 @@ RESEARCH_STATUS_IN_PROGRESS = 1
 RESEARCH_STATUS_VOTING = 2
 RESEARCH_STATUS_PREP = 3
 RESEARCH_STATUS_MAP_END = 4
+RESEARCH_STATUS_CLIENT_VOTED = 5 --- THIS ONE IS SPECIAL!
 
 --[[---------------------------------------------------------
    Name: gamemode:CreateTeams()

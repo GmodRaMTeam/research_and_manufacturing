@@ -76,11 +76,11 @@ function ENT:OnInjured( damageInfo )
 				DynamicStatusUpdate(nil, message, 'error', attacker)
 			else
 				local weapon = attacker:GetActiveWeapon()
-				if weapon:GetClass() == "weapon_crowbar" then
+				if weapon:GetClass() == "weapon_stunstick" then
 					local success = attacker:PickUpScientist(self:GetDisplayName(), self.Cost, self:GetTeam())
 					if success then
 						local message = "Your scientist "..self:GetDisplayName().." was taken from your research lab!"
-						DynamicStatusUpdate(self:GetTeam(), message, 'error', nil)
+						DynamicStatusUpdate(self:GetTeam(), message, 'kidnap', nil)
 						self:Remove()
 					end
 				end
