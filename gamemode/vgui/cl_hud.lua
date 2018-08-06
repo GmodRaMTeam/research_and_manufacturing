@@ -30,6 +30,23 @@ function HUD:Init()
             local status = team.GetAllTeams()[LocalPlayer():Team()].ResearchManager.status
             local weapon = LocalPlayer():GetActiveWeapon()
             local ammo_data = {}
+            local research_timer = {}
+
+            if timer.Exists("RAM_LocalPlayerResearchTimer") then
+                research_timer = {
+                    show = true,
+                    time_left = timer.TimeLeft("RAM_LocalPlayerResearchTimer"),
+                    default_time = 35 -- This needs to be a convar...
+                }
+            else
+                research_timer = {
+                    show = false,
+                }
+            end
+
+--            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+--            PrintTable(research_timer)
+--            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
             local clip_cur = nil
             local clip_max = nil
@@ -38,7 +55,7 @@ function HUD:Init()
 
             if IsValid(weapon) and weapon.DrawAmmo then
                 -- Egon and Gauss use ammo a bit differently...
-                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' then
+                if weapon:GetClass() == 'weapon_ram_gauss' or weapon:GetClass() == 'weapon_ram_egon' or weapon:GetClass() == 'weapon_ram_tripmine' or weapon:GetClass() == 'weapon_ram_satchel' then
                     clip_cur = weapon:GetAmmoPrimary()
                     clip_max = weapon:GetMaxClip1()
                     ammo_total = weapon:Ammo1()
@@ -62,14 +79,15 @@ function HUD:Init()
                     show = false
                 }
             end
-            --            print(status)
+
             local player_data = {
                 health = LocalPlayer():Health(),
                 armor = LocalPlayer():Armor(),
                 has_scientist = LocalPlayer():GetHasScientist(),
                 status = status,
                 team_scientist_count = team.GetAllTeams()[LocalPlayer():Team()].Scientists,
-                ammo_data = ammo_data
+                ammo_data = ammo_data,
+                research_timer = research_timer
             }
             return util.TableToJSON(player_data)
         end
@@ -92,6 +110,7 @@ function HUD:Init()
     end)
 
     self.html:AddFunction("researchMenu", "update", function()
+--        SyncResearch()
         local ply = LocalPlayer()
         if ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE then
             local AllTeams = team.GetAllTeams()

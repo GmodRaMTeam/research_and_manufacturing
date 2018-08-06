@@ -121,22 +121,19 @@ function PLAYER:Loadout()
 			self.Player:Give( "weapon_ram_satchel" )
 		end
 		if ResearchManager.categories['gadgets'].techs['grenade'].researched then
-			self.Player:Give( "weapon_grenade" )
+			self.Player:Give( "weapon_frag" )
 		end
 		if ResearchManager.categories['gadgets'].techs['tripmine'].researched then
 			self.Player:Give( "weapon_ram_tripmine" )
 		end
 
 		if ResearchManager.categories['implants'].techs['legs_one'].researched and not ResearchManager.categories['implants'].techs['legs_two'].researched then
---			print("LEGS ONE IS RESEARCHED")
 			self.Player:SetRunSpeed( 450 )
 			self.Player:SetWalkSpeed( 225 )
 		elseif ResearchManager.categories['implants'].techs['legs_two'].researched then
---			print("LEGS TWO IS RESEARCHED")
 			self.Player:SetRunSpeed( 500 )
 			self.Player:SetWalkSpeed( 250 )
 		else
---			print("NO IMPLANTS")
 			self.Player:SetRunSpeed( 400 )
 			self.Player:SetWalkSpeed( 200 )
 		end

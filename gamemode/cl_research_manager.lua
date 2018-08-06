@@ -49,7 +49,8 @@ function ClientResearchManagerClass:ToJSON()
                 cost=technology.cost,
                 reqs=temp_list_reqs,
                 votes=technology.votes,
-                can_research=technology:CanDoResearch(),
+                can_research=(technology:CanDoResearch() and not technology.researched),
+--                researched=technology.researched
             })
         end
     end
@@ -71,13 +72,10 @@ end
 
 
 net.Receive("RAM_MakeMoney", function()
---    print("we made some muney")
     local team_to_update = net.ReadInt(3)
---    print("Muney goes to team: "..team_to_update.."!")
     local new_money = net.ReadInt(21)
     local TeamInfo = team.GetAllTeams()[team_to_update]
     TeamInfo.Money = new_money
---    print("Money updated!!!!")
 end)
 
 

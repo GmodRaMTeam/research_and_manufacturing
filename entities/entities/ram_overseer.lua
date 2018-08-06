@@ -59,7 +59,6 @@ function ENT:OnContact(ent)
                     local message = "Your team-member " .. ent:Nick() .. " has recruited a new scientist: " .. name .. "!"
                     DynamicStatusUpdate(self:GetTeam(), message, 'success', nil)
                     -- Something to do here
---                    print("Overseer is sending name"..name..".")
                     CaptureScientist(self:GetTeam(), name, cost, original_team)
                 else
 

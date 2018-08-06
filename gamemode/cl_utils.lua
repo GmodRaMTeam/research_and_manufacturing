@@ -44,7 +44,5 @@ net.Receive("RAM_DynamicNotification", function(len, pl)
         surface.PlaySound("beep-5.wav")
     end
 
-    print(stringStatus)
-
     HUD.html:QueueJavascript("toastr." .. stringStatus .. "('" .. stringMsg .. "')")
 end)

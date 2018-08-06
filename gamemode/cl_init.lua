@@ -37,10 +37,37 @@ local function InitPrepEndTimer()
     net.SendToServer()
 end
 
+local function InitSyncScientists()
+    net.Start("RAM_RequestScientistSync")
+    net.SendToServer()
+end
+
+function SyncResearch()
+    net.Start("RAM_RequestClientUpdateEntireResearchTable")
+    net.SendToServer()
+end
+
 function RequestStatus()
     net.Start("RAM_RequestSyncStatus")
     net.SendToServer()
 end
+
+function SyncResearchTimer()
+    net.Start("RAM_RequestSyncResearchTimer")
+    net.SendToServer()
+end
+
+net.Receive("RAM_SyncResearchTimer", function()
+    local research_time = net.ReadInt(12)
+    if timer.Exists("RAM_LocalPlayerResearchTimer") then
+        timer.Remove("RAM_LocalPlayerResearchTimer")
+    end
+    if research_time ~= nil and research_time > 0 then
+        timer.Create("RAM_LocalPlayerResearchTimer", research_time, 1, function()
+            print("!RAM_SyncResearchTimer!")
+        end)
+    end
+end)
 
 net.Receive("RAM_SyncMapTimer", function()
     local time = net.ReadFloat()
@@ -53,7 +80,6 @@ net.Receive("RAM_SyncPrepTimer", function()
 end)
 
 net.Receive("RAM_SyncStatus", function()
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
     local blue_status = net.ReadInt(4)
     local orange_status = net.ReadInt(4)
     team.GetAllTeams()[TEAM_BLUE].ResearchManager.status = blue_status
@@ -70,36 +96,6 @@ local function InitTeamVariables()
                 team_name = TeamInfo['Name']
             })
             newResearchManager.status = RESEARCH_STATUS_PREP
---            local armorCat = newResearchManager:AddCategory('armor', 'Armor', "shield alternate icon")
---            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', 60, 1)
---            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', 65, 2, {'armor_one'})
---            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', 70, 3, {'armor_two'})
---            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor', 75, 4, {'armor_three'})
---            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor', 75, 5, {'armor_four'})
-
---            local healthCat = newResearchManager:AddCategory('health', 'Health', "plus alternate icon")
---            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', 60, 1)
---            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', 65, 2, {'health_one'})
---            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', 70, 3, {'health_two'})
---            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Armor', 75, 4, {'health_three'})
---            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Armor', 75, 5, {'health_four'})
---
---            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons', "fighter jet icon")
---            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 70, 1)
---            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 65, 2)
---            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 65, 3, {'revolver'})
---            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 70, 3, {'shotgun'})
---            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 80, 4, {'smg'})
---            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 85, 5, {'ar'})
---
---            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets', "wrench icon")
---            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 60, 1)
---            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 65, 2, {'satchel'})
---            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 70, 3, {'grenade'})
---
---            local implantCat = newResearchManager:AddCategory('implants', 'Implants', "microchip icon")
---            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', 60, 1)
---            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', 65, 1, {'legs_one'})
 
             -- key, name, description, cost, tier, reqs, category
             local armorCat = newResearchManager:AddCategory({
@@ -285,7 +281,7 @@ local function InitTeamVariables()
                 key = 'grenade',
                 name = 'Grenades',
                 description = 'Classic Handgrenades',
-                class = 'weapon_grenade',
+                class = 'weapon_frag',
                 tier = 2,
                 reqs = { 'satchel' }
             })
@@ -366,11 +362,13 @@ end);
 hook.Add("InitPostEntity", "PlayerSpawnSyncTimers", function()
     InitPrepEndTimer()
     InitMapEndTimer()
+    InitSyncScientists()
     RequestStatus()
+    SyncResearch()
+    SyncResearchTimer()
     if HUD.html == nil then
         HUD:Init()
     end
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 end)
 
 hook.Add("HUDPaint", "ShowNPCHealthAboveHead", function() -- Get the entity we're looking at

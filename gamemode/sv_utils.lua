@@ -95,7 +95,6 @@ end
 function PrintToTeam(teamIndex, stringMsg)
     for k, ply in pairs(player.GetAll()) do
         if ply:Team() == teamIndex then
-            --ply:ChatPrint(stringMsg)
             net.Start("RAM_PrintToTeam")
             net.WriteString(stringMsg)
             net.Send(ply)

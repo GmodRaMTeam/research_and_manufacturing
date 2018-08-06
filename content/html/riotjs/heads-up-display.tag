@@ -12,6 +12,8 @@
         <i class="crosshairs icon"></i>
     </h2>
 
+    <!--show="{player_data.research_timer.show}"-->
+
     <div show="{player_data.ammo_data.show}" id="ammo-container" class="ui inverted segment">
         <h2 class="ui inverted header">
             <!--<i class="plug icon"></i>-->
@@ -38,6 +40,7 @@
 
     <h2 class="ui small inverted icon header" id="voting-container">
         <!--<i class="settings icon"></i>-->
+        <i show="{player_data.status === 0}" class="ellipsis horizontal icon"></i>
         <i show="{player_data.status === 1}" class="cogs icon"></i>
         <i show="{player_data.status === 2}" class="calendar icon"></i>
         <i show="{player_data.status === 3}" class="ellipsis horizontal icon"></i>
@@ -45,6 +48,7 @@
         <i show="{player_data.status === 5}" class="calendar check icon"></i>
         <div class="content">
             Status
+            <div show="{player_data.status === 0}" class="sub header">Finished</div>
             <div show="{player_data.status === 1}" class="sub header">In Progress</div>
             <div show="{player_data.status === 2}" class="sub header">Voting</div>
             <div show="{player_data.status === 3}" class="sub header">Preparing</div>
@@ -60,6 +64,18 @@
             <div class="sub header">{player_data.team_scientist_count}</div>
         </div>
     </h2>
+
+    <div show="{player_data.research_timer.show}" id="research-timer-container" style="opacity: 0.5; fill-opacity: 0.5;" class="ui inverted segment">
+        <div class="progress-bar-icon">
+            <!--<i class="clock icon"></i>-->
+        </div>
+        <div class="ui indicating progress" id="research-timer">
+            <div class="bar">
+                <div class="progress"></div>
+            </div>
+            <div class="label"><p style="color: white;">Research Time Left: {player_data.research_timer.time_left}</p></div>
+        </div>
+    </div>
 
     <div id="health-container">
         <div class="progress-bar-icon">
@@ -95,10 +111,16 @@
                 clip_cur: 7,
                 clip_max: 15,
                 ammo_total: 63,
+            },
+            research_timer: {
+                show: false,
+                time_left: 17,
+                default_time: 35
             }
         }
         self.show_scientist = false
         self.show_voting_status = true
+        self.inital_research_time = null
 
         /**********************************************************************
          * Init
@@ -110,6 +132,14 @@
                 total: 100,
                 autoSuccess: false,
                 showActivity: false,
+                label: 'percent'
+            })
+
+            $('#research-timer').progress({
+                value: 0,
+                total: 35,
+                autoSuccess: false,
+                showActivity: true,
                 label: 'percent'
             })
 
@@ -126,6 +156,11 @@
                                 clip_cur: 7,
                                 clip_max: 15,
                                 ammo_total: 63,
+                            },
+                            research_timer: {
+                                show: true,
+                                time_left: 17,
+                                default_time: 35
                             }
                         })
                     }
@@ -154,6 +189,10 @@
                 'update progress',
                 data.armor
             )
+            $('#research-timer').progress(
+                'update progress',
+                data.research_timer.time_left
+            )
         }
 
         /**********************************************************************
@@ -170,6 +209,21 @@
                         self.show_scientist = true
                     } else {
                         self.show_scientist = false
+                    }
+
+                    if (self.player_data.research_timer.show) {
+                        if (self.player_data.research_timer.time_left > 0 && self.inital_research_time === null){
+                            self.inital_research_time = self.player_data.research_timer.time_left
+                            $('#research-timer').progress({
+                                value: self.player_data.research_timer.time_left,
+                                total: self.player_data.research_timer.time_left,
+                                autoSuccess: false,
+                                showActivity: true,
+                                label: 'percent'
+                            })
+                        }
+                    } else {
+                        self.inital_research_time = null
                     }
                     // if (self.player_data['status'] === 2) {
                     //     self.show_voting_status = true
@@ -262,6 +316,20 @@
             position: fixed;
             bottom: 0;
             right: 1.5%;
+            /*height: 15%;*/
+            /*width: 15%;*/
+
+            /*right: 50%;*/
+
+            /*left: 3px;*/
+        }
+
+        #research-timer-container {
+            position: fixed;
+            top: 0;
+            right: 30%;
+            left: 30%
+            /*width: 35%;*/
             /*height: 15%;*/
             /*width: 15%;*/
 
