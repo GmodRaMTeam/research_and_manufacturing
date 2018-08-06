@@ -24,6 +24,9 @@ util.AddNetworkString("RAM_RequestSyncStatus")
 util.AddNetworkString("RAM_MakeMoney")
 util.AddNetworkString("RAM_ScientistUpdate")
 util.AddNetworkString("RAM_RequestClientUpdateEntireResearchTable")
+util.AddNetworkString("RAM_RequestScientistSync")
+util.AddNetworkString("RAM_RequestSyncResearchTimer")
+util.AddNetworkString("RAM_SyncResearchTimer")
 
 AddCSLuaFile("cl_init.lua")
 
@@ -61,7 +64,7 @@ CreateConVar("ram_map_time_limit_minutes", "30", FCVAR_NOTIFY + FCVAR_REPLICATED
 CreateConVar("ram_prep_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Prep time
 CreateConVar("ram_vote_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How long you have to vote
 CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How much money to lose on player death
-CreateConVar("ram_research_time_seconds", "35", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Research time in seconds. Do not go lower than 30
+CreateConVar("ram_research_time_seconds", "75", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Research time in seconds. Do not go lower than 30
 
 --[[All local spaced server functions]]
 
@@ -167,26 +170,6 @@ local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
     for ID, TeamInfo in pairs(AllTeams) do
         if ID == TEAM_BLUE or ID == TEAM_ORANGE then
---            local newResearchManager = ResearchManager(ID, TeamInfo['Name'])
---            local armorCat = newResearchManager:AddCategory('armor', 'Armor')
-            -- ResearchTechnology(key, name, class, tier, reqs, category)
---            armorCat:AddTechnology('armor_one', 'Armor Type I', 'Light Armor (20)', nil, 60, 1)
---            armorCat:AddTechnology('armor_two', 'Armor Type II', 'Decent Armor (40)', nil, 65, 2, {'armor_one'})
---            armorCat:AddTechnology('armor_three', 'Armor Type III', 'Better Armor (60)', nil, 70, 3, {'armor_two'})
---            armorCat:AddTechnology('armor_four', 'Armor Type IV', 'Good Armor (80)', nil, 75, 4, {'armor_three'})
---            armorCat:AddTechnology('armor_five', 'Armor Type V', 'Best Armor (100)', nil, 75, 5, {'armor_four'})
-
-            -- New style
-            -- key, name, description, class, cost, tier, reqs, category
---            armorCat:AddTechnology({
---                key = 'armor_one', -- This is required
---                name = 'Armor Type I', -- This is required
---                class = nil, -- This is optional
---                cost = 60, -- This is optional
---                tier = 1, -- This is required
---                reqs = nil, -- This is optional
---                category = armorCat, -- This is optional
---            })
 
             local newResearchManager = ResearchManager({
                 team_index = ID,
@@ -382,30 +365,6 @@ local function InitTeamVariables()
                 reqs = { 'legs_one' }
             })
 
---            local healthCat = newResearchManager:AddCategory('health', 'Health')
---            healthCat:AddTechnology('health_one', 'Health Type I', 'Light Health (20)', nil, 60, 1)
---            healthCat:AddTechnology('health_two', 'Health Type II', 'Decent Health (40)', nil, 65, 2, {'health_one'})
---            healthCat:AddTechnology('health_three', 'Health Type III', 'Better Health (60)', nil, 70, 3, {'health_two'})
---            healthCat:AddTechnology('health_four', 'Health Type IV', 'Good Health (80)', nil, 75, 4, {'health_three'})
---            healthCat:AddTechnology('health_five', 'Health Type V', 'Best Health (100)', nil, 75, 5, {'health_four'})
---
---            local weapCat = newResearchManager:AddCategory('weapons', 'Weapons')
---            weapCat:AddTechnology('revolver', 'Revolver', 'Mangum Revolver Pistol', 'weapon_ram_revolver', 70, 1)
---            weapCat:AddTechnology('shotgun', 'Shotgun', 'Light Shotgun', 'weapon_ram_shotgun', 65, 2)
---            weapCat:AddTechnology('smg', 'SMG', 'Basic SMG', 'weapon_ram_smg', 65, 3, {'revolver'})
---            weapCat:AddTechnology('ar', 'Ar2', 'Assault Rifle', 'weapon_ram_ar2', 70, 3, {'shotgun'})
---            weapCat:AddTechnology('gauss', 'Gauss Gun', 'Gauss Gun', 'weapon_ram_gauss', 80, 4, {'smg'})
---            weapCat:AddTechnology('egon', 'Gluon Gun', 'A massive DPS weapon', 'weapon_ram_egon', 85, 5, {'ar'})
---
---            local gadgetCat = newResearchManager:AddCategory('gadgets', 'Gadgets')
---            gadgetCat:AddTechnology('satchel', 'Satchel Charges', 'Little Surprises', 'weapon_ram_satchel', 60, 1)
---            gadgetCat:AddTechnology('grenade', 'Grenades', 'Classic Handgrenades', 'weapon_ram_handgrenade', 65, 2, {'satchel'})
---            gadgetCat:AddTechnology('tripmine', 'Tripmines', "Don't look into the laser!", 'weapon_ram_tripmine', 70, 3, {'grenade'})
---
---            local implantCat = newResearchManager:AddCategory('implants', 'Implants')
---            implantCat:AddTechnology('legs_one', 'Cybenetic Legs MKI', 'Run Faster', nil, 60, 1)
---            implantCat:AddTechnology('legs_two', 'Cybenetic Legs MKII', 'Jump Higher', nil, 65, 1, {'legs_one'})
-
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
             TeamInfo.Scientists = 3 -- Every team gets 3 to start
@@ -482,6 +441,21 @@ hook.Add("InitPostEntity", "SpawnRMNPCS", function()
     end
 end)
 
+local function SyncScientists(ply)
+    local AllTeams = team.GetAllTeams()
+    if ply ~= nil then
+        net.Start("RAM_ScientistUpdate")
+        net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
+        net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
+        net.Send(ply)
+    else
+        net.Start("RAM_ScientistUpdate")
+        net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
+        net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
+        net.Broadcast()
+    end
+end
+
 
 function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_original_team)
     local new_scientist = ents.Create("ram_simple_scientist")
@@ -503,10 +477,7 @@ function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_or
 
     DynamicStatusUpdate(scientist_original_team, 'You have lost one of your scientists to your competitor!', 'kidnap', nil)
 
-    net.Start("RAM_ScientistUpdate")
-    net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
-    net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
-    net.Broadcast()
+    SyncScientists(nil)
 
 end
 
@@ -520,4 +491,14 @@ end)
 
 net.Receive("RAM_RequestSyncStatus", function(len, ply)
     SyncStatus(ply)
+end)
+
+net.Receive("RAM_RequestScientistSync", function(len, ply)
+    SyncScientists(ply)
+end)
+
+net.Receive("RAM_RequestSyncResearchTimer", function(len, ply)
+    if ply:IsValid() and (ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE) then
+        team.GetAllTeams()[ply:Team()].ResearchManager:SyncPlyResearchTimer(ply)
+    end
 end)

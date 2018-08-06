@@ -101,12 +101,10 @@ function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type, is_gadge
             if is_gadget then
                 local given = 1
                 given = math.min(given, self[ammo_max_key] - current_ammo)
-                print("We alternatively gave: "..given.." amount of gadget ammo type: "..ammo_type.."!")
                 ply:AddAmmunition(ammo_type, given)
             else
                 local given = self.AmmoAmount
                 given = math.min(given, self[ammo_max_key] - current_ammo)
-                print("We alternatively gave: "..given.." amount of ammo type: "..ammo_type.."!")
                 ply:AddAmmunition(ammo_type, given)
             end
         end
@@ -166,23 +164,19 @@ function ENT:Touch(ent)
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'satchel') then
                 self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_satchel')
---                print("Give satchels")
                 self:GivePlayerAmmo(ent, 'satchel', 'SatchelAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'grenade') then
                 self:CheckPlayerWeaponAndGive(ent, 'weapon_frag')
---                print("Give grenades")
                 self:GivePlayerAmmo(ent, 'Grenade', 'GrenadeAmmoMax', true, true)
                 --                ent:AddAmmunition('uranium', 20)
             end
 
             if self:CheckTechRequirement(ent:Team(), 'gadgets', 'tripmine') then
                 self:CheckPlayerWeaponAndGive(ent, 'weapon_ram_tripmine')
---                print("Give tripmines")
                 self:GivePlayerAmmo(ent, 'tripmine', 'TripmineAmmoMax', true, true)
-                --                ent:AddAmmunition('uranium', 20)
             end
 
             if self.taken then

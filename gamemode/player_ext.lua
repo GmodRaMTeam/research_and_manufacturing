@@ -28,16 +28,10 @@ function plymeta:PrintScientistVars()
 end
 
 function plymeta:CanPickUpScientist()
---    local ply = self.Player
---    print("Do we not have a networked scientist?: "..tostring(self:GetHasScientist()).." ?")
---    return not self.has_scientist
     return not self:GetHasScientist()
 end
 
 function plymeta:CanRemoveScientist()
---    local ply = self.Player
---    print("Do we have a networked scientist?: "..tostring(self:GetHasScientist()).." ?")
---    return self.has_scientist
     return self:GetHasScientist()
 end
 
@@ -180,7 +174,6 @@ hook.Add("PlayerDeath", "RAM_PlayerTakeMoneyFromTeamOnDeath", function(victim, i
         if team_table.ResearchManager.status ~= RESEARCH_STATUS_PREP then
             team.GetAllTeams()[team_index].Money = team_table.Money - GetConVar("ram_player_death_cost"):GetInt()
             team_table.ResearchManager:SendTeamMoneyUpdate()
---            print("A player caused a team to lose money!")
         end
     end
 end)

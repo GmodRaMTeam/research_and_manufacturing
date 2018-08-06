@@ -27,14 +27,6 @@ net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
     local is_researched = net.ReadBool()
     local vote_count = net.ReadInt(8)
 
-    print("-----------------------------------------------------------------")
-    print("Receiving shit from server")
-    print(cat_key)
-    print(tech_key)
-    print(is_researched)
-    print(vote_count)
-    print("-----------------------------------------------------------------")
-
     local researchManager = team.GetAllTeams()[int_team].ResearchManager
     researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer(is_researched, vote_count)
 
@@ -84,9 +76,6 @@ function ClientResearchTechnologyClass:CanDoResearch()
             return false
         end
     end
-    --    else
-    --        return false
-    --    end
 end
 
 function ClientResearchTechnology(args)
