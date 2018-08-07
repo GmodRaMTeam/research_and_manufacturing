@@ -66,8 +66,8 @@ function PLAYER:Loadout()
 	-- If we're on one of the two teams we made...
 	if self.Player:Team() == TEAM_BLUE or self.Player:Team() == TEAM_ORANGE then
 		local ResearchManager = team.GetAllTeams()[self.Player:Team()].ResearchManager
-		if ResearchManager.categories['armor']:HasAtLeastOneTechUnlocked() then
-			local tech = ResearchManager.categories['armor']:GetHighestTechResearched()
+		if ResearchManager.categories['armor']:has_at_least_one_tech() then
+			local tech = ResearchManager.categories['armor']:get_highest_tech_researched()
 			if tech then
 				self.Player.MaxArmor = tech.tier * 20
 --				self.Player.StartArmor = tech.tier * 20
@@ -79,8 +79,8 @@ function PLAYER:Loadout()
 			self.Player:SetArmor(0)
 		end
 
-		if ResearchManager.categories['health']:HasAtLeastOneTechUnlocked() then
-			local tech = ResearchManager.categories['health']:GetHighestTechResearched()
+		if ResearchManager.categories['health']:has_at_least_one_tech() then
+			local tech = ResearchManager.categories['health']:get_highest_tech_researched()
 			if tech then
 				self.Player.MaxHealth = 100 + (tech.tier * 10)
 --				self.StartHealth = 100 +  (tech.tier * 20)

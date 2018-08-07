@@ -6,7 +6,7 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-include( "research_category.lua" )
+include( "sv_research_category.lua" )
 
 -------------------------------------------------
 
@@ -17,56 +17,41 @@ ResearchManagerClass.status = RESEARCH_STATUS_PREP -- Status, defaults to waitin
 --ResearchManagerClass.current_cost = 0 -- Current research time cost, defaults to 0
 ResearchManagerClass.categories = {} -- Array of categories.
 
-net.Receive("RAM_RequestClientTechnologyUpdate", function(len, pl)
-    -- Make sure the player calling this is a valid entity, and a valid player, on a team.
-    if (IsValid(pl) and pl:IsPlayer()) and (pl:Team() == TEAM_BLUE or pl:Team() == TEAM_ORANGE) then
-        local cat_key = net.ReadString()
-        local tech_key = net.ReadString()
-        local plyTeamResearchManager = team.GetAllTeams()[pl:Team()].ResearchManager
-        if plyTeamResearchManager:IsValidCategoryAndTechnology(cat_key, tech_key) then
-            plyTeamResearchManager:SendClientStatusUpdate(cat_key, tech_key, pl)
-        end
-    end
-end)
-
-net.Receive("RAM_RequestClientUpdateEntireResearchTable", function(len, pl)
-    if (IsValid(pl) and pl:IsPlayer()) and (pl:Team() == TEAM_BLUE or pl:Team() == TEAM_ORANGE) then
-        local plyTeamResearchManager = team.GetAllTeams()[pl:Team()].ResearchManager
-        plyTeamResearchManager:UpdateClientTable(pl)
-    end
-end)
 
 -- This might be an expensive dumb idea
-function ResearchManagerClass:SendClientStatusUpdate(cat_key, tech_key, calling_ply)
+function ResearchManagerClass:send_client_technology_update(cat_key, tech_key)
     local boolResearched = self.categories[cat_key].techs[tech_key].researched
     local intVoteCount = #self.categories[cat_key].techs[tech_key].votes
-    net.Start('RAM_ServerTechnologyUpdate', true)
-    net.WriteInt(calling_ply:Team(), 12)
+    net.Start('RAM_technology_update', true)
+    net.WriteInt(self.team_index, 12)
     net.WriteString(cat_key)
     net.WriteString(tech_key)
     net.WriteBool(boolResearched)
     net.WriteInt(intVoteCount, 8)
-    net.Send(calling_ply)
+--    net.Send(calling_ply)
+    net.Broadcast()
+    -- Broadcasting becasue this might make more sense for clients swithcing teams, etc
 end
 
 -- This might be an expensive dumb idea
-function ResearchManagerClass:SendClientTeamStatusUpdate(cat_key, tech_key)
-    for k, ply in pairs(player.GetAll()) do
-        if IsValid(ply) and ply:Team() == self.team_index then
-            self:SendClientStatusUpdate(cat_key, tech_key, ply)
-        end
-    end
+function ResearchManagerClass:send_team_client_technology_update(cat_key, tech_key)
+--    for k, ply in pairs(player.GetAll()) do
+--        if IsValid(ply) and ply:Team() == self.team_index then
+--            self:send_client_technology_update(cat_key, tech_key, ply)
+--        end
+--    end
+    self:send_client_technology_update(cat_key, tech_key)
 end
 
-function ResearchManagerClass:UpdateClientTable(ply)
+function ResearchManagerClass:update_client_table()
     for cat_key, category in pairs(self.categories) do
         for tech_key, technology in pairs(category.techs) do
-            self:SendClientStatusUpdate(cat_key, tech_key, ply)
+            self:send_client_technology_update(cat_key, tech_key)
         end
     end
 end
 
-function ResearchManagerClass:IsValidCategoryAndTechnology(cat_key, tech_key)
+function ResearchManagerClass:is_valid_cat_tech_pair(cat_key, tech_key)
     if cat_key ~= nil and #cat_key > 0 then
         if tech_key ~= nil and #tech_key > 0 then
             local cat_keys = table.GetKeys( self.categories )
@@ -85,7 +70,7 @@ function ResearchManagerClass:IsValidCategoryAndTechnology(cat_key, tech_key)
 end
 
 
-function ResearchManagerClass:AddCategory(args)
+function ResearchManagerClass:add_category(args)
     --key, name, manager
     if args.manager == nil then
         args.manager = self
@@ -96,7 +81,7 @@ function ResearchManagerClass:AddCategory(args)
 end
 
 
-function ResearchManagerClass:TeamAutoPickResearch()
+function ResearchManagerClass:auto_pick_research()
     local success = false
     -- If this gets called but we chose some research!
     if self.status == RESEARCH_STATUS_IN_PROGRESS then
@@ -105,63 +90,63 @@ function ResearchManagerClass:TeamAutoPickResearch()
     local random_category, cat_key = table.Random( self.categories )
 --    for cat_key, category in pairs(self.categories) do
     for tech_key, technology in pairs(random_category.techs) do
-        if technology:CanDoResearch() then
-            self:TeamDoResearch(cat_key, tech_key)
+        if technology:can_do_research() then
+            self:do_research(cat_key, tech_key)
             success = true
         end
     end
     if not success then -- If we don't succeed, try again
-        self:TeamAutoPickResearch()
+        self:auto_pick_research()
     end
 --    end
 end
 
 
-function ResearchManagerClass:CompleteResearch(cat_key, tech_key)
+function ResearchManagerClass:complete_research(cat_key, tech_key)
     -- First things first, update our technology.
     local technology = self.categories[cat_key].techs[tech_key]
     technology.researched = true
 
     -- Then check if we're done resarching eeeeevvvveryyythinggggg
-    if self:CheckAreAllTechsResearched() then
+    if self:are_all_techs_researched() then
         self.status = RESEARCH_STATUS_WAITING
         -- Send our team an update!
         local msg = "Completed research: " .. technology.name .. "! Appears you've finished all current contracts!"
-        DynamicStatusUpdate(self.team_index, msg, 'warning', nil)
+        ram_dynamic_status_update(self.team_index, msg, 'warning', nil)
         -- Reset vote count, send client updated tech values, and send client the new status
-        self:ResetVoteCount()
-        self:SendClientTeamStatusUpdate(cat_key, tech_key)
-        ClientStatusUpdate(self.status, self.team_index)
+        self:reset_votes()
+        self:send_team_client_technology_updatee(cat_key, tech_key)
+        ram_client_status_update(self.status, self.team_index)
     else
         self.status = RESEARCH_STATUS_VOTING
         -- Send our team an update!
         local msg = "Completed research: " .. technology.name .. "! Begin voting for next tech!"
-        DynamicStatusUpdate(self.team_index, msg, 'voting', nil)
+        ram_dynamic_status_update(self.team_index, msg, 'voting', nil)
         -- Reset vote count, send client updated tech values, and send client the new status
-        self:ResetVoteCount()
-        self:SendClientTeamStatusUpdate(cat_key, tech_key)
-        ClientStatusUpdate(self.status, self.team_index)
+        self:reset_votes()
+        self:send_team_client_technology_update(cat_key, tech_key)
+        ram_client_status_update(self.status, self.team_index)
         -- Create our new timer for the next vote cycle
         local menu_vote_time = GetConVar("ram_vote_time_limit_seconds"):GetInt()
-        timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
+        timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:tally_votes() end)
     end
 end
 
 
-function ResearchManagerClass:TeamDoResearch(cat_key, tech_key)
+function ResearchManagerClass:do_research(cat_key, tech_key)
     local technology = self.categories[cat_key].techs[tech_key]
     local TeamInfo = team.GetAllTeams()[self.team_index]
     self.status = RESEARCH_STATUS_IN_PROGRESS
     local msg = "Research started on "..technology.name.."!"
-    DynamicStatusUpdate(self.team_index, msg, 'success', nil)
-    ClientStatusUpdate(self.status, self.team_index)
+    ram_dynamic_status_update(self.team_index, msg, 'success', nil)
+    ram_client_status_update(self.status, self.team_index)
     local research_cost = technology.cost - (5 * TeamInfo.Scientists)
-    timer.Create("Team" .. self.team_index .. "ResearchTimer", research_cost, 1, function() self:CompleteResearch(cat_key, tech_key) end)
-    self:SyncTeamResearchTimer(research_cost)
+    timer.Create("Team" .. self.team_index .. "ResearchTimer", research_cost, 1, function() self:complete_research(cat_key, tech_key) end)
+    self:sync_team_research_timer(research_cost)
 end
 
 
-function ResearchManagerClass:TallyVotes()
+function ResearchManagerClass:tally_votes()
     -- Setup a temp table to track our values
     local temp_current_winner = {}
     temp_current_winner.value = 0
@@ -191,20 +176,20 @@ function ResearchManagerClass:TallyVotes()
     end
     if temp_current_winner.value == 0 or temp_current_winner.cat_key == nil or temp_current_winner.tech_key == nil then
         local msg = "Your team had research automatically chosen, because no-one voted."
-        DynamicStatusUpdate(self.team_index, msg, 'warning', nil)
-        self:TeamAutoPickResearch()
+        ram_dynamic_status_update(self.team_index, msg, 'warning', nil)
+        self:auto_pick_research()
     else
         local technology = self.categories[temp_current_winner.cat_key].techs[temp_current_winner.tech_key]
         -- Remove our timer if it is there
         if timer.Exists("Team" .. self.team_index .. "ResearchAutoTimer") then
             timer.Remove("Team" .. self.team_index .. "ResearchAutoTimer")
         end
-        self:TeamDoResearch(temp_current_winner.cat_key, temp_current_winner.tech_key)
+        self:do_research(temp_current_winner.cat_key, temp_current_winner.tech_key)
     end
 end
 
 
-function ResearchManagerClass:ResetVoteCount()
+function ResearchManagerClass:reset_votes()
     for cat_key, category in pairs(self.categories) do
         for tech_key, technology in pairs(category.techs) do
             technology.votes = {}
@@ -213,7 +198,7 @@ function ResearchManagerClass:ResetVoteCount()
 end
 
 
-function ResearchManagerClass:HasUserVoted(player_steamid)
+function ResearchManagerClass:has_user_voted(player_steamid)
     for cat_key, category in pairs(self.categories) do
         for tech_key, technology in pairs(category.techs) do
             for vote_index, vote in pairs(technology.votes) do
@@ -227,32 +212,32 @@ function ResearchManagerClass:HasUserVoted(player_steamid)
 end
 
 
-function ResearchManagerClass:MakeMoney()
+function ResearchManagerClass:make_money()
     local TeamInfo = team.GetAllTeams()[self.team_index]
     TeamInfo.Money = TeamInfo.Money + (200 + (100 * TeamInfo.Scientists))
-    self:SendTeamMoneyUpdate()
+    self:send_team_money_update()
 end
 
 
-function ResearchManagerClass:SendTeamMoneyUpdate()
+function ResearchManagerClass:send_team_money_update()
     local TeamInfo = team.GetAllTeams()[self.team_index]
-    net.Start("RAM_MakeMoney")
+    net.Start("RAM_make_money")
     net.WriteInt(self.team_index, 3)
     net.WriteInt(TeamInfo.Money, 21)
     net.Broadcast()
 end
 
 
-function ResearchManagerClass:StartResearchAndMoneyMaking()
-    timer.Create('RAM_Team' .. self.team_index .. "MoneyCycleTimer", 15, 0, function()
-        self:MakeMoney()
+function ResearchManagerClass:start_research_cycle()
+    timer.Create('RAM_Team' .. self.team_index .. "MoneyCycleTimer", GetConVar("ram_money_cycle_time_seconds"):GetInt(), 0, function()
+        self:make_money()
     end)
     self.status = RESEARCH_STATUS_VOTING
     local menu_vote_time = GetConVar("ram_vote_time_limit_seconds"):GetInt()
-    timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:TallyVotes() end)
+    timer.Create("Team" .. self.team_index .. "VoteMenuTimeLimit", menu_vote_time, 1, function() self:tally_votes() end)
 end
 
-function ResearchManagerClass:CheckAreAllTechsResearched()
+function ResearchManagerClass:are_all_techs_researched()
     for cat_key, category in pairs(self.categories) do
         for tech_key, technology in pairs(category.techs) do
             if not technology.researched then return false end
@@ -261,13 +246,13 @@ function ResearchManagerClass:CheckAreAllTechsResearched()
     return true
 end
 
-function ResearchManagerClass:SyncTeamResearchTimer()
+function ResearchManagerClass:sync_team_research_timer()
     if timer.Exists("Team" .. self.team_index .. "ResearchTimer") then
         local research_cost = timer.TimeLeft("Team" .. self.team_index .. "ResearchTimer")
         print("Syncing timers with players")
         for k, ply in pairs(player.GetAll()) do
             if IsValid(ply) and ply:Team() == self.team_index then
-                net.Start("RAM_SyncResearchTimer")
+                net.Start("RAM_sync_research_timer")
                 net.WriteInt(research_cost, 12)
                 net.Send(ply)
             end
@@ -275,11 +260,11 @@ function ResearchManagerClass:SyncTeamResearchTimer()
     end
 end
 
-function ResearchManagerClass:SyncPlyResearchTimer(ply)
+function ResearchManagerClass:sync_player_research_timer(ply)
     if timer.Exists("Team" .. self.team_index .. "ResearchTimer") then
         local research_cost = timer.TimeLeft("Team" .. self.team_index .. "ResearchTimer")
         if IsValid(ply) and ply:Team() == self.team_index then
-            net.Start("RAM_SyncResearchTimer")
+            net.Start("RAM_sync_research_timer")
             net.WriteInt(research_cost, 12)
             net.Send(ply)
             print("WE SENT A PLAYER RESEARCH TIMER")
@@ -298,35 +283,3 @@ function ResearchManager(args)
     --Return our new Object.
     return newResearchManager
 end
-
---====================================================================================================================--
---                                                                                                                    --
---====================================================================================================================--
-
-net.Receive("RAM_RecordResearchVote", function(len, ply)
---    DynamicStatusUpdate(ply:Team(), 'Test', 'success', nil)
-
-	local research_cat = net.ReadString()
-	local research_index = net.ReadString()
-    local AllTeams = team.GetAllTeams()
-    local TeamInfo = AllTeams[ply:Team()]
-
-    local ply_has_voted = TeamInfo.ResearchManager:HasUserVoted(ply:SteamID())
-    local tech = TeamInfo.ResearchManager.categories[research_cat].techs[research_index]
-
-    if not ply_has_voted then
-        if tech:CanDoResearch() and not tech.researched then
-            table.insert(tech.votes, ply:SteamID())
-            local research_name = tech.name
-            local msg = "Vote recorded for " .. research_name .. " by " .. ply:Nick() .. "!"
-            DynamicStatusUpdate(ply:Team(), msg, 'success', nil)
-            ClientStatusUpdateToPlayer(RESEARCH_STATUS_CLIENT_VOTED, ply:Team(), ply)
-        else
-            local msg = "You are un-able to currently research that!"
-            DynamicStatusUpdate(nil, msg, 'error', ply)
-        end
-    else
-        local msg = "Please wait until the next voting session to vote again!"
-        DynamicStatusUpdate(nil, msg, 'error', ply)
-    end
-end)

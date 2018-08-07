@@ -40,7 +40,7 @@ function SWEP:SetWeaponHoldType(t)
 	end
 	self:SetupWeaponHoldTypeForAI(t)
 end
-SWEP:SetWeaponHoldType("pistol")
+--SWEP:SetWeaponHoldType("pistol")
 
 function SWEP:TranslateActivity(act)
 	if self.Owner:IsNPC() then

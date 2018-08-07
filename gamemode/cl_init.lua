@@ -7,6 +7,8 @@
 --include( "cl_research_category.lua" )
 --include( "cl_research_technology.lua" )
 
+include( "cl_net.lua" )
+include( "cl_hooks.lua" )
 include( "cl_research_manager.lua" )
 include( "cl_utils.lua" )
 include( "shared.lua" )
@@ -17,74 +19,6 @@ include( "vgui/cl_hud.lua" )
 include( "vgui/cl_pickteam.lua" )
 include( "vgui/cl_research_menu.lua" )
 include( "vgui/cl_scoreboard.lua" )
-
-local function EndMap()
-    -- Yay we're a placeholder
-    HUD.html:QueueJavascript([[ EVENTS.trigger('show_scoreboard') ]])
-end
-
-local function EndPrep()
-    -- Yay we're a placeholder
-end
-
-local function InitMapEndTimer()
-    net.Start("RAM_RequestSyncMapTimer")
-    net.SendToServer()
-end
-
-local function InitPrepEndTimer()
-    net.Start("RAM_RequestSyncPrepTimer")
-    net.SendToServer()
-end
-
-local function InitSyncScientists()
-    net.Start("RAM_RequestScientistSync")
-    net.SendToServer()
-end
-
-function SyncResearch()
-    net.Start("RAM_RequestClientUpdateEntireResearchTable")
-    net.SendToServer()
-end
-
-function RequestStatus()
-    net.Start("RAM_RequestSyncStatus")
-    net.SendToServer()
-end
-
-function SyncResearchTimer()
-    net.Start("RAM_RequestSyncResearchTimer")
-    net.SendToServer()
-end
-
-net.Receive("RAM_SyncResearchTimer", function()
-    local research_time = net.ReadInt(12)
-    if timer.Exists("RAM_LocalPlayerResearchTimer") then
-        timer.Remove("RAM_LocalPlayerResearchTimer")
-    end
-    if research_time ~= nil and research_time > 0 then
-        timer.Create("RAM_LocalPlayerResearchTimer", research_time, 1, function()
-            print("!RAM_SyncResearchTimer!")
-        end)
-    end
-end)
-
-net.Receive("RAM_SyncMapTimer", function()
-    local time = net.ReadFloat()
-    timer.Create('RAM_TimerMapEnd', time , 1, EndMap)
-end)
-
-net.Receive("RAM_SyncPrepTimer", function()
-    local time = net.ReadFloat()
-    timer.Create('RAM_TimerPrepEnd', time, 1, EndPrep)
-end)
-
-net.Receive("RAM_SyncStatus", function()
-    local blue_status = net.ReadInt(4)
-    local orange_status = net.ReadInt(4)
-    team.GetAllTeams()[TEAM_BLUE].ResearchManager.status = blue_status
-    team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status = orange_status
-end)
 
 local function InitTeamVariables()
     local AllTeams = team.GetAllTeams()
@@ -98,20 +32,20 @@ local function InitTeamVariables()
             newResearchManager.status = RESEARCH_STATUS_PREP
 
             -- key, name, description, cost, tier, reqs, category
-            local armorCat = newResearchManager:AddCategory({
+            local armorCat = newResearchManager:add_category({
                 key = 'armor',
                 name = 'Armor',
                 icon = "shield alternate icon"
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_one', -- This is required
                 name = 'Armor Type I', -- This is required
                 description = '20 Armor',
                 tier = 1, -- This is required
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_two', -- This is required
                 name = 'Armor Type II', -- This is required
                 description = '40 Armor',
@@ -119,7 +53,7 @@ local function InitTeamVariables()
                 reqs = {'armor_one'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_three', -- This is required
                 name = 'Armor Type III', -- This is required
                 description = '60 Armor',
@@ -127,7 +61,7 @@ local function InitTeamVariables()
                 reqs = {'armor_two'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_four', -- This is required
                 name = 'Armor Type IV', -- This is required
                 description = '80 Armor',
@@ -135,7 +69,7 @@ local function InitTeamVariables()
                 reqs = {'armor_three'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_five', -- This is required
                 name = 'Armor Type V', -- This is required
                 description = '100 Armor',
@@ -143,20 +77,20 @@ local function InitTeamVariables()
                 reqs = {'armor_four'}
             })
 
-            local healthCat = newResearchManager:AddCategory({
+            local healthCat = newResearchManager:add_category({
                 key = 'health',
                 name = 'Health',
                 icon = "plus alternate icon"
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_one', -- This is required
                 name = 'Health Type I', -- This is required
                 description = '110 Health',
                 tier = 1, -- This is required,
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_two', -- This is required
                 name = 'Health Type II', -- This is required
                 description = '120 Health',
@@ -164,7 +98,7 @@ local function InitTeamVariables()
                 reqs = {'health_one'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_three', -- This is required
                 name = 'Health Type III', -- This is required
                 description = '130 Health',
@@ -172,7 +106,7 @@ local function InitTeamVariables()
                 reqs = {'health_two'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_four', -- This is required
                 name = 'Health Type IV', -- This is required
                 description = '140 Health',
@@ -180,7 +114,7 @@ local function InitTeamVariables()
                 reqs = {'health_three'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_five', -- This is required
                 name = 'Health Type V', -- This is required
                 description = '150 Health',
@@ -188,12 +122,12 @@ local function InitTeamVariables()
                 reqs = {'health_four'}
             })
 
-            local weapCat = newResearchManager:AddCategory({
+            local weapCat = newResearchManager:add_category({
                 key = 'weapons',
                 name = 'Weapons',
                 icon = "fighter jet icon"
             })
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'revolver',
                 name = 'Revolver',
                 description = 'Mangum Revolver Pistol',
@@ -201,7 +135,7 @@ local function InitTeamVariables()
                 tier = 1
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'shotgun',
                 name = 'Shotgun',
                 description = 'Basic singlebarrel shotgun',
@@ -209,7 +143,7 @@ local function InitTeamVariables()
                 tier = 2
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'smg',
                 name = 'SMG',
                 description = 'A low ROF high dmg SMG',
@@ -218,7 +152,7 @@ local function InitTeamVariables()
                 reqs = { 'revolver' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'ar',
                 name = 'Ar2',
                 description = 'A high ROF low dmg AR',
@@ -227,7 +161,7 @@ local function InitTeamVariables()
                 reqs = { 'shotgun' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'crossbow',
                 name = 'Crossbow',
                 description = 'Classic Crossbow',
@@ -236,7 +170,7 @@ local function InitTeamVariables()
                 reqs = { 'smg' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'rpg',
                 name = 'RPG',
                 description = 'Classic RPG',
@@ -245,7 +179,7 @@ local function InitTeamVariables()
                 reqs = { 'ar' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'gauss',
                 name = 'Gauss Gun',
                 description = 'The HL1 Gauss Gun',
@@ -254,7 +188,7 @@ local function InitTeamVariables()
                 reqs = { 'crossbow' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'egon',
                 name = 'Gluon Gun',
                 description = 'The HL1 Gluon Gun',
@@ -263,13 +197,13 @@ local function InitTeamVariables()
                 reqs = { 'rpg' }
             })
 
-            local gadgetCat = newResearchManager:AddCategory({
+            local gadgetCat = newResearchManager:add_category({
                 key = 'gadgets',
                 name = 'Gadgets',
                 icon = "wrench icon"
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'satchel',
                 name = 'Satchel Charges',
                 description = 'Little surprises!',
@@ -277,7 +211,7 @@ local function InitTeamVariables()
                 tier = 1
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'grenade',
                 name = 'Grenades',
                 description = 'Classic Handgrenades',
@@ -286,7 +220,7 @@ local function InitTeamVariables()
                 reqs = { 'satchel' }
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'tripmine',
                 name = 'Tripmines',
                 description = "Don't walk into the lasers!",
@@ -295,20 +229,20 @@ local function InitTeamVariables()
                 reqs = { 'grenade' }
             })
 
-            local implantCat = newResearchManager:AddCategory({
+            local implantCat = newResearchManager:add_category({
                 key = 'implants',
                 name = 'Implants',
                 icon = "microchip icon"
             })
 
-            implantCat:AddTechnology({
+            implantCat:add_technology({
                 key = 'legs_one',
                 name = 'Cybenetic Legs MKI',
                 description = "Walk 25 units faster and run 50 units faster",
                 tier = 1
             })
 
-            implantCat:AddTechnology({
+            implantCat:add_technology({
                 key = 'legs_two',
                 name = 'Cybenetic Legs MKII',
                 description = "Walk 50 units faster and run 100 units faster",
@@ -319,7 +253,7 @@ local function InitTeamVariables()
             TeamInfo.ResearchManager = newResearchManager
             TeamInfo.Money = 30000 -- Every team gets $30,000 to start
             TeamInfo.Scientists = 3 -- Every team gets $30,000 to start
-            TeamInfo.ResearchManager:ToJSON()
+            TeamInfo.ResearchManager:to_JSON()
         end
     end
 end
@@ -335,6 +269,7 @@ end
 
 -- Hide the standard HUD stuff
 local hud = { ["CCrossHair"] = false, ["CHudHealth"] = true, ["CHudBattery"] = true, ["CHudAmmo"] = true, ["CHudSecondaryAmmo"] = true }
+
 function GM:HUDShouldDraw(name)
     if hud[name] then return false end
 
@@ -354,74 +289,3 @@ function GM:HUDShouldDraw(name)
 
     return true
 end
-
-hook.Add("HUDPaint", "PaintOurHud", function()
-    HUD:Draw()
-end);
-
-hook.Add("InitPostEntity", "PlayerSpawnSyncTimers", function()
-    InitPrepEndTimer()
-    InitMapEndTimer()
-    InitSyncScientists()
-    RequestStatus()
-    SyncResearch()
-    SyncResearchTimer()
-    if HUD.html == nil then
-        HUD:Init()
-    end
-end)
-
-hook.Add("HUDPaint", "ShowNPCHealthAboveHead", function() -- Get the entity we're looking at
-    local ent = LocalPlayer():GetEyeTrace().Entity
-    -- check if it's really an NPC and the class we want
-    if IsValid(ent) and ent:GetClass() == 'ram_simple_scientist' then
-        local pos = (ent:GetPos() + Vector(0,-2,80)):ToScreen()
-        local team = ''
-        local color = Color(255, 255, 255)
-        if ent:GetTeam() == TEAM_BLUE then
-            team = 'Blue Team'
-            color = Color(0, 0, 255)
-        else
-            team = 'Orange Team'
-            color = Color(255, 160, 0)
-        end
-        -- check we can actually see this part of the entity
-        if pos.visible and LocalPlayer():GetPos():Distance(ent:GetPos()) < 100 then -- what info to draw
-            draw.DrawText(
-                tostring(ent:GetDisplayName()),
-                "Trebuchet18",
-                pos.x, pos.y,
-                color,
-                -- how to align the text
-                TEXT_ALIGN_CENTER
-            )
-            draw.DrawText(
-                tostring(team),
-                "Trebuchet18",
-                pos.x, pos.y + 10,
-                color,
-                -- how to align the text
-                TEXT_ALIGN_CENTER
-            )
-        end
-    end
-end)
-
-net.Receive('RAM_ShowHelp', function()
-    local ply = LocalPlayer()
-    local researchStatus = net.ReadInt(4)
-    if ( ply:Team() ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR ) then
-        if researchStatus == RESEARCH_STATUS_VOTING then
-            if HUD.html ~= nil then
-                HUD.html:QueueJavascript([[ EVENTS.trigger('toggle_research_menu') ]])
-                local current_cursor_status = vgui.CursorVisible()
-                gui.EnableScreenClicker((not current_cursor_status))
-            end
-        end
-    end
-end)
-
-net.Receive("RAM_ScientistUpdate", function()
-    team.GetAllTeams()[TEAM_BLUE].Scientists = net.ReadInt(4)
-    team.GetAllTeams()[TEAM_ORANGE].Scientists = net.ReadInt(4)
-end)

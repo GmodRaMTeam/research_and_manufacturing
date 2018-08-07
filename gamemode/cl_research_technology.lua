@@ -18,37 +18,22 @@ ClientResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
 ClientResearchTechnologyClass.votes = 0 -- Defaults to empty array/table
 ClientResearchTechnologyClass.category = nil
 
-
-net.Receive("RAM_ServerTechnologyUpdate", function(len, pl)
-    -- Make sur ethe player calling this is a valid entity, and a valid player, on a team.
-    local int_team = net.ReadInt(12)
-    local cat_key = net.ReadString()
-    local tech_key = net.ReadString()
-    local is_researched = net.ReadBool()
-    local vote_count = net.ReadInt(8)
-
-    local researchManager = team.GetAllTeams()[int_team].ResearchManager
-    researchManager.categories[cat_key].techs[tech_key]:UpdateFromServer(is_researched, vote_count)
-
-end)
-
-
-function ClientResearchTechnologyClass:RequestServerUpdate()
+function ClientResearchTechnologyClass:request_server_update()
     print("Requesting server update")
-    net.Start("RAM_RequestClientTechnologyUpdate")
+    net.Start("RAMCL_request_technology_update")
     net.WriteString(self.category.key)
     net.WriteString(self.key)
     net.SendToServer()
 end
 
 
-function ClientResearchTechnologyClass:UpdateFromServer(is_researched, vote_count)
+function ClientResearchTechnologyClass:update_from_server(is_researched, vote_count)
     self.researched = is_researched
     self.votes = vote_count
 end
 
 
-function ClientResearchTechnologyClass:MeetsRequirements()
+function ClientResearchTechnologyClass:requirements_met()
     -- If no requirementList passed, return True
     if #self.reqs == 0 then
         return true
@@ -63,18 +48,15 @@ function ClientResearchTechnologyClass:MeetsRequirements()
 end
 
 
-function ClientResearchTechnologyClass:CanDoResearch()
+function ClientResearchTechnologyClass:can_do_research()
     local manager = self.category.manager
     --    if (manager.status == RESEARCH_STATUS_VOTING) then
     -- If we have researched it, return false, if not keep going
-    if self.researched then
-        return false
+    if self.researched then return false end
+    if self:requirements_met() then
+        return true
     else
-        if self:MeetsRequirements() then
-            return true
-        else
-            return false
-        end
+        return false
     end
 end
 

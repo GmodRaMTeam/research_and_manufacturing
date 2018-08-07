@@ -73,21 +73,21 @@ function ENT:OnInjured( damageInfo )
 		if TeamInfo.ResearchManager.status ~= RESEARCH_STATUS_PREP then
 			if attacker:Team() == self:GetTeam() then
 				local message = "This scientist is on your team!"
-				DynamicStatusUpdate(nil, message, 'error', attacker)
+				ram_dynamic_status_update(nil, message, 'error', attacker)
 			else
 				local weapon = attacker:GetActiveWeapon()
 				if weapon:GetClass() == "weapon_stunstick" then
 					local success = attacker:PickUpScientist(self:GetDisplayName(), self.Cost, self:GetTeam())
 					if success then
 						local message = "Your scientist "..self:GetDisplayName().." was taken from your research lab!"
-						DynamicStatusUpdate(self:GetTeam(), message, 'kidnap', nil)
+						ram_dynamic_status_update(self:GetTeam(), message, 'kidnap', nil)
 						self:Remove()
 					end
 				end
 			end
 		else
 			local message = "Please wait for prep to end!"
-			DynamicStatusUpdate(nil, message, 'error', attacker)
+			ram_dynamic_status_update(nil, message, 'error', attacker)
 		end
 	end
 end

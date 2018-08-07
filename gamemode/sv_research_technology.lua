@@ -17,7 +17,7 @@ ResearchTechnologyClass.reqs = {} -- Defaults to empty array/table
 ResearchTechnologyClass.votes = {} -- Defaults to empty array/table
 ResearchTechnologyClass.category = nil
 
-function ResearchTechnologyClass:MeetsRequirements()
+function ResearchTechnologyClass:requirements_met()
     -- If no requirementList passed, return True
     if #self.reqs == 0 then
         return true
@@ -32,14 +32,14 @@ function ResearchTechnologyClass:MeetsRequirements()
 end
 
 
-function ResearchTechnologyClass:CanDoResearch()
+function ResearchTechnologyClass:can_do_research()
     local manager = self.category.manager
     if (manager.status == RESEARCH_STATUS_VOTING) then
         -- If we have researched it, return false, if not keep going
         if self.researched then
             return false
         else
-            if self:MeetsRequirements() then
+            if self:requirements_met() then
                 return true
             else
                 return false

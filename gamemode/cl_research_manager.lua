@@ -16,7 +16,7 @@ ClientResearchManagerClass.team_name = nil -- Changes on constructor
 ClientResearchManagerClass.status = RESEARCH_STATUS_PREP -- Status, defaults to waiting
 ClientResearchManagerClass.categories = {} -- Array of categories.
 
-function ClientResearchManagerClass:AddCategory(args)
+function ClientResearchManagerClass:add_category(args)
     -- key, name, icon, manager
     if args.manager == nil then
         args.manager = self
@@ -27,7 +27,7 @@ function ClientResearchManagerClass:AddCategory(args)
 end
 
 
-function ClientResearchManagerClass:ToJSON()
+function ClientResearchManagerClass:to_JSON()
     local temp_data = {}
     for cat_key, category in pairs(self.categories) do
         local cat_key_index = table.insert(temp_data, {
@@ -49,9 +49,10 @@ function ClientResearchManagerClass:ToJSON()
                 cost=technology.cost,
                 reqs=temp_list_reqs,
                 votes=technology.votes,
-                can_research=(technology:CanDoResearch() and not technology.researched),
+                can_research=(technology:can_do_research() and not technology.researched),
 --                researched=technology.researched
             })
+            print(tostring((technology:can_do_research() and not technology.researched)))
         end
     end
     local temp_data_json = util.TableToJSON(temp_data)
@@ -69,17 +70,3 @@ function ClientResearchManager(args)
     --Return our new Object.
     return newClientResearchManager
 end
-
-
-net.Receive("RAM_MakeMoney", function()
-    local team_to_update = net.ReadInt(3)
-    local new_money = net.ReadInt(21)
-    local TeamInfo = team.GetAllTeams()[team_to_update]
-    TeamInfo.Money = new_money
-end)
-
-
-
---====================================================================================================================--
---                                                                                                                    --
---====================================================================================================================--

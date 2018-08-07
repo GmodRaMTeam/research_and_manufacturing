@@ -115,7 +115,7 @@ function HUD:Init()
         if ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE then
             local AllTeams = team.GetAllTeams()
             local ResearchManager = AllTeams[ply:Team()].ResearchManager
-            local json_data = ResearchManager:ToJSON()
+            local json_data = ResearchManager:to_JSON()
             if json_data ~= nil then
                 return json_data
             else
@@ -125,7 +125,7 @@ function HUD:Init()
     end)
 
     self.html:AddFunction("vote", "send", function(cat_key, tech_key)
-        net.Start("RAM_RecordResearchVote")
+        net.Start("RAMCL_record_research_vote")
         net.WriteString(cat_key)
         net.WriteString(tech_key)
         net.SendToServer()

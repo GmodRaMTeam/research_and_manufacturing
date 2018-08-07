@@ -198,6 +198,7 @@
         /**********************************************************************
          * Methods
          *********************************************************************/
+
         var update_loop = function () {
             if (typeof player !== 'undefined' && typeof player.getInfo !== 'undefined') {
                 var result = player.getInfo()
@@ -211,6 +212,7 @@
                         self.show_scientist = false
                     }
 
+
                     if (self.player_data.research_timer.show) {
                         if (self.player_data.research_timer.time_left > 0 && self.inital_research_time === null){
                             self.inital_research_time = self.player_data.research_timer.time_left
@@ -222,6 +224,7 @@
                                 label: 'percent'
                             })
                         }
+                        self.player_data.research_timer.time_left = self.player_data.research_timer.time_left.toString().toMMSS()
                     } else {
                         self.inital_research_time = null
                     }

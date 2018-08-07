@@ -38,7 +38,7 @@ end
 function plymeta:PickUpScientist(scientist_name, scientist_cost, scientist_team)
     if self:CanPickUpScientist() then
         local message = "Your team-member " .. self:Nick() .. " has picked up a scientist!"
-        DynamicStatusUpdate(self:Team(), message, 'success', nil)
+        ram_dynamic_status_update(self:Team(), message, 'success', nil)
 --        self.has_scientist = true
         self:SetHasScientist(true)
         self.scientist = { name = scientist_name, cost = scientist_cost, original_team = scientist_team }
@@ -46,7 +46,7 @@ function plymeta:PickUpScientist(scientist_name, scientist_cost, scientist_team)
     else
         local message = "You already have a scientist!"
         local ply = self
-        DynamicStatusUpdate(nil, message, 'warning', ply)
+        ram_dynamic_status_update(nil, message, 'warning', ply)
         return false
     end
 end
@@ -85,10 +85,10 @@ function plymeta:DropScientist(victim_pos)
         new_scientist:ReturnToBase()
 
         local message_attacker_team = "Your team-mate " .. self:Nick() .. " dropped a scientist!"
-        DynamicStatusUpdate(self:Team(), message_attacker_team, 'warning', nil)
+        ram_dynamic_status_update(self:Team(), message_attacker_team, 'warning', nil)
 
         local message_defender_team = "One of your scientists was dropped by a dead enemy!"
-        DynamicStatusUpdate(self.scientist['original_team'], message_defender_team, 'error', nil)
+        ram_dynamic_status_update(self.scientist['original_team'], message_defender_team, 'error', nil)
 
         self.scientist = {}
     end
@@ -162,18 +162,3 @@ function plymeta:AddAmmunition(ammo, iAmount)
 end
 
 ----------------------- END SILVERLAN WEAPON UTILS --------------------------
-
-hook.Add("PlayerDeath", "RAM_PlayerDropScientistOnDeath", function(victim, inflictor, attacker)
-    victim:DropScientist(victim:GetPos())
-end)
-
-hook.Add("PlayerDeath", "RAM_PlayerTakeMoneyFromTeamOnDeath", function(victim, inflictor, attacker)
-    if IsValid(victim) and victim:IsPlayer() and victim:Team() == TEAM_BLUE or victim:Team() == TEAM_ORANGE then
-        local team_index = victim:Team()
-        local team_table = team.GetAllTeams()[team_index]
-        if team_table.ResearchManager.status ~= RESEARCH_STATUS_PREP then
-            team.GetAllTeams()[team_index].Money = team_table.Money - GetConVar("ram_player_death_cost"):GetInt()
-            team_table.ResearchManager:SendTeamMoneyUpdate()
-        end
-    end
-end)

@@ -6,54 +6,53 @@
 
 DEFINE_BASECLASS( "gamemode_base" )
 
-util.AddNetworkString("RAM_DynamicNotification")
-util.AddNetworkString("RAM_ShowHelp")
-util.AddNetworkString("RAM_HideResearchMenu")
-util.AddNetworkString("RAM_RequestClientTechnologyUpdate")
-util.AddNetworkString("RAM_StartTeamResearch")
-util.AddNetworkString("RAM_RecordResearchVote")
-util.AddNetworkString("RAM_ClientStatusUpdate")
-util.AddNetworkString("RAM_PrintToTeam")
-util.AddNetworkString("RAM_ServerTechnologyUpdate")
-util.AddNetworkString("RAM_SyncMapTimer")
-util.AddNetworkString("RAM_SyncPrepTimer")
-util.AddNetworkString("RAM_SyncStatus")
-util.AddNetworkString("RAM_RequestSyncMapTimer")
-util.AddNetworkString("RAM_RequestSyncPrepTimer")
-util.AddNetworkString("RAM_RequestSyncStatus")
-util.AddNetworkString("RAM_MakeMoney")
-util.AddNetworkString("RAM_ScientistUpdate")
-util.AddNetworkString("RAM_RequestClientUpdateEntireResearchTable")
-util.AddNetworkString("RAM_RequestScientistSync")
-util.AddNetworkString("RAM_RequestSyncResearchTimer")
-util.AddNetworkString("RAM_SyncResearchTimer")
+util.AddNetworkString("RAM_dynamic_notification")
+util.AddNetworkString("RAM_show_help")
+util.AddNetworkString("RAM_status_update")
+util.AddNetworkString("RAM_print_to_team")
+util.AddNetworkString("RAM_technology_update")
+util.AddNetworkString("RAM_sync_map_timer")
+util.AddNetworkString("RAM_sync_prep_timer")
+util.AddNetworkString("RAM_sync_status")
+util.AddNetworkString("RAM_make_money")
+util.AddNetworkString("RAM_scientist_update")
+util.AddNetworkString("RAM_sync_research_timer")
+
+util.AddNetworkString("RAMCL_request_technology_update")
+util.AddNetworkString("RAMCL_record_research_vote")
+util.AddNetworkString("RAMCL_request_sync_map_timer")
+util.AddNetworkString("RAMCL_request_sync_prep_timer")
+util.AddNetworkString("RAMCL_request_sync_status")
+util.AddNetworkString("RAMCL_request_entire_research_table")
+util.AddNetworkString("RAMCL_request_scientist_sync")
+util.AddNetworkString("RAMCL_request_sync_research_timer")
 
 AddCSLuaFile("cl_init.lua")
-
+AddCSLuaFile("cl_hooks.lua")
+AddCSLuaFile("cl_net.lua")
 AddCSLuaFile("vgui/cl_hud.lua")
 AddCSLuaFile("vgui/cl_pickteam.lua")
 AddCSLuaFile("vgui/cl_research_menu.lua")
 AddCSLuaFile("vgui/cl_scoreboard.lua")
-
 AddCSLuaFile("shared.lua")
-
 AddCSLuaFile("cl_research_manager.lua")
 AddCSLuaFile("cl_research_category.lua")
 AddCSLuaFile("cl_research_technology.lua")
-
 AddCSLuaFile("shd_utils.lua")
 AddCSLuaFile("cl_utils.lua")
 AddCSLuaFile("cl_player_ext.lua")
 
 include("shared.lua")
-include("player.lua")
-include("player_ext.lua")
-include("entity_ext.lua")
-include("physobj_ext.lua")
-include("komerad_autorun.lua")
-include("research_manager.lua")
-include("research_category.lua")
-include("research_technology.lua")
+include("sv_net.lua")
+include("sv_hooks.lua")
+include("sv_player.lua")
+include("sv_player_ext.lua")
+include("sv_entity_ext.lua")
+include("sv_physobj_ext.lua")
+include("shd_komerad_autorun.lua")
+include("sv_research_manager.lua")
+include("sv_research_category.lua")
+include("sv_research_technology.lua")
 include("shd_utils.lua")
 include("sv_utils.lua")
 
@@ -65,80 +64,27 @@ CreateConVar("ram_prep_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATE
 CreateConVar("ram_vote_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How long you have to vote
 CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How much money to lose on player death
 CreateConVar("ram_research_time_seconds", "75", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Research time in seconds. Do not go lower than 30
+CreateConVar("ram_money_cycle_time_seconds", "15", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How often to make money
 
 --[[All local spaced server functions]]
 
-local function OverseerSelectSpawn(team)
-    local spawn_class = ''
-
-    if team == TEAM_BLUE then
-        spawn_class = 'info_overseer_blue_spawn'
-    else
-        spawn_class = 'info_overseer_orange_spawn'
-    end
-
-    local SpawnPoints = ents.FindByClass(spawn_class)
-
-    local ChosenSpawnPoint = table.Random(SpawnPoints)
-
-    if ChosenSpawnPoint == nil then
-        return nil
-    else
-        return {
-            pos = ChosenSpawnPoint:GetPos(),
-            ang = ChosenSpawnPoint:GetAngles()
-        }
-    end
-end
-
-local function SyncMapTimer(ply)
-    local time_left = nil
-    if timer.Exists("RAM_TimerMapEnd") then
-        time_left = timer.TimeLeft("RAM_TimerMapEnd")
-    else
-        time_left = 0
-    end
-    net.Start("RAM_SyncMapTimer")
-    net.WriteFloat(time_left)
-    net.Send(ply)
-end
-
-local function SyncPrepTimer(ply)
+local function prep_end_sync_timers()
     local time_left = nil
     if timer.Exists("RAM_TimerPrepEnd") then
         time_left = timer.TimeLeft("RAM_TimerPrepEnd")
     else
         time_left = 0
     end
-    net.Start("RAM_SyncPrepTimer")
-    net.WriteFloat(time_left)
-    net.Send(ply)
-end
-
-local function SyncPrepTimerBroadcast()
-    local time_left = nil
-    if timer.Exists("RAM_TimerPrepEnd") then
-        time_left = timer.TimeLeft("RAM_TimerPrepEnd")
-    else
-        time_left = 0
-    end
-    net.Start("RAM_SyncPrepTimer")
+    net.Start("RAM_sync_prep_timer")
     net.WriteFloat(time_left)
     net.Broadcast()
-end
-
-local function SyncStatus(ply)
-    net.Start("RAM_SyncStatus")
-    net.WriteInt(team.GetAllTeams()[TEAM_BLUE].ResearchManager.status, 4)
-    net.WriteInt(team.GetAllTeams()[TEAM_ORANGE].ResearchManager.status, 4)
-    net.Send(ply)
 end
 
 ------------------------------------------------------------------------------------------------------------
 
 
 local function EndMap()
-    DynamicStatusUpdate(nil, 'The map has ended!', 'warning', nil)
+    ram_dynamic_status_update(nil, 'The map has ended!', 'warning', nil)
 
     timer.Simple(15, function() game.LoadNextMap() end)
 end
@@ -146,23 +92,23 @@ end
 function EndPrep()
     if timer.Exists("RAM_TimerPrepEnd") then
         timer.Remove("RAM_TimerPrepEnd")
-        SyncPrepTimerBroadcast()
-        DynamicStatusUpdate(nil, 'Preparation has ended! Begin voting!', 'voting', nil)
+        prep_end_sync_timers()
+        ram_dynamic_status_update(nil, 'Preparation has ended! Begin voting!', 'voting', nil)
         local AllTeams = team.GetAllTeams()
         for ID, TeamInfo in pairs(AllTeams) do
             if ID == TEAM_BLUE or ID == TEAM_ORANGE then
-                ClientStatusUpdate(RESEARCH_STATUS_VOTING, ID)
-                TeamInfo.ResearchManager:StartResearchAndMoneyMaking()
+                ram_client_status_update(RESEARCH_STATUS_VOTING, ID)
+                TeamInfo.ResearchManager:start_research_cycle()
             end
         end
     end
 end
 
-local function InitMapEndTimer()
+local function server_init_map_end_timer()
     timer.Create('RAM_TimerMapEnd', GetConVar("ram_map_time_limit_minutes"):GetInt() * 60, 1, EndMap)
 end
 
-local function InitPrepEndTimer()
+local function server_init_prep_end_timer()
     timer.Create('RAM_TimerPrepEnd', GetConVar("ram_prep_time_limit_seconds"):GetInt(), 1, EndPrep)
 end
 
@@ -175,103 +121,103 @@ local function InitTeamVariables()
                 team_index = ID,
                 team_name = TeamInfo['Name']
             })
-            local armorCat = newResearchManager:AddCategory({
+            local armorCat = newResearchManager:add_category({
                 key = 'armor',
                 name = 'Armor',
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_one', -- This is required
                 name = 'Armor Type I', -- This is required
                 tier = 1, -- This is required
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_two', -- This is required
                 name = 'Armor Type II', -- This is required
                 tier = 2, -- This is required
                 reqs = {'armor_one'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_three', -- This is required
                 name = 'Armor Type III', -- This is required
                 tier = 3, -- This is required
                 reqs = {'armor_two'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_four', -- This is required
                 name = 'Armor Type IV', -- This is required
                 tier = 4, -- This is required,
                 reqs = {'armor_three'}
             })
 
-            armorCat:AddTechnology({
+            armorCat:add_technology({
                 key = 'armor_five', -- This is required
                 name = 'Armor Type V', -- This is required
                 tier = 5, -- This is required,
                 reqs = {'armor_four'}
             })
 
-            local healthCat = newResearchManager:AddCategory({
+            local healthCat = newResearchManager:add_category({
                 key = 'health',
                 name = 'Health',
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_one', -- This is required
                 name = 'Health Type I', -- This is required
                 tier = 1, -- This is required,
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_two', -- This is required
                 name = 'Health Type II', -- This is required
                 tier = 2, -- This is required
                 reqs = {'health_one'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_three', -- This is required
                 name = 'Health Type III', -- This is required
                 tier = 3, -- This is required
                 reqs = {'health_two'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_four', -- This is required
                 name = 'Health Type IV', -- This is required
                 tier = 4, -- This is required
                 reqs = {'health_three'}
             })
 
-            healthCat:AddTechnology({
+            healthCat:add_technology({
                 key = 'health_five', -- This is required
                 name = 'Health Type V', -- This is required
                 tier = 5, -- This is required
                 reqs = {'health_four'}
             })
 
-            local weapCat = newResearchManager:AddCategory({
+            local weapCat = newResearchManager:add_category({
                 key = 'weapons',
                 name = 'Weapons',
             })
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'revolver',
                 name = 'Revolver',
                 class = 'weapon_ram_revolver',
                 tier = 1
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'shotgun',
                 name = 'Shotgun',
                 class = 'weapon_ram_shotgun',
                 tier = 2
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'smg',
                 name = 'SMG',
                 class = 'weapon_ram_smg',
@@ -279,7 +225,7 @@ local function InitTeamVariables()
                 reqs = { 'revolver' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'ar',
                 name = 'Ar2',
                 class = 'weapon_ram_ar2',
@@ -287,7 +233,7 @@ local function InitTeamVariables()
                 reqs = { 'shotgun' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'crossbow',
                 name = 'Crossbow',
                 class = 'weapon_crossbow',
@@ -295,7 +241,7 @@ local function InitTeamVariables()
                 reqs = { 'smg' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'rpg',
                 name = 'RPG',
                 class = 'weapon_rpg',
@@ -303,7 +249,7 @@ local function InitTeamVariables()
                 reqs = { 'ar' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'gauss',
                 name = 'Gauss Gun',
                 class = 'weapon_ram_gauss',
@@ -311,7 +257,7 @@ local function InitTeamVariables()
                 reqs = { 'crossbow' }
             })
 
-            weapCat:AddTechnology({
+            weapCat:add_technology({
                 key = 'egon',
                 name = 'Gluon Gun',
                 class = 'weapon_ram_egon',
@@ -319,19 +265,19 @@ local function InitTeamVariables()
                 reqs = { 'rpg' }
             })
 
-            local gadgetCat = newResearchManager:AddCategory({
+            local gadgetCat = newResearchManager:add_category({
                 key = 'gadgets',
                 name = 'Gadgets'
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'satchel',
                 name = 'Satchel Charges',
                 class = 'weapon_ram_satchel',
                 tier = 1
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'grenade',
                 name = 'Grenades',
                 class = 'weapon_frag',
@@ -339,7 +285,7 @@ local function InitTeamVariables()
                 reqs = { 'satchel' }
             })
 
-            gadgetCat:AddTechnology({
+            gadgetCat:add_technology({
                 key = 'tripmine',
                 name = 'Tripmines',
                 class = 'weapon_ram_tripmine',
@@ -347,18 +293,18 @@ local function InitTeamVariables()
                 reqs = { 'grenade' }
             })
 
-            local implantCat = newResearchManager:AddCategory({
+            local implantCat = newResearchManager:add_category({
                 key = 'implants',
                 name = 'Implants'
             })
 
-            implantCat:AddTechnology({
+            implantCat:add_technology({
                 key = 'legs_one',
                 name = 'Cybenetic Legs MKI',
                 tier = 1
             })
 
-            implantCat:AddTechnology({
+            implantCat:add_technology({
                 key = 'legs_two',
                 name = 'Cybenetic Legs MKII',
                 tier = 2,
@@ -376,16 +322,16 @@ end
 
 function GM:Initialize()
     InitTeamVariables()
-    InitPrepEndTimer()
-    InitMapEndTimer()
+    server_init_prep_end_timer()
+    server_init_map_end_timer()
 end
 
 function GM:ShowHelp(ply) -- This hook is called everytime F1 is pressed.
     local AllTeams = team.GetAllTeams()
     if (ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE) then
         local status = AllTeams[ply:Team()]['ResearchManager'].status
-        if status == RESEARCH_STATUS_VOTING and not AllTeams[ply:Team()].ResearchManager:HasUserVoted(ply:SteamID()) then
-            net.Start("RAM_ShowHelp")
+        if status == RESEARCH_STATUS_VOTING and not AllTeams[ply:Team()].ResearchManager:has_user_voted(ply:SteamID()) then
+            net.Start("RAM_show_help")
             net.WriteInt(status, 4)
             net.Send(ply)
         end
@@ -406,99 +352,3 @@ function GM:PlayerSpawn( pl )
     pl:CrosshairDisable()
 
 end
-
-
-hook.Add("InitPostEntity", "SpawnRMNPCS", function()
-    local AllTeams = team.GetAllTeams()
-    for ID, TeamInfo in pairs(AllTeams) do
-        if (ID ~= TEAM_CONNECTING and ID ~= TEAM_UNASSIGNED and ID ~= TEAM_SPECTATOR) then
-            for k = 0, TeamInfo.Scientists - 1 do
-                local new_scientist = ents.Create("ram_simple_scientist")
-                if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
-                --                button:SetModel("models/dav0r/buttons/button.mdl")
-                local spawnpoint_pos = new_scientist:ScientistSelectSpawn(ID)
-                if spawnpoint_pos ~= nil then
-                    new_scientist:SetPos(spawnpoint_pos)
-                    new_scientist:SetTeam(ID)
-                    new_scientist:Spawn()
-                else
-                    new_scientist:Remove()
-                end
-            end
-            local new_overseer = ents.Create("ram_overseer")
-            if (not IsValid(new_overseer)) then return end -- Check whether we successfully made an entity, if not - bail
-            --                button:SetModel("models/dav0r/buttons/button.mdl")
-            local spawnpoint_pos_data = OverseerSelectSpawn(ID)
-            if spawnpoint_pos_data ~= nil then
-                new_overseer:SetPos(spawnpoint_pos_data['pos'])
-                new_overseer:SetAngles(spawnpoint_pos_data['ang'])
-                new_overseer:SetTeam(ID)
-                new_overseer:Spawn()
-            else
-                new_overseer:Remove()
-            end
-        end
-    end
-end)
-
-local function SyncScientists(ply)
-    local AllTeams = team.GetAllTeams()
-    if ply ~= nil then
-        net.Start("RAM_ScientistUpdate")
-        net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
-        net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
-        net.Send(ply)
-    else
-        net.Start("RAM_ScientistUpdate")
-        net.WriteInt(AllTeams[TEAM_BLUE].Scientists, 4)
-        net.WriteInt(AllTeams[TEAM_ORANGE].Scientists, 4)
-        net.Broadcast()
-    end
-end
-
-
-function CaptureScientist(new_team, scientist_name, scientist_cost, scientist_original_team)
-    local new_scientist = ents.Create("ram_simple_scientist")
-    if (not IsValid(new_scientist)) then return end -- Check whether we successfully made an entity, if not - bail
-    local pos = new_scientist:ScientistSelectSpawn(new_team)
-    if pos ~= nil then
-        new_scientist:SetPos(pos)
-        new_scientist:Spawn()
-        new_scientist:SetTeam(new_team)
-        new_scientist:SetDisplayName(scientist_name)
-        new_scientist:SetCost(scientist_cost)
-    else
-        new_scientist:Remove()
-    end
-
-    local AllTeams = team.GetAllTeams()
-    AllTeams[new_team].Scientists = AllTeams[new_team].Scientists + 1
-    AllTeams[scientist_original_team].Scientists = AllTeams[scientist_original_team].Scientists - 1
-
-    DynamicStatusUpdate(scientist_original_team, 'You have lost one of your scientists to your competitor!', 'kidnap', nil)
-
-    SyncScientists(nil)
-
-end
-
-net.Receive("RAM_RequestSyncMapTimer", function(len, ply)
-    SyncMapTimer(ply)
-end)
-
-net.Receive("RAM_RequestSyncPrepTimer", function(len, ply)
-    SyncPrepTimer(ply)
-end)
-
-net.Receive("RAM_RequestSyncStatus", function(len, ply)
-    SyncStatus(ply)
-end)
-
-net.Receive("RAM_RequestScientistSync", function(len, ply)
-    SyncScientists(ply)
-end)
-
-net.Receive("RAM_RequestSyncResearchTimer", function(len, ply)
-    if ply:IsValid() and (ply:Team() == TEAM_BLUE or ply:Team() == TEAM_ORANGE) then
-        team.GetAllTeams()[ply:Team()].ResearchManager:SyncPlyResearchTimer(ply)
-    end
-end)

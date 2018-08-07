@@ -6,7 +6,7 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-include( "research_technology.lua" )
+include( "sv_research_technology.lua" )
 
 local ResearchCategoryClass = {}
 ResearchCategoryClass.key = '' -- Default empty string
@@ -14,7 +14,7 @@ ResearchCategoryClass.name = '' -- Default empty string
 ResearchCategoryClass.techs = {} -- Default empty array
 ResearchCategoryClass.manager = nil
 
-function ResearchCategoryClass:AddTechnology(args)
+function ResearchCategoryClass:add_technology(args)
     -- key, name, description, class, cost, tier, reqs, category
     if args.category == nil then
         args.category = self
@@ -25,7 +25,7 @@ function ResearchCategoryClass:AddTechnology(args)
     return newResearchTechnology-- Return our category to do something with it
 end
 
-function ResearchCategoryClass:GetHighestTechResearched()
+function ResearchCategoryClass:get_highest_tech_researched()
     local last_researched = nil
     for tech_key, technology in pairs(self.techs) do
         if technology.researched then
@@ -42,7 +42,7 @@ function ResearchCategoryClass:GetHighestTechResearched()
     return last_researched
 end
 
-function ResearchCategoryClass:HasAtLeastOneTechUnlocked()
+function ResearchCategoryClass:has_at_least_one_tech()
     for tech_key, technology in pairs(self.techs) do
         if technology.researched then
             return true
