@@ -1,69 +1,32 @@
-# research_and_manufacturing
-RaM (R&M): A Science and Industry Inspired Gmod Gamemode
+# Research & Manufacturing
+RaM: A Science and Industry Inspired Gmod Gamemode
+
+Test Server IP: 192.223.25.217:27015
+
+Discord: https://discord.gg/MHkDB5U
+
+Basic Map Run Through/Gameplay feature showcase: https://youtu.be/LE63_uDXeDc
 
 ### Project Goals
  - Object Orientated Coding Style
  - Dynamic HTML Interface (Done through RiotJS/Semantic-UI)
  - Configurable/Customisable to those with some rough LUA/HTML/JS knowledge
+ - Simple and classic gameplay. Nothing too outside of the box.
 
-# Installation
+## Gameplay Explained: [RaM Gameplay](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Gameplay)
 
-### For Windows
+## Installation: [RaM Installation](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Installation)
 
-1. Click the "Clone or Download" button above and get a zip of this repo.
-2. Unzip it to `C:\Program Files (x86)\Steam\steamapps\common\GarrysMod\garrysmod\gamemodes\`
+## Mapping: [RaM Mapping](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Mapping)
 
-### For Mac OSX
+## Developers: [RaM Modification](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Development-Modification)
 
-1. Click the "Clone or Download" button above and get a zip of this repo.
-2. Unzip it to `~/Library/Application\ Support/Steam/steamapps/common/GarrysMod/garrysmod/gamemodes/`
+## Credits: [RaM Credits](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Credits)
 
-## Mapping
-For anyone wanting to take a look into mapping, included is the .vmf for the test map, and the .fgd for getting the entities into Hammer.
+## Wiki: [RaM Wiki](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki)
 
-.vmf: ```content/maps/src/```
-
-.fgd: ```ram.fgd (It's in the base gamemode dir)```
-
-## Credits:
-
-### Modelers from Gamebannana (Will grab a list of specifics soon)
- - All the replacement models/sounds/textures for the default HL2 weapons
-#### Bob (Murderthon9000)
- - M9K Weapon base
-#### Garry Newman
- - Sandbox & Base
-#### ie, grome, GuyonthecoucH, Lez, Parasite, pears
-    Science and Industry Maintainers: Gameplay ideas/etc.
-    These are the admins listed on the wiki/discord.
-    The original moddb poster was: TheROsingleB
-#### Silverlan: https://steamcommunity.com/id/silverlan
-    Made great contributions to Gmod over the years with different contents/addons.
-    I used parts of Half Life Renaissance weapon's code to re-create specific HL1 weapons.
-    Not seeking explicit permission for custom use as steam profile stats:
-
-        "Don't add me about anything gmod-related or related to my workshop addons."
-
-        and content says:
-
-        "I'm done with gmod and I don't take requests, so please stop spamming the comment section.
-        There won't be any updates or new packs."
-
-    And Code was non-functional as it existed.
-#### Valve/Possible 3rd Party Modeler
-    For:
-        - HL1 Gluon Gun model (weapon_egon)
-        - HL1 Gauss Gun model (weapon_gauss)
-        - HL1 Satchel model (weapon_satchel)
-        - HL1 Tripmine model (weapon_tripmine)
-        - HL1 Grenade model (weapon_grenade)
-        - Associated viewmodels/worldmodels/textures/materials
-    The associated assets are not my content, and were distributed with the code for said weapons. I'm assuming the author had   
-    permission to use them or they are re-makes. If this is not the case I will gladly remove these assets and require HL:S for this 
-    content
-
-## Project Contributors:
+### Project Contributors
 
 #### CKCollab: 
-    UI/HTML/RiotJS work
-    Ideas
+ - UI/HTML/RiotJS work
+ - Ideas
