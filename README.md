@@ -1,11 +1,11 @@
 # Research & Manufacturing
 RaM: A Science and Industry Inspired Gmod Gamemode
 
-Test Server IP: 192.223.25.217:27015
+Test Server IP: `192.223.25.217:27015`
 
-Discord: https://discord.gg/MHkDB5U
+Discord: [RaM Public Discord](https://discord.gg/MHkDB5U)
 
-Basic Map Run Through/Gameplay feature showcase: https://youtu.be/LE63_uDXeDc
+Basic Map Run Through/Gameplay feature showcase: [RaM Simple Demo](https://youtu.be/LE63_uDXeDc)
 
 ### Project Goals
  - Object Orientated Coding Style
