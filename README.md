@@ -1,6 +1,12 @@
 # Research & Manufacturing
 RaM: A Science and Industry Inspired Gmod Gamemode
 
+Test Server IP: 192.223.25.217:27015
+
+Discord: https://discord.gg/MHkDB5U
+
+Basic Map Run Through/Gameplay feature showcase: https://youtu.be/LE63_uDXeDc
+
 ### Project Goals
  - Object Orientated Coding Style
  - Dynamic HTML Interface (Done through RiotJS/Semantic-UI)
@@ -16,6 +22,8 @@ RaM: A Science and Industry Inspired Gmod Gamemode
 ## Developers: [RaM Modification](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Development-Modification)
 
 ## Credits: [RaM Credits](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki/Credits)
+
+## Wiki: [RaM Wiki](https://github.com/GmodRaMTeam/research_and_manufacturing/wiki)
 
 ### Project Contributors
 
