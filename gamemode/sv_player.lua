@@ -4,6 +4,8 @@
 --- DateTime: 5/27/2018 10:31 AM
 ---
 
+DEFINE_BASECLASS( "gamemode_base" )
+
 --function GM:PlayerSpawn(ply)
 --end
 
@@ -23,6 +25,32 @@ function GM:PlayerSpawnAsSpectator(pl)
 
     pl:SetTeam(TEAM_SPECTATOR)
     pl:Spectate(OBS_MODE_ROAMING)
+end
+
+
+--[[---------------------------------------------------------
+	Name: gamemode:PlayerDeath()
+	Desc: Called when a player dies.
+-----------------------------------------------------------]]
+function GM:PlayerDeath( ply, inflictor, attacker )
+    BaseClass.PlayerDeath( self, ply, inflictor, attacker )
+    ply.NextSpawnTime = CurTime() + GetConVar("ram_player_respawn_time"):GetInt()
+end
+
+--[[---------------------------------------------------------
+	Name: gamemode:PlayerDeathThink( player )
+	Desc: Called when the player is waiting to respawn
+-----------------------------------------------------------]]
+function GM:PlayerDeathThink( pl )
+
+	if ( pl.NextSpawnTime and pl.NextSpawnTime > CurTime() ) then return end
+
+	if ( pl:IsBot() or pl:KeyPressed( IN_ATTACK ) or pl:KeyPressed( IN_ATTACK2 ) or pl:KeyPressed( IN_JUMP ) ) then
+
+		pl:Spawn()
+
+	end
+
 end
 
 --[[---------------------------------------------------------

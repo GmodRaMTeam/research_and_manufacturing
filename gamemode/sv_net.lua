@@ -64,7 +64,7 @@ end)
 
 -- One question is whether to do player validation, which really we should.
 net.Receive("RAMCL_request_technology_update", function(len, pl)
-    print("!!!!!!!!!!!!!!!!!!!!RAMCL_request_technology_update!!!!!!!!!!!!!!!!!!!!")
+--    print("!!!!!!!!!!!!!!!!!!!!RAMCL_request_technology_update!!!!!!!!!!!!!!!!!!!!")
     -- Make sure the player calling this is a valid entity, and a valid player, on a team.
     if (IsValid(pl) and pl:IsPlayer()) and (pl:Team() == TEAM_BLUE or pl:Team() == TEAM_ORANGE) then
         local cat_key = net.ReadString()

@@ -35,6 +35,8 @@ AddCSLuaFile("vgui/cl_pickteam.lua")
 AddCSLuaFile("vgui/cl_research_menu.lua")
 AddCSLuaFile("vgui/cl_scoreboard.lua")
 AddCSLuaFile("shared.lua")
+AddCSLuaFile("shd_hooks.lua")
+AddCSLuaFile("shd_player_ext.lua")
 AddCSLuaFile("cl_research_manager.lua")
 AddCSLuaFile("cl_research_category.lua")
 AddCSLuaFile("cl_research_technology.lua")
@@ -50,11 +52,14 @@ include("sv_player_ext.lua")
 include("sv_entity_ext.lua")
 include("sv_physobj_ext.lua")
 include("shd_komerad_autorun.lua")
+include("shd_player_ext.lua")
 include("sv_research_manager.lua")
 include("sv_research_category.lua")
 include("sv_research_technology.lua")
 include("shd_utils.lua")
 include("sv_utils.lua")
+include("sv_gibs.lua")
+include("shd_hooks.lua")
 
 --DEFAULT_RESEARCH_TIME = 60 -- GetConvar was not working in a specific spot...
 
@@ -65,6 +70,7 @@ CreateConVar("ram_vote_time_limit_seconds", "30", FCVAR_NOTIFY + FCVAR_REPLICATE
 CreateConVar("ram_player_death_cost", "250", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How much money to lose on player death
 CreateConVar("ram_research_time_seconds", "75", FCVAR_NOTIFY + FCVAR_REPLICATED) -- Research time in seconds. Do not go lower than 30
 CreateConVar("ram_money_cycle_time_seconds", "15", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How often to make money
+CreateConVar("ram_player_respawn_time", "5", FCVAR_NOTIFY + FCVAR_REPLICATED) -- How often to make money
 
 --[[All local spaced server functions]]
 
@@ -350,5 +356,47 @@ function GM:PlayerSpawn( pl )
 	BaseClass.PlayerSpawn( self, pl )
 
     pl:CrosshairDisable()
+
+end
+
+function GM:PlayerShouldTakeDamage(victim, pl)
+    if pl:IsPlayer() and victim ~= pl then -- check the attacker is player
+        if (pl:Team() == victim:Team()) then -- check the teams are equal and that friendly fire is off.
+            return false -- do not damage the player
+        end
+    end
+    return true -- damage the player
+end
+
+--[[---------------------------------------------------------
+   Name: gamemode:DoPlayerDeath( )
+   Desc: Carries out actions when the player dies
+-----------------------------------------------------------]]
+function GM:DoPlayerDeath( ply, attacker, dmginfo )
+
+--    if IsValid(ply) and IsValid(attacker) then
+--        if dmginfo:GetDamage() > ply:Health() * 2 then
+--            ply:Gib()
+--        end
+--    end
+
+--  if       dmg         greater than a quarter of playermaxhp (Eg dmg > 25)
+    if dmginfo:GetDamage() > (ply:GetMaxHealth() * 0.80) then
+        ply:ExplodeIntoGibs()
+    else
+        ply:CreateRagdoll()
+    end
+
+	ply:AddDeaths( 1 )
+
+	if ( attacker:IsValid() and attacker:IsPlayer() ) then
+
+		if ( attacker == ply ) then
+			attacker:AddFrags( -1 )
+		else
+			attacker:AddFrags( 1 )
+		end
+
+	end
 
 end

@@ -6,9 +6,9 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-hook.Add("HUDPaint", "PaintOurHud", function()
-    HUD:Draw()
-end);
+--hook.Add("HUDPaint", "PaintOurHud", function()
+--    HUD:Draw()
+--end);
 
 hook.Add("InitPostEntity", "PlayerSpawnSyncTimers", function()
     cl_init_prep_end_timer()

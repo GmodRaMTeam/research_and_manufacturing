@@ -52,18 +52,6 @@ end
 
 ---------------------------------- All ServerSide Gamemode Utillity Functions ----------------------------------
 
---function GetMapTimeLeft()
---    if timer.Exists('RAM_TimerMapEnd') then
---        return timer.TimeLeft('RAM_TimerMapEnd')
---    end
---end
-
---function GetPrepTimeLeft()
---    if timer.Exists('RAM_TimerPrepEnd') then
---        return timer.TimeLeft('RAM_TimerPrepEnd')
---    end
---end
-
 function ram_dynamic_status_update(team_index, message, status, specific_player)
     -- Status can be: 'warning', 'success', 'error', voting, kidnap
     if team_index ~= nil then

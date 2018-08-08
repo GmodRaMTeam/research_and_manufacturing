@@ -6,6 +6,8 @@
 -- To change this template use File | Settings | File Templates.
 --
 
+DEFINE_BASECLASS( "gamemode_base" )
+
 local function OverseerSelectSpawn(team)
     local spawn_class = ''
 
@@ -31,6 +33,64 @@ end
 
 hook.Add("PlayerDeath", "RAM_PlayerDropScientistOnDeath", function(victim, inflictor, attacker)
     victim:DropScientist(victim:GetPos())
+end)
+
+hook.Add("EntityTakeDamage", "RAM_CorrectHL2Damage", function(target, dmg)
+    local attacker = dmg:GetAttacker()
+    if IsValid(target) and IsValid(attacker) then
+        if target:IsPlayer() and attacker:IsPlayer() then
+            local attacker_weapon = attacker:GetActiveWeapon()
+            if attacker_weapon:GetClass() == 'weapon_rpg' then
+                print("Correcting RPG damage!")
+                dmg:ScaleDamage( 0.65 )
+            end
+        end
+    end
+end)
+
+hook.Add("PlayerInitialSpawn", "RAM_SetBotsToOrangeTeam", function(ply)
+    if ply:IsBot() then
+        timer.Simple(5, function()
+            print("Player is a bot")
+    --        BaseClass.PlayerJoinTeam(self, ply, TEAM_ORANGE )
+            local iOldTeam = ply:Team()
+
+            if (ply:Alive()) then
+                if (iOldTeam == TEAM_SPECTATOR or iOldTeam == TEAM_UNASSIGNED) then
+                    ply:KillSilent()
+                else
+                    ply:Kill()
+                end
+            end
+
+            ply:SetTeam(TEAM_ORANGE)
+            ply.LastTeamSwitch = RealTime()
+
+            -- Here's an immediate respawn thing by default. If you want to
+            -- re-create something more like CS or some shit you could probably
+            -- change to a spectator or something while dead.
+            if (ply:Team() == TEAM_SPECTATOR) then
+
+                -- If we changed to spectator mode, respawn where we are
+                local Pos = ply:EyePos()
+                ply:Spawn()
+                ply:SetPos(Pos)
+
+            elseif (iOldTeam == TEAM_SPECTATOR) then
+
+                -- If we're changing from spectator, join the game
+                ply:Spawn()
+
+            else
+
+                -- If we're straight up changing teams just hang
+                -- around until we're ready to respawn onto the
+                -- team that we chose
+            end
+
+            PrintMessage(HUD_PRINTTALK, Format("%s joined '%s'", ply:Nick(), team.GetName(ply:Team())))
+         end)
+    end
 end)
 
 hook.Add("PlayerDeath", "RAM_PlayerTakeMoneyFromTeamOnDeath", function(victim, inflictor, attacker)

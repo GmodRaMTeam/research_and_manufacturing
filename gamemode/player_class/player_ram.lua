@@ -128,13 +128,13 @@ function PLAYER:Loadout()
 		end
 
 		if ResearchManager.categories['implants'].techs['legs_one'].researched and not ResearchManager.categories['implants'].techs['legs_two'].researched then
-			self.Player:SetRunSpeed( 450 )
+			self.Player:SetRunSpeed( 325 )
 			self.Player:SetWalkSpeed( 225 )
 		elseif ResearchManager.categories['implants'].techs['legs_two'].researched then
-			self.Player:SetRunSpeed( 500 )
+			self.Player:SetRunSpeed( 350 )
 			self.Player:SetWalkSpeed( 250 )
 		else
-			self.Player:SetRunSpeed( 400 )
+			self.Player:SetRunSpeed( 300 )
 			self.Player:SetWalkSpeed( 200 )
 		end
 

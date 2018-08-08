@@ -32,6 +32,9 @@ function plymeta:CanPickUpScientist()
 end
 
 function plymeta:CanRemoveScientist()
+    if self.GetHasScientist == nil then
+        return false
+    end
     return self:GetHasScientist()
 end
 
@@ -92,6 +95,40 @@ function plymeta:DropScientist(victim_pos)
 
         self.scientist = {}
     end
+end
+
+local gib_models_table = {
+    player_ragdoll_head = "models/gibs/gibhead.mdl",
+    player_ragdoll_heart = "models/gibs/heart.mdl",
+    player_ragdoll_leg = "models/gibs/leg.mdl",
+    player_ragdoll_leg_2 = "models/gibs/leg.mdl",
+    player_ragdoll_p1 = "models/gibs/pgib_p1.mdl",
+    player_ragdoll_p2 = "models/gibs/pgib_p2.mdl",
+    player_ragdoll_p3 = "models/gibs/pgib_p3.mdl",
+    player_ragdoll_p4 = "models/gibs/pgib_p4.mdl",
+    player_ragdoll_p5 = "models/gibs/pgib_p5.mdl",
+    player_ragdoll_r1 = "models/gibs/rgib_p1.mdl",
+    player_ragdoll_r2 = "models/gibs/rgib_p2.mdl",
+    player_ragdoll_r3 = "models/gibs/rgib_p3.mdl",
+    player_ragdoll_r4 = "models/gibs/rgib_p4.mdl",
+    player_ragdoll_r5 = "models/gibs/rgib_p5.mdl",
+}
+
+function plymeta:ExplodeIntoGibs()
+    local temp_pos = self:GetPos()
+
+    -- First we try to make our player ragdoll a head so that they follow the gib direction (For funsies)
+    self:CreateRagdoll()
+    local ragdoll = self:GetRagdollEntity()
+    ragdoll:SetModel(gib_models_table['player_ragdoll_head'])
+
+    for model_key, model_string in pairs(gib_models_table) do
+        GIBS.CreateGib({
+            pos = temp_pos + Vector(math.random(-8, 8), math.random(-8, 8), math.random(16, 64)),
+            model = model_string
+        })
+    end
+
 end
 
 ------------------- SILVERLAN WEAPON UTILS -----------------------------

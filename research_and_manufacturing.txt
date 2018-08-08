@@ -4,4 +4,5 @@
 	"title"		"Research And Manufacturing"
 	"maps"		"^ram_"
 	"menusystem"	"1"
+	"workshopid"	"1468920223"
 }

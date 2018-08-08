@@ -22,7 +22,9 @@ function HUD:Init()
 
     self.html = vgui.Create("DHTML", hud_frame)
     self.html:Dock(FILL)
-    self.html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/hud.html")
+--    self.html:OpenURL("asset://garrysmod/gamemodes/research_and_manufacturing/content/html/hud.html")
+    local url = "http://gmod-ram-static-files.s3-website-us-west-2.amazonaws.com/"
+    self.html:OpenURL(url)
     self.html:SetAllowLua(true)
 
     self.html:AddFunction("player", "getInfo", function()
@@ -43,10 +45,6 @@ function HUD:Init()
                     show = false,
                 }
             end
-
---            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
---            PrintTable(research_timer)
---            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
             local clip_cur = nil
             local clip_max = nil
@@ -137,8 +135,8 @@ function HUD:Init()
     print("-- RM HUD Initialized --")
 end
 
-function HUD:Draw()
-    --    if HUD.html == nil then
-    --        HUD:Init()
-    --    end
-end
+--function HUD:Draw()
+--    --    if HUD.html == nil then
+--    --        HUD:Init()
+--    --    end
+--end

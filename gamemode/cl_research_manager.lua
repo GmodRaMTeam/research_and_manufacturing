@@ -52,7 +52,6 @@ function ClientResearchManagerClass:to_JSON()
                 can_research=(technology:can_do_research() and not technology.researched),
 --                researched=technology.researched
             })
-            print(tostring((technology:can_do_research() and not technology.researched)))
         end
     end
     local temp_data_json = util.TableToJSON(temp_data)

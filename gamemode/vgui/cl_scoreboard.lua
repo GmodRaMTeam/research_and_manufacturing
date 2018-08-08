@@ -79,6 +79,9 @@ function scoreboard:init()
 end
 
 function GM:ScoreboardShow()
+    if HUD.html == nil then
+        HUD:Init()
+    end
     -- Only inits on first attempt to draw
     scoreboard:init()
 
