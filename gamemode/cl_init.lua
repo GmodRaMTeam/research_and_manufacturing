@@ -129,6 +129,7 @@ local function InitTeamVariables()
                 name = 'Weapons',
                 icon = "fighter jet icon"
             })
+
             weapCat:add_technology({
                 key = 'revolver',
                 name = 'Revolver',
@@ -138,18 +139,18 @@ local function InitTeamVariables()
             })
 
             weapCat:add_technology({
-                key = 'shotgun',
-                name = 'Shotgun',
-                description = 'Basic singlebarrel shotgun',
-                class = 'weapon_ram_shotgun',
-                tier = 2
-            })
-
-            weapCat:add_technology({
                 key = 'smg',
                 name = 'SMG',
                 description = 'A low ROF high dmg SMG',
                 class = 'weapon_ram_smg',
+                tier = 2,
+            })
+
+            weapCat:add_technology({
+                key = 'shotgun',
+                name = 'Shotgun',
+                description = 'Basic singlebarrel shotgun',
+                class = 'weapon_ram_shotgun',
                 tier = 3,
                 reqs = { 'revolver' }
             })
@@ -160,7 +161,7 @@ local function InitTeamVariables()
                 description = 'A high ROF low dmg AR',
                 class = 'weapon_ram_ar2',
                 tier = 4,
-                reqs = { 'shotgun' }
+                reqs = { 'smg' }
             })
 
             weapCat:add_technology({

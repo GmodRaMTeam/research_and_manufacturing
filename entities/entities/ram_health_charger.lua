@@ -31,7 +31,7 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_BBOX)
 
-    self:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE)
+    self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
     --   local b = 26
     --   self:SetCollisionBounds(Vector(-b, -b, -b), Vector(b,b,b))
 

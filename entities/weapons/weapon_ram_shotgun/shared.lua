@@ -19,8 +19,9 @@ SWEP.HoldType = "shotgun"
 
 SWEP.ViewModelFOV = 70
 SWEP.ViewModelFlip = false
-SWEP.ViewModel = "models/weapons/v_Shotgun.mdl"    -- Weapon view model
-SWEP.WorldModel = "models/weapons/w_Shotgun.mdl"    -- Weapon world model
+SWEP.ViewModel = "models/weapons/v_shotgun.mdl"    -- Weapon view model
+SWEP.WorldModel = "models/weapons/w_shotgun.mdl"    -- Weapon world model
+SWEP.ShowWorldModel = true
 SWEP.Base = "komerads_shotty_base" --the Base this weapon will work on. PLEASE RENAME THE BASE!
 SWEP.Spawnable = true
 SWEP.AdminSpawnable = true
@@ -52,3 +53,8 @@ SWEP.IronSightsPos = Vector(-9, -14.674, 4.159)
 SWEP.IronSightsAng = Vector(0, 0, 0)
 SWEP.RunSightsPos = Vector(5.719, 0, 1.879)
 SWEP.RunSightsAng = Vector(-11.256, 16.884, 0)
+
+--SWEP.WElements = {
+--    ["gun"] = { type = "Model", model = "models/weapons/w_shotgun.mdl", bone = "ValveBiped.Bip01_R_Hand", rel = "", pos = Vector(0, 0.323, 0), angle = Angle(-176.958, -180, 0), size = Vector(1, 1, 1), color = Color(255, 255, 255, 255), surpresslightning = false, material = "", skin = 0, bodygroup = {} }
+--}
+

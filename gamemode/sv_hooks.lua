@@ -44,6 +44,9 @@ hook.Add("EntityTakeDamage", "RAM_CorrectHL2Damage", function(target, dmg)
                 print("Correcting RPG damage!")
                 dmg:ScaleDamage( 0.65 )
             end
+            if attacker_weapon:GetClass() == 'weapon_stunstick' then
+                dmg:SetDamage(25) -- 40 is wayyyyy too stronky
+            end
         end
     end
 end)
