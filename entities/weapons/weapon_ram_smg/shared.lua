@@ -15,7 +15,7 @@ SWEP.DrawCrosshair = true        -- set false if you want no crosshair
 SWEP.Weight = 30        -- rank relative ot other weapons. bigger is better
 SWEP.AutoSwitchTo = true        -- Auto switch to if we pick it up
 SWEP.AutoSwitchFrom = true        -- Auto switch from if you pick up a better weapon
-SWEP.HoldType = "smg1"        -- how others view you carrying the weapon
+SWEP.HoldType = "smg"        -- how others view you carrying the weapon
 -- normal melee melee2 fist knife smg ar2 pistol rpg physgun grenade shotgun crossbow slam passive 
 -- you're mostly going to use ar2, smg, shotgun or pistol. rpg makes for good sniper rifles
 
@@ -49,7 +49,7 @@ SWEP.Secondary.IronFOV = 70        -- How much you 'zoom' in. Less is more!
 SWEP.data = {}                --The starting firemode
 SWEP.data.ironsights = 1
 
-SWEP.Primary.Damage = 30    -- Base damage per bullet
+SWEP.Primary.Damage = 16    -- Base damage per bullet
 SWEP.Primary.Spread = .02    -- Define from-the-hip accuracy 1 is terrible, .0001 is exact)
 SWEP.Primary.IronAccuracy = .01 -- Ironsight accuracy, should be the same for shotguns
 

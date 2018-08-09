@@ -104,7 +104,7 @@ function SWEP:OnThink()
 	self:PlayThirdPersonAnim()
 	if CLIENT then return end
 	local tr = util.TraceLine(util.GetPlayerTrace(self.Owner))
-	util.BlastDamage(self, self.Owner, tr.HitPos, 80, 14)
+	util.BlastDamage(self, self.Owner, tr.HitPos, 80, 18)
 	self.Weapon:AddAmmoPrimary(-1)
 end
 

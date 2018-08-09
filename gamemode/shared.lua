@@ -4,8 +4,8 @@
 --- DateTime: 5/22/2018 10:16 PM
 ---
 
-include( "komerad_autorun.lua" )
-AddCSLuaFile( "komerad_autorun.lua" )
+include( "shd_komerad_autorun.lua" )
+AddCSLuaFile( "shd_komerad_autorun.lua" )
 
 if SERVER then
 	include("shd_utils.lua")
@@ -13,10 +13,10 @@ end
 include( "player_class/player_ram.lua" )
 
 
-GM.Name = "Research & Manufactury"
+GM.Name = "Research & Manufacturing"
 GM.Author = "Комерад"
 GM.Email = "komeradgygabite@gmail.com"
-GM.Website = "N/A"
+GM.Website = "https://gmodramteam.github.io/research_and_manufacturing/"
 GM.TeamBased = true
 
 RESEARCH_STATUS_WAITING = 0
