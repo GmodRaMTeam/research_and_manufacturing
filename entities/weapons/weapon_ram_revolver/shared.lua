@@ -23,7 +23,7 @@ SWEP.ViewModelFOV = 70
 SWEP.ViewModelFlip = false
 SWEP.ViewModel = "models/weapons/v_357.mdl"    -- Weapon view model
 SWEP.WorldModel = "models/weapons/w_357.mdl"    -- Weapon world model
-SWEP.ShowWorldModel = false
+
 SWEP.Base = "komerads_gun_base" --the Base this weapon will work on. PLEASE RENAME THE BASE!
 SWEP.Spawnable = true
 SWEP.AdminSpawnable = true

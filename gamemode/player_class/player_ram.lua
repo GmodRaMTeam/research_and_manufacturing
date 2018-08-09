@@ -66,8 +66,8 @@ function PLAYER:Loadout()
 	-- If we're on one of the two teams we made...
 	if self.Player:Team() == TEAM_BLUE or self.Player:Team() == TEAM_ORANGE then
 		local ResearchManager = team.GetAllTeams()[self.Player:Team()].ResearchManager
-		if ResearchManager.categories['armor']:HasAtLeastOneTechUnlocked() then
-			local tech = ResearchManager.categories['armor']:GetHighestTechResearched()
+		if ResearchManager.categories['armor']:has_at_least_one_tech() then
+			local tech = ResearchManager.categories['armor']:get_highest_tech_researched()
 			if tech then
 				self.Player.MaxArmor = tech.tier * 20
 --				self.Player.StartArmor = tech.tier * 20
@@ -79,8 +79,8 @@ function PLAYER:Loadout()
 			self.Player:SetArmor(0)
 		end
 
-		if ResearchManager.categories['health']:HasAtLeastOneTechUnlocked() then
-			local tech = ResearchManager.categories['health']:GetHighestTechResearched()
+		if ResearchManager.categories['health']:has_at_least_one_tech() then
+			local tech = ResearchManager.categories['health']:get_highest_tech_researched()
 			if tech then
 				self.Player.MaxHealth = 100 + (tech.tier * 10)
 --				self.StartHealth = 100 +  (tech.tier * 20)
@@ -128,13 +128,13 @@ function PLAYER:Loadout()
 		end
 
 		if ResearchManager.categories['implants'].techs['legs_one'].researched and not ResearchManager.categories['implants'].techs['legs_two'].researched then
-			self.Player:SetRunSpeed( 450 )
+			self.Player:SetRunSpeed( 325 )
 			self.Player:SetWalkSpeed( 225 )
 		elseif ResearchManager.categories['implants'].techs['legs_two'].researched then
-			self.Player:SetRunSpeed( 500 )
+			self.Player:SetRunSpeed( 350 )
 			self.Player:SetWalkSpeed( 250 )
 		else
-			self.Player:SetRunSpeed( 400 )
+			self.Player:SetRunSpeed( 300 )
 			self.Player:SetWalkSpeed( 200 )
 		end
 

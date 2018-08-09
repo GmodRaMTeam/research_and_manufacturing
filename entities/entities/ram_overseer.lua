@@ -28,7 +28,7 @@ function ENT:OnInjured( damageInfo )
 	if attacker:IsValid() and attacker:IsPlayer() then
 		if attacker:Team() == self:GetTeam() then
 			local message = "This Overseer is on your team idiot!"
-			DynamicStatusUpdate(nil, message, 'error', attacker)
+			ram_dynamic_status_update(nil, message, 'error', attacker)
 --			damageInfo:SetDamage(0)
 		end -- WHY YO HITTING OUR SCIENTISTS
 	end
@@ -57,9 +57,9 @@ function ENT:OnContact(ent)
             if status then
                 if name ~= nil and cost ~= nil and original_team ~= nil then
                     local message = "Your team-member " .. ent:Nick() .. " has recruited a new scientist: " .. name .. "!"
-                    DynamicStatusUpdate(self:GetTeam(), message, 'success', nil)
+                    ram_dynamic_status_update(self:GetTeam(), message, 'success', nil)
                     -- Something to do here
-                    CaptureScientist(self:GetTeam(), name, cost, original_team)
+                    sv_ram_capture_scientist(self:GetTeam(), name, cost, original_team)
                 else
 
                 end

@@ -15,8 +15,8 @@ ENT.ShotgunAmmoMax = 96
 ENT.RevolverAmmoMax = 48
 ENT.SMGAmmoMax = 240
 ENT.ARAmmoMax = 180
-ENT.XBowAmmoMax = 10
-ENT.RPGAmmoMax = 10
+ENT.XBowAmmoMax = 5
+ENT.RPGAmmoMax = 3
 ENT.GaussAmmoMax = 150
 ENT.SatchelAmmoMax = 5
 ENT.GrenadeAmmoMax = 5
@@ -44,7 +44,7 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_BBOX)
 
-    self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+    self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
     --   local b = 26
     --   self:SetCollisionBounds(Vector(-b, -b, -b), Vector(b,b,b))
 
@@ -98,6 +98,8 @@ function ENT:GivePlayerAmmo(ply, ammo_type, ammo_max_key, use_alt_type, is_gadge
             given = math.min(given, self[ammo_max_key] - current_ammo)
             ply:GiveAmmo(given, ammo_type)
         else
+            -- items/ammo_pickup.wav
+            sound.Play( "items/ammo_pickup.wav", self:GetPos())
             if is_gadget then
                 local given = 1
                 given = math.min(given, self[ammo_max_key] - current_ammo)

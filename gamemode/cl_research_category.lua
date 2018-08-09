@@ -15,7 +15,7 @@ ClientResearchCategoryClass.icon = '' -- Default empty string, set to a semantic
 ClientResearchCategoryClass.techs = {} -- Default empty array
 ClientResearchCategoryClass.manager = nil
 
-function ClientResearchCategoryClass:AddTechnology(args)
+function ClientResearchCategoryClass:add_technology(args)
     -- key, name, description, cost, tier, reqs, category
     if args.category == nil then
         args.category = self
@@ -25,7 +25,7 @@ function ClientResearchCategoryClass:AddTechnology(args)
     return newResearchTechnology-- Return our category to do something with it
 end
 
-function ClientResearchCategoryClass:GetHighestTechResearched()
+function ClientResearchCategoryClass:get_highest_tech_researched()
     local last_researched = nil
     for tech_key, technology in pairs(self.techs) do
         if technology.researched then
@@ -42,7 +42,7 @@ function ClientResearchCategoryClass:GetHighestTechResearched()
     return last_researched
 end
 
-function ClientResearchCategoryClass:HasAtLeastOneTechUnlocked()
+function ClientResearchCategoryClass:has_at_least_one_tech()
     for tech_key, technology in pairs(self.techs) do
         if technology.researched then
             return true
