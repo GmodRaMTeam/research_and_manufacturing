@@ -1,6 +1,8 @@
 # Research & Manufacturing
 RaM: A Science and Industry Inspired Gmod Gamemode
 
+This is not supposed to be SI on Source Engine. I'm not trying to compete with SI or draw flak from that community. I just wanted make a gamemode reminiscient of my favorite HL1 mod in Gmod. There would be a tremendous amount of work trying to perfectly re-create what they have done. I respect their work and if they truly have an issue with my gamemode, I'll take it down.
+
 Test Server IP: `192.223.25.217:27015`
 
 Discord: [RaM Public Discord](https://discord.gg/MHkDB5U)
